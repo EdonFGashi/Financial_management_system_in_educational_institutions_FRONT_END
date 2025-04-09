@@ -10,7 +10,7 @@ function SignIn() {
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundBlendMode: 'overlay',
-        backgroundColor: 'rgba(255, 255, 255, 0.8)',
+        backgroundColor: 'rgba(255, 255, 255, 0.7)',
       }}    
     >
       <div className="bg-white bg-opacity-90 p-8 rounded-xl shadow-lg max-w-md w-full">
