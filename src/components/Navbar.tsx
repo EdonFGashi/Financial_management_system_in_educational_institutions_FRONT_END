@@ -5,7 +5,7 @@ function Navbar() {
 
   const navLinks = [
     { to: "/", label: "Ballina" },
-    { to: "/dashboard", label: "Paneli" },
+    { to: "/komuna/dashboard", label: "Paneli" },
   ];
 
   const isActive = (path: string) =>
