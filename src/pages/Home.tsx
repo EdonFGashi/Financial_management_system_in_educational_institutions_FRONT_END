@@ -19,6 +19,9 @@ const messages = [
 
 function Home() {
   const [currentMessage, setCurrentMessage] = useState(0);
+  const [subtext, setSubtext] = useState("");
+  const [cursorVisible, setCursorVisible] = useState(true);
+  const fullSubtext = "Ndërtoje të ardhmen që ke ëndërruar.";
 
   useEffect(() => {
     AOS.init({ duration: 1000, once: false });
@@ -27,6 +30,36 @@ function Home() {
       setCurrentMessage((prev) => (prev + 1) % messages.length);
     }, 3000);
 
+    return () => clearInterval(interval);
+  }, []);
+
+  // Blinking cursor
+  useEffect(() => {
+    const blink = setInterval(() => {
+      setCursorVisible((prev) => !prev);
+    }, 500);
+    return () => clearInterval(blink);
+  }, []);
+
+  // Typewriter subtext
+  useEffect(() => {
+    let i = 0;
+    let forward = true;
+    const interval = setInterval(() => {
+      if (forward) {
+        setSubtext(fullSubtext.slice(0, i + 1));
+        i++;
+        if (i > fullSubtext.length) {
+          forward = false;
+        }
+      } else {
+        setSubtext(fullSubtext.slice(0, i - 1));
+        i--;
+        if (i <= 0) {
+          forward = true;
+        }
+      }
+    }, 100);
     return () => clearInterval(interval);
   }, []);
 
@@ -51,10 +84,12 @@ function Home() {
             </motion.h1>
           </AnimatePresence>
 
-          <TypewriterSubtext
-            text="Ndërtoje të ardhmen që ke ëndërruar."
-            delay={250}
-          />
+          <p className="text-white/80 text-xl sm:text-2xl mt-4 font-medium">
+            {subtext}
+            <span className="inline-block w-2 ml-1">
+              {cursorVisible ? "|" : "\u00A0"}
+            </span>
+          </p>
         </div>
 
         {/* 3D Visual Right */}
