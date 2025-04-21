@@ -12,16 +12,15 @@ import "../App.css";
 
 const messages = [
   "Mirësevini!",
-  "Ne bëjmë ëndrrat realitet.",
   "Digjitalizoni financat.",
-  "Thjeshtë, shpejtë dhe sigurt.",
+  "Thjeshtë, shpejtë dhe sigurtë.",
 ];
 
 function Home() {
   const [currentMessage, setCurrentMessage] = useState(0);
   const [subtext, setSubtext] = useState("");
   const [cursorVisible, setCursorVisible] = useState(true);
-  const fullSubtext = "Ndërtoje të ardhmen që ke ëndërruar.";
+  const fullSubtext = "Menaxhoni financat e institucioneve arsimore në mënyrë efikase!";
 
   useEffect(() => {
     AOS.init({ duration: 1000, once: false });
@@ -68,7 +67,7 @@ function Home() {
       <Navbar />
 
       {/* Hero Section */}
-      <section className="relative min-h-[80vh] bg-gradient-to-r from-indigo-700 to-blue-600 overflow-hidden flex flex-col-reverse md:flex-row items-center justify-center gap-8 px-6 md:px-20 pt-12 md:pt-0">
+      <section className="relative min-h-[92vh] bg-gradient-to-r from-indigo-700 to-blue-600 overflow-hidden flex flex-col-reverse md:flex-row items-center justify-center gap-8 px-6 md:px-20 pt-12 md:pt-0">
         {/* Text Left */}
         <div className="z-10 w-full md:w-1/2 text-center md:text-left">
           <AnimatePresence mode="wait">

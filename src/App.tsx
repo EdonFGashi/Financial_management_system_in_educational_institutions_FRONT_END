@@ -6,6 +6,8 @@ import KomunaDashboard from "./pages/komuna/KomunaDashboard";
 import RaportetPorosi from "./pages/komuna/porosite/RaportetPorosi";
 import ListaPorosive from "./pages/komuna/porosite/ListaPorosive";
 import AnimatedRoutes from "./components/AnimatedRoutes";
+import ShkollaDashboard from "./pages/Shkolla/ShkollaDashboard";
+
 
 function App() {
   return (
@@ -15,9 +17,17 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/signin" element={<SignIn />} />
           <Route path="/signup" element={<SignUp />} />
+          // Komuna
           <Route path="/komuna/dashboard" element={<KomunaDashboard />} />
           <Route path="/komuna/porosite/lista" element={<ListaPorosive />} />
           <Route path="/komuna/porosite/raporte" element={<RaportetPorosi />} />
+          // Shkolla
+          <Route path="/shkolla/dashboard" element={<ShkollaDashboard />} />
+          {/*<Route path="/shkolla/porosite/market" element={<MarketPage />} />*/}
+          {/*<Route path="/shkolla/porosite/shporta" element={<ShportaPage />} />*/}
+          {/*<Route path="/shkolla/porosite/historiku" element={<HistorikuPage />} />*/}
+          {/*<Route path="/shkolla/stafi/ndalesat" element={<NdalesatPage />} />*/}
+          {/*<Route path="/shkolla/stafi/oret-shtese" element={<OretShtesePage />} />*/}
         </Routes>
       </AnimatedRoutes>
     </Router>
