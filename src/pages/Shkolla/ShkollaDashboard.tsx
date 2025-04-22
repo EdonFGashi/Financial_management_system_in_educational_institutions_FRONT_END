@@ -44,7 +44,7 @@ function ShkollaDashboard() {
                     transition={{ duration: 0.7 }}
                     className="bg-gradient-to-r from-green-700 to-lime-600 text-white px-4 sm:px-6 md:px-12 py-12 md:py-14 mb-12"
                 >
-                    <h1 className="text-3xl sm:text-4xl font-bold mb-2">Paneli i Shkollës</h1>
+                    <h1 className="text-3xl sm:text-4xl font-bold mb-2">Mirësevini në panelin e Shkollës</h1>
                     <p className="text-base sm:text-lg text-green-100">
                         Kontrolloni financat, porositë dhe stafin me lehtësi.
                     </p>
