@@ -8,6 +8,7 @@ import ListaPorosive from "./pages/komuna/porosite/ListaPorosive";
 import AnimatedRoutes from "./components/AnimatedRoutes";
 import ShkollaDashboard from "./pages/Shkolla/ShkollaDashboard";
 import Market from "./pages/Shkolla/porosite/Market";
+import Shporta from "./pages/Shkolla/porosite/Shporta";
 
 
 
@@ -26,7 +27,7 @@ function App() {
           // Shkolla
           <Route path="/shkolla/dashboard" element={<ShkollaDashboard />} />
           <Route path="/shkolla/porosite/market" element={<Market />} />
-          {/*<Route path="/shkolla/porosite/shporta" element={<ShportaPage />} />*/}
+          <Route path="/shkolla/porosite/shporta" element={<Shporta />} />
           {/*<Route path="/shkolla/porosite/historiku" element={<HistorikuPage />} />*/}
           {/*<Route path="/shkolla/stafi/ndalesat" element={<NdalesatPage />} />*/}
           {/*<Route path="/shkolla/stafi/oret-shtese" element={<OretShtesePage />} />*/}
