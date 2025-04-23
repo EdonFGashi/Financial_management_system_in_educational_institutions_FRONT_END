@@ -112,10 +112,10 @@ function ShkollaMarket() {
     const [quantities, setQuantities] = useState<{ [key: number]: number }>({});
 
     // Kategoritë e disponueshme
-    const categories = ["të gjitha", "mobilier", "aksesore", "teknologji", "libra"];
+    const categories = ["të gjitha", "mobilie", "aksesore", "teknologji", "libra"];
     const subcategories = {
         "të gjitha": ["të gjitha"],
-        "mobilier": ["të gjitha", "banka", "tavolina"],
+        "mobilie": ["të gjitha", "banka", "tavolina"],
         "aksesore": ["të gjitha", "pastrim", "shkrim"],
         "teknologji": ["të gjitha", "kompjutere", "printera"],
         "libra": ["të gjitha", "tekste", "atlase"],
