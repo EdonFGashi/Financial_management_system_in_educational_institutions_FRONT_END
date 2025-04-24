@@ -1,5 +1,7 @@
 import { useState } from "react";
 import Sidebar from "../Sidebar";
+import {ChevronLeftIcon} from "@heroicons/react/24/outline";
+import {ChevronRightIcon} from "@heroicons/react/24/outline";
 
 interface Porosi {
     id: number;
@@ -15,7 +17,7 @@ const companyOptions = ["Albi Office", "TechKosova", "EduSupply", "PrintMaster",
 
 const mockData: Porosi[] = Array.from({ length: 35 }, (_, i) => ({
     id: i + 1,
-    item: ["Lapsa", "Laptop", "Tabela", "Printer", "Projektor", "Karrige", "Dritare", "Router", "Switch", "Klasor"][i % 10],
+    item: ["Lapsa", "Laptop", "Tabela", "Printer", "Projektor", "Karrige", "Dritare", "Router", "Switch", "Smart TV"][i % 10],
     sasia: (i + 2) % 20 + 1,
     data: `2025-04-${(i % 28) + 1}`.padStart(10, "0"),
     cmimiTotal: Math.floor(Math.random() * 500) + 50,
@@ -147,17 +149,18 @@ function Historiku() {
                         <button
                             onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
                             disabled={currentPage === 1}
-                            className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
+                            className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50 flex items-center gap-2"
                         >
-                            ⬅️ Kthehu
+                            <ChevronLeftIcon className="w-5 h-5" /> Kthehu
                         </button>
                         <span className="px-4 py-2 font-medium">Faqja {currentPage} nga {totalPages}</span>
                         <button
                             onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
                             disabled={currentPage === totalPages}
-                            className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
+                            className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50 flex items-center gap-2"
                         >
-                            Tjetra ➡️
+                            Tjetra
+                            <ChevronRightIcon className="w-5 h-5" />
                         </button>
                     </div>
 
