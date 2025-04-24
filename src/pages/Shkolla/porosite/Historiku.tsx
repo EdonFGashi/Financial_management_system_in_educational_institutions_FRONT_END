@@ -108,16 +108,6 @@ function Historiku() {
                     </div>
                 </div>
 
-                {/* Download Button */}
-                <div className="px-4 sm:px-6 md:px-12 pb-4 flex justify-end">
-                    <button
-                        onClick={() => alert("Raporti do të shkarkohet (placeholder)")}
-                        className="px-5 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
-                    >
-                        Shkarko në PDF
-                    </button>
-                </div>
-
                 {/* Table */}
                 <div className="px-4 sm:px-6 md:px-12 pb-10 overflow-x-auto">
                     <table className="w-full bg-white rounded-xl shadow-md text-sm">
@@ -153,14 +143,13 @@ function Historiku() {
                         </tbody>
                     </table>
 
-                    {/* Pagination */}
                     <div className="flex justify-center mt-6 space-x-2">
                         <button
                             onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
                             disabled={currentPage === 1}
                             className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
                         >
-                            ⬅️ Kthehu
+                            ⬅️ Më parë
                         </button>
                         <span className="px-4 py-2 font-medium">Faqja {currentPage} nga {totalPages}</span>
                         <button
@@ -168,7 +157,17 @@ function Historiku() {
                             disabled={currentPage === totalPages}
                             className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
                         >
-                            Tjetra ➡️
+                            Më pas ➡️
+                        </button>
+                    </div>
+
+                    {/* PDF Download Button - Now at the bottom */}
+                    <div className="flex justify-end">
+                        <button
+                            onClick={() => alert("Raporti do të shkarkohet (placeholder)")}
+                            className="px-5 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition -mt-[30px]"
+                        >
+                            Shkarko në PDF
                         </button>
                     </div>
                 </div>
