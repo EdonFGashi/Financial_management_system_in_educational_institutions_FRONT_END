@@ -131,6 +131,12 @@ function ShkollaSidebar() {
                                 } ml-4 mt-1 space-y-1`}
                             >
                                 <Link
+                                     to="/shkolla/stafi/menaxhimi"
+                                     className={`flex items-center gap-3 px-4 py-2 rounded-lg text-sm transition ${isActive("/shkolla/stafi/menaxhimi")}`}
+                                 >
+                                     Menaxhimi i Stafit
+                                 </Link>
+                                <Link
                                     to="/shkolla/stafi/ndalesat"
                                     className={`flex items-center gap-3 px-4 py-2 rounded-lg text-sm transition ${isActive("/shkolla/stafi/ndalesat")}`}
                                 >
