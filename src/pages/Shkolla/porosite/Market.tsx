@@ -20,7 +20,6 @@ interface Product {
     subcategory: string;
     image: string;
     dateAdded: string;
-    rating: number;
 }
 
 function ShkollaMarket() {
@@ -36,7 +35,6 @@ function ShkollaMarket() {
             subcategory: "banka",
             image: "https://via.placeholder.com/150?text=Banka",
             dateAdded: "2023-05-15",
-            rating: 4.5,
         },
         {
             id: 2,
@@ -48,7 +46,7 @@ function ShkollaMarket() {
             subcategory: "pastrim",
             image: "https://via.placeholder.com/150?text=Shkumes",
             dateAdded: "2023-06-20",
-            rating: 4.2,
+
         },
         {
             id: 3,
@@ -60,7 +58,7 @@ function ShkollaMarket() {
             subcategory: "kompjutere",
             image: "https://via.placeholder.com/150?text=Laptop",
             dateAdded: "2023-04-10",
-            rating: 4.8,
+
         },
         {
             id: 4,
@@ -72,7 +70,7 @@ function ShkollaMarket() {
             subcategory: "tavolina",
             image: "https://via.placeholder.com/150?text=Tabela",
             dateAdded: "2023-07-01",
-            rating: 4.3,
+
         },
         {
             id: 5,
@@ -84,7 +82,7 @@ function ShkollaMarket() {
             subcategory: "tekste",
             image: "https://via.placeholder.com/150?text=Libra",
             dateAdded: "2023-03-25",
-            rating: 4.7,
+
         },
         {
             id: 6,
@@ -96,7 +94,7 @@ function ShkollaMarket() {
             subcategory: "printera",
             image: "https://via.placeholder.com/150?text=Printer",
             dateAdded: "2023-08-12",
-            rating: 4.4,
+
         },
     ]);
 
@@ -175,8 +173,6 @@ function ShkollaMarket() {
                     return a.company.localeCompare(b.company);
                 case "company-desc":
                     return b.company.localeCompare(a.company);
-                case "rating-desc":
-                    return b.rating - a.rating;
                 default:
                     return 0;
             }
@@ -253,7 +249,6 @@ function ShkollaMarket() {
                                     <option value="date-desc">Data: Nga më e reja</option>
                                     <option value="company-asc">Kompania: A-Z</option>
                                     <option value="company-desc">Kompania: Z-A</option>
-                                    <option value="rating-desc">Vlerësimi më i lartë</option>
                                 </select>
                                 <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
                                     <ArrowsUpDownIcon className="w-4 h-4" />
@@ -376,9 +371,7 @@ function ShkollaMarket() {
                                         />
                                         <div className="flex justify-between items-start mb-1">
                                             <h3 className="text-lg font-semibold text-gray-800">{product.name}</h3>
-                                            <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
-                        {product.rating} ★
-                      </span>
+
                                         </div>
                                         <p className="text-sm text-gray-600 mb-2">{product.description}</p>
                                         <p className="text-sm text-gray-500 mb-1">Nga: {product.company}</p>
