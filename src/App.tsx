@@ -9,6 +9,8 @@ import AnimatedRoutes from "./components/AnimatedRoutes";
 import ShkollaDashboard from "./pages/Shkolla/ShkollaDashboard";
 import Market from "./pages/Shkolla/porosite/Market";
 import Shporta from "./pages/Shkolla/porosite/Shporta";
+import Historiku from "./pages/Shkolla/porosite/Historiku";
+import StafiShkolles from "./pages/Shkolla/stafi/ListaStafit";
 import KompaniaDashboard from "./pages/Kompania/KompaniaDashboard";
 
 
@@ -28,7 +30,8 @@ function App() {
           <Route path="/shkolla/dashboard" element={<ShkollaDashboard />} />
           <Route path="/shkolla/porosite/market" element={<Market />} />
           <Route path="/shkolla/porosite/shporta" element={<Shporta />} />
-          {/*<Route path="/shkolla/porosite/historiku" element={<HistorikuPage />} />*/}
+          <Route path="/shkolla/porosite/historiku" element={<Historiku/>} />
+          <Route path="/shkolla/stafi/menaxhimi" element={<StafiShkolles />} />
           {/*<Route path="/shkolla/stafi/ndalesat" element={<NdalesatPage />} />*/}
           {/*<Route path="/shkolla/stafi/oret-shtese" element={<OretShtesePage />} />*/}
           // Kompania

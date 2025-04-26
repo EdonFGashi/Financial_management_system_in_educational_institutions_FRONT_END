@@ -8,6 +8,7 @@ import {
     Bars3Icon,
     XMarkIcon,
     UserCircleIcon,
+    ArchiveBoxIcon
 } from "@heroicons/react/24/outline";
 import { useState } from "react";
 
@@ -55,6 +56,15 @@ function ShkollaSidebar() {
                         >
                             <HomeIcon className="w-5 h-5" />
                             <span className="text-sm">Dashboard</span>
+                        </Link>
+
+                        {/* New Inventari Aktual button */}
+                        <Link
+                            to="/shkolla/inventari"
+                            className={`flex items-center gap-3 px-4 py-2 rounded-lg transition ${isActive("/shkolla/inventari")}`}
+                        >
+                            <ArchiveBoxIcon className="w-5 h-5" />
+                            <span className="text-sm">Inventari Aktual</span>
                         </Link>
 
                         {/* Porosite Dropdown */}
@@ -120,6 +130,12 @@ function ShkollaSidebar() {
                                     hoveredStafi ? "max-h-40 opacity-100" : "max-h-0 opacity-0"
                                 } ml-4 mt-1 space-y-1`}
                             >
+                                <Link
+                                     to="/shkolla/stafi/menaxhimi"
+                                     className={`flex items-center gap-3 px-4 py-2 rounded-lg text-sm transition ${isActive("/shkolla/stafi/menaxhimi")}`}
+                                 >
+                                     Menaxhimi i Stafit
+                                 </Link>
                                 <Link
                                     to="/shkolla/stafi/ndalesat"
                                     className={`flex items-center gap-3 px-4 py-2 rounded-lg text-sm transition ${isActive("/shkolla/stafi/ndalesat")}`}
