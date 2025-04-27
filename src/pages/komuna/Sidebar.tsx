@@ -14,6 +14,7 @@ import {
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { useState } from "react";
+import Authorized from "../../auth/Authorized";
 
 function Sidebar() {
   const location = useLocation();
@@ -21,7 +22,9 @@ function Sidebar() {
   const [isOpen, setIsOpen] = useState(true);
 
   const isActive = (path: string) =>
-    location.pathname === path ? "font-semibold text-indigo-700" : "text-gray-700 hover:text-indigo-600";
+    location.pathname === path
+      ? "font-semibold text-indigo-700"
+      : "text-gray-700 hover:text-indigo-600";
 
   return (
     <>
@@ -30,7 +33,11 @@ function Sidebar() {
         className="md:hidden fixed top-4 left-4 z-50 bg-white p-2 rounded shadow-md border"
         onClick={() => setIsOpen(!isOpen)}
       >
-        {isOpen ? <XMarkIcon className="w-6 h-6 text-gray-700" /> : <Bars3Icon className="w-6 h-6 text-gray-700" />}
+        {isOpen ? (
+          <XMarkIcon className="w-6 h-6 text-gray-700" />
+        ) : (
+          <Bars3Icon className="w-6 h-6 text-gray-700" />
+        )}
       </button>
 
       <aside
@@ -44,7 +51,9 @@ function Sidebar() {
             <UserCircleIcon className="w-10 h-10 text-indigo-500" />
             <div>
               <p className="text-sm text-gray-500">Përdoruesi</p>
-              <h2 className="text-lg font-bold text-gray-800">Admin i Komunës</h2>
+              <h2 className="text-lg font-bold text-gray-800">
+                Admin i Komunës
+              </h2>
             </div>
           </div>
 
@@ -52,7 +61,9 @@ function Sidebar() {
           <nav className="space-y-2">
             <Link
               to="/komuna/dashboard"
-              className={`flex items-center gap-3 px-4 py-2 rounded-lg transition ${isActive("/komuna/dashboard")}`}
+              className={`flex items-center gap-3 px-4 py-2 rounded-lg transition ${isActive(
+                "/komuna/dashboard"
+              )}`}
             >
               <HomeIcon className="w-5 h-5" />
               <span className="text-sm">Dashboard</span>
@@ -68,50 +79,72 @@ function Sidebar() {
                   <FolderOpenIcon className="w-5 h-5" /> Porositë
                 </span>
                 <ChevronDownIcon
-                  className={`w-4 h-4 transform transition-transform duration-200 ${hovered ? "rotate-180" : "rotate-0"}`}
+                  className={`w-4 h-4 transform transition-transform duration-200 ${
+                    hovered ? "rotate-180" : "rotate-0"
+                  }`}
                 />
               </div>
               <div
-                className={`overflow-hidden transition-all duration-300 ${hovered ? "max-h-40 opacity-100" : "max-h-0 opacity-0"} ml-4 mt-1 space-y-1`}
+                className={`overflow-hidden transition-all duration-300 ${
+                  hovered ? "max-h-40 opacity-100" : "max-h-0 opacity-0"
+                } ml-4 mt-1 space-y-1`}
               >
                 <Link
                   to="/komuna/porosite/lista"
-                  className={`flex items-center gap-3 px-4 py-2 rounded-lg text-sm transition ${isActive("/komuna/porosite/lista")}`}
+                  className={`flex items-center gap-3 px-4 py-2 rounded-lg text-sm transition ${isActive(
+                    "/komuna/porosite/lista"
+                  )}`}
                 >
                   <DocumentDuplicateIcon className="w-4 h-4" /> Lista e Porosive
                 </Link>
                 <Link
                   to="/komuna/porosite/raporte"
-                  className={`flex items-center gap-3 px-4 py-2 rounded-lg text-sm transition ${isActive("/komuna/porosite/raporte")}`}
+                  className={`flex items-center gap-3 px-4 py-2 rounded-lg text-sm transition ${isActive(
+                    "/komuna/porosite/raporte"
+                  )}`}
                 >
-                  <ClipboardDocumentListIcon className="w-4 h-4" /> Raportet e Porosive
+                  <ClipboardDocumentListIcon className="w-4 h-4" /> Raportet e
+                  Porosive
                 </Link>
               </div>
             </div>
 
             <Link
               to="/komuna/buxheti"
-              className={`flex items-center gap-3 px-4 py-2 rounded-lg transition ${isActive("/komuna/buxheti")}`}
+              className={`flex items-center gap-3 px-4 py-2 rounded-lg transition ${isActive(
+                "/komuna/buxheti"
+              )}`}
             >
               <AdjustmentsVerticalIcon className="w-5 h-5" />
               <span className="text-sm">Ndarja e Buxhetit</span>
             </Link>
 
-            <Link
-              to="/komuna/kontraktoret"
-              className={`flex items-center gap-3 px-4 py-2 rounded-lg transition ${isActive("/komuna/kontraktoret")}`}
-            >
-              <BriefcaseIcon className="w-5 h-5" />
-              <span className="text-sm">Kontraktorët</span>
-            </Link>
+            <Authorized
+              role="admin"
+              authorized={
+                <>
+                  <Link
+                    to="/komuna/kontraktoret"
+                    className={`flex items-center gap-3 px-4 py-2 rounded-lg transition ${isActive(
+                      "/komuna/kontraktoret"
+                    )}`}
+                  >
+                    <BriefcaseIcon className="w-5 h-5" />
+                    <span className="text-sm">Kontraktorët</span>
+                  </Link>
 
-            <Link
-              to="/komuna/financat"
-              className={`flex items-center gap-3 px-4 py-2 rounded-lg transition ${isActive("/komuna/financat")}`}
-            >
-              <BanknotesIcon className="w-5 h-5" />
-              <span className="text-sm">Financat</span>
-            </Link>
+                  <Link
+                    to="/komuna/financat"
+                    className={`flex items-center gap-3 px-4 py-2 rounded-lg transition ${isActive(
+                      "/komuna/financat"
+                    )}`}
+                  >
+                    <BanknotesIcon className="w-5 h-5" />
+                    <span className="text-sm">Financat</span>
+                  </Link>
+                </>
+              }
+            />
           </nav>
         </div>
 

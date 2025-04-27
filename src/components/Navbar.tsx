@@ -1,11 +1,19 @@
 import { Link, useLocation } from "react-router-dom";
+import Authorized from "../auth/Authorized";
+import { BanknotesIcon, BriefcaseIcon } from "@heroicons/react/24/outline";
 
 function Navbar() {
   const location = useLocation();
 
   const navLinks = [
     { to: "/", label: "Ballina" },
-    { to: "/komuna/dashboard", label: "Paneli" },
+    { to: "/komuna/dashboard", label: "Komuna" },
+  ];
+
+  const authorizedLinks = [
+    { to: "/shkolla/dashboard", label: "Shkolla" },
+    { to: "/kompania/dashboard", label: "Kompanite" },
+    { to: "/perdoruesit", label: "Perdoruesit" }
   ];
 
   const isActive = (path: string) =>
@@ -36,6 +44,24 @@ function Navbar() {
             {link.label}
           </Link>
         ))}
+
+          {/* Authorized Links (only visible to admin) */}
+        <Authorized
+          role="admin"
+          authorized={
+            <>
+              {authorizedLinks.map((link) => (
+                <Link
+                  key={link.to}
+                  to={link.to}
+                  className={`relative text-lg font-medium transition duration-200 ${isActive(link.to)} after:content-[''] after:absolute after:left-0 after:-bottom-1 after:w-0 after:h-[2px] after:bg-black hover:after:w-full after:transition-all after:duration-300`}
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </>
+          }
+        />
 
         {/* Login Button */}
         <Link
