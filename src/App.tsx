@@ -12,6 +12,8 @@ import Shporta from "./pages/Shkolla/porosite/Shporta";
 import Historiku from "./pages/Shkolla/porosite/Historiku";
 import StafiShkolles from "./pages/Shkolla/stafi/ListaStafit";
 import KompaniaDashboard from "./pages/Kompania/KompaniaDashboard";
+import RegjistriProdukteve from "./pages/Kompania/produktet/regjistriProdukteve" 
+
 
 
 function App() {
@@ -36,6 +38,7 @@ function App() {
           {/*<Route path="/shkolla/stafi/oret-shtese" element={<OretShtesePage />} />*/}
           // Kompania
           <Route path="/kompania/dashboard" element={<KompaniaDashboard />} />
+          <Route path="/kompania/regjistri" element={<RegjistriProdukteve />} />
           {/* <Route path="/kompania/porosite/market" element={<Market />} />
           <Route path="/kompania/porosite/shporta" element={<Shporta />} /> */}
         </Routes>
