@@ -16,6 +16,7 @@ import routes from "./route-config";
 import { useEffect, useState } from "react";
 import { claim } from "./auth/auth.models";
 import AuthenticationContext from "./auth/AuthenticationContext";
+import { getClaims } from "./auth/handleJWT";
 
 
 function App() {
@@ -24,13 +25,14 @@ function App() {
   //na duhet nje useState variabel sepse po deshirojme qe sa here te ndryshojme claims, te ndryshoje edhe UI (sepse komponentete si Authorized do ta perditesojne UI)
   //ketu na vijne claims te userit
   const [claims, setClaims] = useState<claim[]>([
-    { name: "email", value: "edon@live.com" },
-    { name: "role", value: "admin" },
+    // { name: "email", value: "edon@live.com" },
+    // { name: "role", value: "admin" },
   ]);
 
-  // useEffect(() => {
-  //   setClaims(getClaims())
-  // }, [])
+  //i merr claims kur aplikacioni ngarkohet (edhe nese bejme refresh prap i kemi tokenin)
+  useEffect(() => {
+    setClaims(getClaims())
+  }, [])
 
   function isAdmin() {
     return (

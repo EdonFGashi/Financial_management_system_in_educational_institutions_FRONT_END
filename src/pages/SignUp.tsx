@@ -1,18 +1,24 @@
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import * as FiIcons from 'react-icons/fi';
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import * as FiIcons from "react-icons/fi";
 
-const FiUser = FiIcons.FiUser as unknown as React.FC<React.SVGProps<SVGSVGElement>>;
-const FiMail = FiIcons.FiMail as unknown as React.FC<React.SVGProps<SVGSVGElement>>;
-const FiLock = FiIcons.FiLock as unknown as React.FC<React.SVGProps<SVGSVGElement>>;
+const FiUser = FiIcons.FiUser as unknown as React.FC<
+  React.SVGProps<SVGSVGElement>
+>;
+const FiMail = FiIcons.FiMail as unknown as React.FC<
+  React.SVGProps<SVGSVGElement>
+>;
+const FiLock = FiIcons.FiLock as unknown as React.FC<
+  React.SVGProps<SVGSVGElement>
+>;
 
 function SignUp() {
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [strength, setStrength] = useState(0);
   const [passwordMatch, setPasswordMatch] = useState(true);
-  const [animatedText, setAnimatedText] = useState('');
-  const fullText = 'Krijoni një llogari për të menaxhuar financat lehtësisht.';
+  const [animatedText, setAnimatedText] = useState("");
+  const fullText = "Krijoni një llogari për të menaxhuar financat lehtësisht.";
 
   useEffect(() => {
     let i = 0;
@@ -37,7 +43,7 @@ function SignUp() {
 
   useEffect(() => {
     checkStrength(password);
-    setPasswordMatch(password === confirmPassword || confirmPassword === '');
+    setPasswordMatch(password === confirmPassword || confirmPassword === "");
   }, [password, confirmPassword]);
 
   const checkStrength = (pass: string) => {
@@ -50,15 +56,24 @@ function SignUp() {
   };
 
   const strengthLabel = ["Shumë e dobët", "E dobët", "Mesatare", "Perfekte"];
-  const strengthColor = ["bg-red-400", "bg-orange-400", "bg-yellow-400", "bg-green-400"];
+  const strengthColor = [
+    "bg-red-400",
+    "bg-orange-400",
+    "bg-yellow-400",
+    "bg-green-400",
+  ];
 
   return (
     <div className="min-h-screen flex">
       {/* Left side - Sign Up form */}
       <div className="w-full md:w-1/2 flex flex-col justify-center items-center px-10 py-16 bg-white">
         <div className="max-w-md w-full">
-          <h1 className="text-4xl font-bold text-indigo-700 mb-4">Regjistrohu</h1>
-          <p className="text-gray-600 mb-8">Krijoni një llogari të re për të vazhduar.</p>
+          <h1 className="text-4xl font-bold text-indigo-700 mb-4">
+            Regjistrohu
+          </h1>
+          <p className="text-gray-600 mb-8">
+            Krijoni një llogari të re për të vazhduar.
+          </p>
 
           <form className="space-y-5">
             <div className="relative">
@@ -98,8 +113,13 @@ function SignUp() {
             )}
 
             {password && (
-              <p className={`text-sm ${strength < 3 ? 'text-red-500' : 'text-green-600'}`}>
-                Forca e fjalëkalimit: <strong>{strengthLabel[strength - 1]}</strong>
+              <p
+                className={`text-sm ${
+                  strength < 3 ? "text-red-500" : "text-green-600"
+                }`}
+              >
+                Forca e fjalëkalimit:{" "}
+                <strong>{strengthLabel[strength - 1]}</strong>
               </p>
             )}
 
@@ -110,12 +130,16 @@ function SignUp() {
                 placeholder="Konfirmo fjalëkalimin"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className={`w-full p-3 pl-10 rounded-lg border ${passwordMatch ? 'border-gray-300' : 'border-red-500'} focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+                className={`w-full p-3 pl-10 rounded-lg border ${
+                  passwordMatch ? "border-gray-300" : "border-red-500"
+                } focus:outline-none focus:ring-2 focus:ring-indigo-500`}
               />
             </div>
 
             {!passwordMatch && (
-              <p className="text-sm text-red-500">⚠️ Fjalëkalimet nuk përputhen!</p>
+              <p className="text-sm text-red-500">
+                ⚠️ Fjalëkalimet nuk përputhen!
+              </p>
             )}
 
             <button
@@ -127,8 +151,8 @@ function SignUp() {
           </form>
 
           <p className="text-center mt-6">
-            Keni llogari?{' '}
-            <Link to="/signin" className="text-indigo-600 hover:underline">
+            Keni llogari?{" "}
+            <Link to="/signup" className="text-indigo-600 hover:underline">
               Kyçu këtu
             </Link>
           </p>

@@ -1,4 +1,5 @@
 import RedirectToLandingPage from "./RedirectToLandingPage";
+import Signup from "./AuthForm";
 import Home from "./pages/Home";
 import KompaniaDashboard from "./pages/Kompania/KompaniaDashboard";
 import ShkollaDashboard from "./pages/Shkolla/ShkollaDashboard";
@@ -11,11 +12,14 @@ import SignUp from "./pages/SignUp";
 import KomunaDashboard from "./pages/komuna/KomunaDashboard";
 import ListaPorosive from "./pages/komuna/porosite/ListaPorosive";
 import RaportetPorosi from "./pages/komuna/porosite/RaportetPorosi";
+import Register from "./Register";
+import Login from "./auth/Login";
 
 const routes = [
     { path: "/", component: Home },
-  { path: "/signin", component: SignIn },
-  { path: "/signup", component: SignUp },
+  { path: "/signin", component: Login },
+  // { path: "/signup", component: SignUp },
+  { path: "/register", component: Register },
 
   // Komuna
   { path: "/komuna/dashboard", component: KomunaDashboard, isAdmin: true},
