@@ -1,11 +1,28 @@
 import { Link, useLocation } from "react-router-dom";
+import Authorized from "../auth/Authorized";
+import { BanknotesIcon, BriefcaseIcon } from "@heroicons/react/24/outline";
+import Button from "./Button";
+import { logout } from "../auth/handleJWT";
+import { useContext } from "react";
+import AuthenticationContext from "../auth/AuthenticationContext";
 
 function Navbar() {
   const location = useLocation();
 
+  const {update, claims} = useContext(AuthenticationContext);
+  function getUserEmail(): string {
+    return claims.filter(x => x.name === "email")[0]?.value;
+  }
+
   const navLinks = [
     { to: "/", label: "Ballina" },
-    { to: "/komuna/dashboard", label: "Paneli" },
+    { to: "/komuna/dashboard", label: "Komuna" },
+  ];
+
+  const authorizedLinks = [
+    { to: "/shkolla/dashboard", label: "Shkolla" },
+    { to: "/kompania/dashboard", label: "Kompanite" },
+    { to: "/perdoruesit", label: "Perdoruesit" }
   ];
 
   const isActive = (path: string) =>
@@ -37,13 +54,54 @@ function Navbar() {
           </Link>
         ))}
 
-        {/* Login Button */}
-        <Link
+
+          {/* Authorized Links (only visible to admin) */}
+        <Authorized
+          // role="admin"
+          authorized={
+            <>
+              {authorizedLinks.map((link) => (
+                <Link
+                  key={link.to}
+                  to={link.to}
+                  className={`relative text-lg font-medium transition duration-200 ${isActive(link.to)} after:content-[''] after:absolute after:left-0 after:-bottom-1 after:w-0 after:h-[2px] after:bg-black hover:after:w-full after:transition-all after:duration-300`}
+                >
+                  {link.label}
+                </Link>
+              ))}
+              <span className="nav-link">Hello, {getUserEmail()}</span>
+              <Button 
+              onClick={() =>{
+                logout();
+                update([]);
+              }}
+              className="nav-link btn btn-link"
+              >Log Out</Button>
+            </>
+          }
+          notAuthorized={<>
+            <Link
+          to="/register"
+          className="px-5 py-2 bg-black text-white rounded-xl font-medium shadow-md hover:bg-gray-800 transition"
+        >
+          Register
+        </Link>
+            <Link
           to="/signin"
           className="px-5 py-2 bg-black text-white rounded-xl font-medium shadow-md hover:bg-gray-800 transition"
         >
           Log In
         </Link>
+          </>}
+        />
+
+        {/* Login Button */}
+        {/* <Link
+          to="/signin"
+          className="px-5 py-2 bg-black text-white rounded-xl font-medium shadow-md hover:bg-gray-800 transition"
+        >
+          Log In
+        </Link> */}
       </div>
     </nav>
   );

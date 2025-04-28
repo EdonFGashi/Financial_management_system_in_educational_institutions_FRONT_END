@@ -77,7 +77,7 @@ function SignIn() {
 
           <p className="text-center mt-6">
             Nuk keni llogari?{' '}
-            <Link to="/signup" className="text-indigo-600 hover:underline">
+            <Link to="/register" className="text-indigo-600 hover:underline">
               Regjistrohu këtu
             </Link>
           </p>
