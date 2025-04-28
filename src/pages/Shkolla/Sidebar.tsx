@@ -58,15 +58,6 @@ function ShkollaSidebar() {
                             <span className="text-sm">Dashboard</span>
                         </Link>
 
-                        {/* New Inventari Aktual button */}
-                        <Link
-                            to="/shkolla/inventari"
-                            className={`flex items-center gap-3 px-4 py-2 rounded-lg transition ${isActive("/shkolla/inventari")}`}
-                        >
-                            <ArchiveBoxIcon className="w-5 h-5" />
-                            <span className="text-sm">Inventari Aktual</span>
-                        </Link>
-
                         {/* Porosite Dropdown */}
                         <div
                             onMouseEnter={() => setHoveredPorosite(true)}
@@ -105,6 +96,12 @@ function ShkollaSidebar() {
                                     className={`flex items-center gap-3 px-4 py-2 rounded-lg text-sm transition ${isActive("/shkolla/porosite/historiku")}`}
                                 >
                                     Historiku i porosive
+                                </Link>
+                                <Link
+                                    to="/shkolla/porosite/inventari"
+                                    className={`flex items-center gap-3 px-4 py-2 rounded-lg text-sm transition ${isActive("/shkolla/porosite/inventari")}`}
+                                >
+                                    Inventari Aktual
                                 </Link>
                             </div>
                         </div>

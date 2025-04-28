@@ -11,12 +11,15 @@ import Market from "./pages/Shkolla/porosite/Market";
 import Shporta from "./pages/Shkolla/porosite/Shporta";
 import Historiku from "./pages/Shkolla/porosite/Historiku";
 import StafiShkolles from "./pages/Shkolla/stafi/ListaStafit";
+import InventariAktual from "./pages/Shkolla/porosite/InventariAktual";
 import KompaniaDashboard from "./pages/Kompania/KompaniaDashboard";
 import routes from "./route-config";
 import { useEffect, useState } from "react";
 import { claim } from "./auth/auth.models";
 import AuthenticationContext from "./auth/AuthenticationContext";
 import { getClaims } from "./auth/handleJWT";
+
+import RegjistriProdukteve from "./pages/Kompania/produktet/regjistriProdukteve" 
 
 
 function App() {
@@ -43,6 +46,7 @@ function App() {
   }
 
   return (
+
     <BrowserRouter>
     <AuthenticationContext.Provider value={{ claims, update: setClaims }}>
     <div className="container">
@@ -68,6 +72,37 @@ function App() {
     
     </AuthenticationContext.Provider>
     </BrowserRouter>
+// =======
+//     <Router>
+//       <AnimatedRoutes>
+//         <Routes>
+//           <Route path="/" element={<Home />} />
+//           <Route path="/signin" element={<SignIn />} />
+//           <Route path="/signup" element={<SignUp />} />
+//           // Komuna
+//           <Route path="/komuna/dashboard" element={<KomunaDashboard />} />
+//           <Route path="/komuna/porosite/lista" element={<ListaPorosive />} />
+//           <Route path="/komuna/porosite/raporte" element={<RaportetPorosi />} />
+//           // Shkolla
+//           <Route path="/shkolla/dashboard" element={<ShkollaDashboard />} />
+//           <Route path="/shkolla/porosite/market" element={<Market />} />
+//           <Route path="/shkolla/porosite/shporta" element={<Shporta />} />
+//           <Route path="/shkolla/porosite/historiku" element={<Historiku/>} />
+//           <Route path="/shkolla/stafi/menaxhimi" element={<StafiShkolles />} />
+//           <Route path="/shkolla/porosite/inventari" element={<InventariAktual />} />
+
+
+//           {/*<Route path="/shkolla/stafi/ndalesat" element={<NdalesatPage />} />*/}
+//           {/*<Route path="/shkolla/stafi/oret-shtese" element={<OretShtesePage />} />*/}
+//           // Kompania
+//           <Route path="/kompania/dashboard" element={<KompaniaDashboard />} />
+//           <Route path="/kompania/regjistri" element={<RegjistriProdukteve />} />
+//           {/* <Route path="/kompania/porosite/market" element={<Market />} />
+//           <Route path="/kompania/porosite/shporta" element={<Shporta />} /> */}
+//         </Routes>
+//       </AnimatedRoutes>
+//     </Router>
+
   );
 }
 
