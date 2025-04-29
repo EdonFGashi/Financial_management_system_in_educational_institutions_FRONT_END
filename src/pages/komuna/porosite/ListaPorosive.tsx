@@ -1,17 +1,115 @@
+import { useEffect, useState } from "react";
+import axios from "axios";
 import { Link } from "react-router-dom";
 import Sidebar from "../Sidebar";
-import {
-  ClipboardDocumentCheckIcon,
-  BuildingStorefrontIcon,
-  CalendarIcon,
-} from "@heroicons/react/24/outline";
+import { urlPorosite } from "../../../endpoints";
+import { ClipboardDocumentCheckIcon } from "@heroicons/react/24/outline";
+import Toast from "../../../components/Toast"; 
+import Swal from "sweetalert2";
 
 function ListaPorosive() {
+  const [porosite, setPorosite] = useState<any[]>([]);
+  const [filters, setFilters] = useState({
+    pershkrimi: "",
+    kompania: "",
+    shkolla: "",
+    data: "",
+  });
+  const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
+
+  useEffect(() => {
+    fetchPorosite();
+  }, []);
+
+  const fetchPorosite = async () => {
+    try {
+      const params = new URLSearchParams();
+      if (filters.pershkrimi) params.append("pershkrimi", filters.pershkrimi);
+      if (filters.kompania) params.append("kompania", filters.kompania);
+      if (filters.shkolla) params.append("shkolla", filters.shkolla);
+      if (filters.data) params.append("data", filters.data);
+
+      const response = await axios.get(`${urlPorosite}?${params.toString()}`);
+      
+      // NEW: response.data.data
+      setPorosite(response.data.data || []);
+    } catch (error) {
+      console.error("Gabim duke marrë porositë:", error);
+    }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFilters((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleFilter = () => {
+    fetchPorosite();
+  };
+
+  const handlePaguaj = async (id: number) => {
+    const result = await Swal.fire({
+      title: "A jeni i sigurt?",
+      text: "Dëshironi të paguani këtë porosi?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#16a34a",
+      cancelButtonColor: "#dc2626",
+      confirmButtonText: "Po, Paguaj",
+      cancelButtonText: "Anulo",
+    });
+
+    if (result.isConfirmed) {
+      try {
+        const res = await axios.patch(`${urlPorosite}/paguaj/${id}`);
+        setToast({ message: res.data.message || "✅ Porosia u pagua me sukses!", type: "success" });
+        fetchPorosite();
+      } catch (error) {
+        console.error("Gabim gjatë pagesës:", error);
+        setToast({ message: "❌ Veprimi nuk u krye me sukses!", type: "error" });
+      }
+    }
+  };
+
+  const handleFshij = async (id: number) => {
+    const result = await Swal.fire({
+      title: "A jeni i sigurt?",
+      text: "Dëshironi të fshini këtë porosi?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#dc2626",
+      cancelButtonColor: "#6b7280",
+      confirmButtonText: "Po, Fshij",
+      cancelButtonText: "Anulo",
+    });
+
+    if (result.isConfirmed) {
+      try {
+        const res = await axios.patch(`${urlPorosite}/fshij/${id}`);
+        setToast({ message: res.data.message || "✅ Porosia u fshi me sukses!", type: "success" });
+        fetchPorosite();
+      } catch (error) {
+        console.error("Gabim gjatë fshirjes:", error);
+        setToast({ message: "❌ Veprimi nuk u krye me sukses!", type: "error" });
+      }
+    }
+  };
+
   return (
-    <div className="flex flex-col md:flex-row min-h-screen bg-gray-50 text-gray-800">
+    <div className="flex flex-col md:flex-row min-h-screen bg-gray-50 text-gray-800 relative">
       <Sidebar />
 
       <main className="flex-1 p-4 sm:p-6 md:p-10">
+        {/* Toast Notification */}
+        {toast && (
+          <div className="fixed top-5 right-5">
+            <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />
+          </div>
+        )}
+
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
           <h2 className="text-2xl sm:text-3xl font-bold flex items-center gap-2">
@@ -27,47 +125,78 @@ function ListaPorosive() {
 
         {/* Filters */}
         <div className="bg-white p-4 sm:p-6 rounded-xl shadow mb-8">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            {["Përshkrimi", "Kompania", "Shkolla", "Data", "Fshira/Paguara"].map((label, idx) => (
-              <input
-                key={idx} 
-                type="text"
-                placeholder={label}
-                className="px-3 py-2 border border-gray-300 rounded-md text-sm"
-              />
-            ))}
-            <button className="bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700 transition col-span-1">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+            <input
+              type="text"
+              name="pershkrimi"
+              value={filters.pershkrimi}
+              onChange={handleInputChange}
+              placeholder="Përshkrimi"
+              className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+            />
+            <input
+              type="text"
+              name="kompania"
+              value={filters.kompania}
+              onChange={handleInputChange}
+              placeholder="Kompania"
+              className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+            />
+            <input
+              type="text"
+              name="shkolla"
+              value={filters.shkolla}
+              onChange={handleInputChange}
+              placeholder="Shkolla"
+              className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+            />
+            <input
+              type="date"
+              name="data"
+              value={filters.data}
+              onChange={handleInputChange}
+              className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+            />
+            <button
+              onClick={handleFilter}
+              className="bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700 transition col-span-1"
+            >
               Filtro
             </button>
           </div>
         </div>
 
-        {/* Table */}
-        <div className="bg-white rounded-xl shadow overflow-x-auto">
-          <table className="w-full text-sm text-left">
-            <thead className="bg-gray-100 text-gray-700 font-semibold">
-              <tr>
-                {["Përshkrimi", "Sasia", "Kompania", "Shkolla", "Data", "Fshi/Pagesa"].map((col, i) => (
-                  <th key={i} className="px-4 py-3 border-b whitespace-nowrap">{col}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              <tr className="hover:bg-gray-50">
-                <td className="px-4 py-3">Laptop Dell</td>
-                <td className="px-4 py-3">10</td>
-                <td className="px-4 py-3">TechShpk</td>
-                <td className="px-4 py-3">Shkolla "Naim Frashëri"</td>
-                <td className="px-4 py-3">2025-04-10</td>
-                <td className="px-4 py-3 font-medium">
-                  <span className="text-red-600">Fshirë</span>
-                  {/* OR */}
-                  {/* <span className="text-green-600">Paguar</span> */}
-                </td>
-              </tr>
-              {/* Additional rows could go here */}
-            </tbody>
-          </table>
+        {/* Cards view */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {porosite.length > 0 ? (
+            porosite
+              .filter(p => p.statusi === "Ne Pritje")
+              .map((porosi) => (
+                <div key={porosi.id} className="bg-white rounded-xl shadow p-6 flex flex-col gap-4 hover:shadow-lg transition">
+                  <h3 className="text-lg font-semibold">{porosi.produktiEmri}</h3>
+                  <p><strong>Sasia:</strong> {porosi.sasia}</p>
+                  <p><strong>Kompania:</strong> {porosi.produktiEmri}</p>
+                  <p><strong>Shkolla:</strong> {porosi.shkollaEmri}</p>
+                  <p><strong>Data:</strong> {new Date(porosi.dataPorosise).toLocaleDateString('sq-AL', { day: '2-digit', month: '2-digit', year: 'numeric' })}</p>
+                  <div className="flex gap-2 mt-4">
+                    <button
+                      onClick={() => handlePaguaj(porosi.id)}
+                      className="flex-1 bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition text-sm"
+                    >
+                      Paguaj
+                    </button>
+                    <button
+                      onClick={() => handleFshij(porosi.id)}
+                      className="flex-1 bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition text-sm"
+                    >
+                      Fshij
+                    </button>
+                  </div>
+                </div>
+              ))
+          ) : (
+            <div className="text-center text-gray-500 col-span-full">Nuk ka të dhëna për t'u shfaqur.</div>
+          )}
         </div>
       </main>
     </div>

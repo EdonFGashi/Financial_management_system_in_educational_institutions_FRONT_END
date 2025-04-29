@@ -13,3 +13,6 @@
     animation: blink 1s step-start infinite;
   }
   
+  .container{
+    max-width: 100%;
+  }
