@@ -1,22 +1,9 @@
-import { BrowserRouter as Router, Routes, Route, BrowserRouter } from "react-router-dom";
-import Home from "./pages/Home";
-import SignIn from "./pages/SignIn";
-import SignUp from "./pages/SignUp";
-import KomunaDashboard from "./pages/komuna/KomunaDashboard";
-import RaportetPorosi from "./pages/komuna/porosite/RaportetPorosi";
-import ListaPorosive from "./pages/komuna/porosite/ListaPorosive";
-import AnimatedRoutes from "./components/AnimatedRoutes";
-import ShkollaDashboard from "./pages/Shkolla/ShkollaDashboard";
-import Market from "./pages/Shkolla/porosite/Market";
-import Shporta from "./pages/Shkolla/porosite/Shporta";
-import Historiku from "./pages/Shkolla/porosite/Historiku";
-import StafiShkolles from "./pages/Shkolla/stafi/ListaStafit";
-import KompaniaDashboard from "./pages/Kompania/KompaniaDashboard";
-import routes from "./route-config";
 import { useEffect, useState } from "react";
-import { claim } from "./auth/auth.models";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import AuthenticationContext from "./auth/AuthenticationContext";
+import { claim } from "./auth/auth.models";
 import { getClaims } from "./auth/handleJWT";
+import routes from "./route-config";
 
 
 function App() {

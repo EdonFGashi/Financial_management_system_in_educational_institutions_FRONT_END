@@ -7,6 +7,7 @@ import AuthForm from "./AuthForm";
 import AuthenticationContext from "./auth/AuthenticationContext";
 import { useNavigate } from "react-router-dom";
 import { getClaims, saveToken } from "./auth/handleJWT";
+import AuthRegister from "./auth/AuthRegister";
 
 export default function Register() {
   const [errors, setErrors] = useState<string[]>([]);
@@ -27,10 +28,10 @@ export default function Register() {
       console.log(response);
     } catch (error) {}
   }
-  return (
+  return ( 
     <>
-      <AuthForm
-        model={{ email: "", password: "" }}
+      <AuthRegister
+        model={{ email: "", password: "" , organisationName: "", confirmPassword: "", role: ""}}
         onSubmit={async (values) => await register(values)}
       />
     </>
