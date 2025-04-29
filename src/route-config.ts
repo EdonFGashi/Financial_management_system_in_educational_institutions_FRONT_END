@@ -46,9 +46,10 @@ const routes = [
   { path: "/register", component: Register },
 
   // Komuna
-  { path: "/komuna/dashboard", component: KomunaDashboard, isAdmin: true},
+  { path: "/komuna/dashboard", component: KomunaDashboard, isAdmin: false},
   { path: "/komuna/porosite/lista", component: ListaPorosive, isAdmin: false},
-  { path: "/komuna/porosite/raporte", component: RaportetPorosi ,isAdmin: true},
+  { path: "/komuna/porosite/raporte", component: RaportetPorosi ,isAdmin: false},
+
 
   // Shkolla
   { path: "/shkolla/dashboard", component: ShkollaDashboard, isAdmin: true },

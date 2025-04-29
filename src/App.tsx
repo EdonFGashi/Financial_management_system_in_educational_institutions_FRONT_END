@@ -29,7 +29,7 @@ function App() {
   //ketu na vijne claims te userit
   const [claims, setClaims] = useState<claim[]>([
     // { name: "email", value: "edon@live.com" },
-    // { name: "role", value: "admin" },
+    { name: "role", value: "admin" },
   ]);
 
   //i merr claims kur aplikacioni ngarkohet (edhe nese bejme refresh prap i kemi tokenin)
