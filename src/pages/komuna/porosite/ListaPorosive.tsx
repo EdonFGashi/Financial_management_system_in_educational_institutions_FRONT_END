@@ -3,7 +3,13 @@ import axios from "axios";
 import { Link } from "react-router-dom";
 import Sidebar from "../Sidebar";
 import { urlPorosite } from "../../../endpoints";
-import { ClipboardDocumentCheckIcon } from "@heroicons/react/24/outline";
+import { 
+  ClipboardDocumentCheckIcon, 
+  BuildingOffice2Icon, 
+  ClipboardDocumentListIcon, 
+  AcademicCapIcon, 
+  ArchiveBoxIcon 
+} from "@heroicons/react/24/outline";
 import Toast from "../../../components/Toast"; 
 import Swal from "sweetalert2";
 
@@ -30,8 +36,6 @@ function ListaPorosive() {
       if (filters.data) params.append("data", filters.data);
 
       const response = await axios.get(`${urlPorosite}?${params.toString()}`);
-      
-      // NEW: response.data.data
       setPorosite(response.data.data || []);
     } catch (error) {
       console.error("Gabim duke marrë porositë:", error);
@@ -166,28 +170,50 @@ function ListaPorosive() {
           </div>
         </div>
 
-        {/* Cards view */}
+        {/* Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {porosite.length > 0 ? (
             porosite
               .filter(p => p.statusi === "Ne Pritje")
               .map((porosi) => (
-                <div key={porosi.id} className="bg-white rounded-xl shadow p-6 flex flex-col gap-4 hover:shadow-lg transition">
-                  <h3 className="text-lg font-semibold">{porosi.produktiEmri}</h3>
-                  <p><strong>Sasia:</strong> {porosi.sasia}</p>
-                  <p><strong>Kompania:</strong> {porosi.produktiEmri}</p>
-                  <p><strong>Shkolla:</strong> {porosi.shkollaEmri}</p>
-                  <p><strong>Data:</strong> {new Date(porosi.dataPorosise).toLocaleDateString('sq-AL', { day: '2-digit', month: '2-digit', year: 'numeric' })}</p>
-                  <div className="flex gap-2 mt-4">
+                <div key={porosi.id} className="bg-white rounded-2xl shadow-lg p-6 flex flex-col gap-4 hover:shadow-2xl transition relative group">
+                  {/* Date Badge */}
+                  <div className="absolute top-3 right-3 bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-xs font-semibold">
+                    {new Date(porosi.dataPorosise).toLocaleDateString('sq-AL', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                  </div>
+
+                  {/* Title */}
+                  <h3 className="text-xl font-bold border-b pb-2">{porosi.produktiEmri}</h3>
+
+                  {/* Body with icons */}
+                  <div className="flex items-center gap-2 text-gray-600 text-sm">
+                    <ClipboardDocumentListIcon className="h-4 w-4" />
+                    <span><strong>Pershkrimi:</strong> {porosi.produktiPershkrimi || "N/A"}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-gray-600 text-sm">
+                    <BuildingOffice2Icon className="h-4 w-4" />
+                    <span><strong>Kompania:</strong> {porosi.kompaniaEmri}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-gray-600 text-sm">
+                    <AcademicCapIcon className="h-4 w-4" />
+                    <span><strong>Shkolla:</strong> {porosi.shkollaEmri}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-gray-600 text-sm">
+                    <ArchiveBoxIcon className="h-4 w-4" />
+                    <span><strong>Sasia:</strong> {porosi.sasia}</span>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex gap-3 mt-4">
                     <button
                       onClick={() => handlePaguaj(porosi.id)}
-                      className="flex-1 bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition text-sm"
+                      className="flex-1 bg-green-500 hover:bg-green-600 text-white py-2 rounded-lg text-sm font-semibold transition"
                     >
                       Paguaj
                     </button>
                     <button
                       onClick={() => handleFshij(porosi.id)}
-                      className="flex-1 bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition text-sm"
+                      className="flex-1 bg-red-500 hover:bg-red-600 text-white py-2 rounded-lg text-sm font-semibold transition"
                     >
                       Fshij
                     </button>
