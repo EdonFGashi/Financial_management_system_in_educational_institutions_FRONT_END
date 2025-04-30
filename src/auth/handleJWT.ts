@@ -61,9 +61,9 @@ export function logout(update?: (claims: claim[]) => void) {
   localStorage.removeItem(role);
   localStorage.removeItem(email);
   if (update) update([]);
-  console.log('Roli pas dales',localStorage.getItem(role));
-  console.log('tokeni pas dales',localStorage.getItem(tokenKey));
-  console.log('emaili pas dales',localStorage.getItem(email));
+  console.log("Roli pas daljes", localStorage.getItem(role));
+  console.log("tokeni pas daljes", localStorage.getItem(tokenKey));
+  console.log("emaili pas daljes", localStorage.getItem(email));
 }
 
 export function getToken() {

@@ -16,12 +16,12 @@ function Navbar() {
 
   const navLinks = [
     { to: "/", label: "Ballina" },
-    { to: "/komuna/dashboard", label: "Komuna" },
   ];
 
   const authorizedLinks = [
-    { to: "/shkolla/dashboard", label: "Shkolla" , roles: ["admin", "komun"]},
-    { to: "/kompania/dashboard", label: "Kompanite" , roles: ["admin", "shkoll"]},
+    { to: "/komuna/dashboard", label: "Komuna" , roles: ["admin", "komun"]},
+    { to: "/shkolla/dashboard", label: "Shkolla" , roles: ["admin", "shkoll"]},
+    { to: "/kompania/dashboard", label: "Kompanite" , roles: ["admin", "kompani"]},
     { to: "/perdoruesit", label: "Perdoruesit" ,  roles: ["admin"]}
   ];
 
