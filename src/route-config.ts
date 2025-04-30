@@ -31,13 +31,6 @@ import Market from "./pages/Shkolla/porosite/Market";
 import Shporta from "./pages/Shkolla/porosite/Shporta";
 import StafiShkolles from "./pages/Shkolla/stafi/ListaStafit";
 
-import SignIn from "./pages/SignIn";
-import SignUp from "./pages/SignUp";
-import KomunaDashboard from "./pages/komuna/KomunaDashboard";
-import ListaPorosive from "./pages/komuna/porosite/ListaPorosive";
-import RaportetPorosi from "./pages/komuna/porosite/RaportetPorosi";
-import Register from "./Register";
-import Login from "./auth/Login";
 import UsersManagement from "./admin/UsersManagement";
 
 
