@@ -16,6 +16,7 @@ interface School {
   nrNxenesve: number;
   shfrytezimiAktual: number;
   buxhetiTotal: number;
+  buxhetiAktual: number; // Add this
 }
 
 function NdarjaBuxhetit() {
@@ -27,6 +28,9 @@ function NdarjaBuxhetit() {
   const [autoAllocate, setAutoAllocate] = useState(false);
   const [daysInterval, setDaysInterval] = useState("5");
 
+  // Add state for allocation input
+  const [allocations, setAllocations] = useState<{ [key: number]: { amount: string; isPercentage: boolean } }>({});
+
   // Mock data
   useEffect(() => {
     setSchools([
@@ -35,22 +39,72 @@ function NdarjaBuxhetit() {
         emri: "Sami Frasheri",
         nrNxenesve: 850,
         shfrytezimiAktual: 32,
-        buxhetiTotal: 250
+        buxhetiTotal: 500,
+        buxhetiAktual: 160  // 32% of 500
       },
       {
         id: 2,
         emri: "Xhevdet Doda",
         nrNxenesve: 720,
         shfrytezimiAktual: 63,
-        buxhetiTotal: 120
+        buxhetiTotal: 400,
+        buxhetiAktual: 252  // 63% of 400
       }
     ]);
   }, []);
 
+  // Add handler for allocation type toggle
+  const handleAllocationTypeToggle = (schoolId: number) => {
+    setAllocations(prev => ({
+      ...prev,
+      [schoolId]: {
+        amount: prev[schoolId]?.amount || '',
+        isPercentage: !prev[schoolId]?.isPercentage
+      }
+    }));
+  };
+
+  // Add handler for allocation input change
+  const handleAllocationChange = (schoolId: number, value: string) => {
+    setAllocations(prev => ({
+      ...prev,
+      [schoolId]: {
+        ...prev[schoolId],
+        amount: value
+      }
+    }));
+  };
+
   const handleAllocation = async (schoolId: number) => {
+    const school = schools.find(s => s.id === schoolId);
+    const allocation = allocations[schoolId];
+    
+    if (!school || !allocation?.amount) {
+      setToast({
+        message: "Ju lutem vendosni shumën për ndarje",
+        type: "error"
+      });
+      return;
+    }
+
+    let allocationAmount: number;
+    if (allocation.isPercentage) {
+      allocationAmount = (parseFloat(allocation.amount) / 100) * school.buxhetiTotal;
+    } else {
+      allocationAmount = parseFloat(allocation.amount);
+    }
+
+    if (isNaN(allocationAmount) || allocationAmount <= 0) {
+      setToast({
+        message: "Shuma e ndarjes duhet të jetë pozitive",
+        type: "error"
+      });
+      return;
+    }
+
     const result = await Swal.fire({
       title: 'Konfirmo ndarjen e buxhetit',
-      text: "A jeni të sigurt që dëshironi të ndani buxhetin?",
+      text: `A jeni të sigurt që dëshironi të ndani ${allocationAmount}€ për shkollën "${school.emri}"?`,
       icon: 'question',
       showCancelButton: true,
       confirmButtonColor: '#16a34a',
@@ -61,7 +115,23 @@ function NdarjaBuxhetit() {
 
     if (result.isConfirmed) {
       try {
-        // API call would go here
+        // Update the school's budget utilization
+        const updatedSchools = schools.map(s => {
+          if (s.id === schoolId) {
+            const newBuxhetiAktual = s.buxhetiAktual + allocationAmount;
+            const newShfrytezimiAktual = (newBuxhetiAktual / s.buxhetiTotal) * 100;
+            return {
+              ...s,
+              buxhetiAktual: newBuxhetiAktual,
+              shfrytezimiAktual: Math.min(Math.round(newShfrytezimiAktual), 100)
+            };
+          }
+          return s;
+        });
+
+        setSchools(updatedSchools);
+        setAllocations(prev => ({ ...prev, [schoolId]: { amount: '', isPercentage: false } }));
+        
         setToast({
           message: "Buxheti u nda me sukses!",
           type: "success"
@@ -113,113 +183,167 @@ function NdarjaBuxhetit() {
         </div>
 
         {/* Controls Section */}
-        <div className="bg-white p-6 rounded-xl shadow mb-8">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 items-center">
+        <div className="bg-white p-4 sm:p-6 rounded-xl shadow mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Për muajin:</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Për muajin:
+              </label>
               <select
                 value={selectedMonth}
                 onChange={(e) => setSelectedMonth(e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded-md"
+                className="w-full p-2 border border-gray-300 rounded-md text-sm"
               >
                 <option>Qershor 2025</option>
                 <option>Korrik 2025</option>
+                <option>Gusht 2025</option>
               </select>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Ndarja automatike:</label>
-              <div className="flex items-center">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Ndarja automatike:
+              </label>
+              <div className="flex h-10 items-center">
                 <input
                   type="checkbox"
                   checked={autoAllocate}
                   onChange={(e) => setAutoAllocate(e.target.checked)}
-                  className="h-4 w-4 text-indigo-600"
+                  className="h-4 w-4 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500"
                 />
-                <span className="ml-2 text-sm">Auto</span>
+                <span className="ml-2 text-sm text-gray-600">Auto</span>
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Çdo (ditë):</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Çdo (ditë):
+              </label>
               <select
                 value={daysInterval}
                 onChange={(e) => setDaysInterval(e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded-md"
-                disabled={!autoAllocate}
+                className="w-full p-2 border border-gray-300 rounded-md text-sm"
+                // disabled={!autoAllocate}
+                
               >
-                <option>5</option>
-                <option>10</option>
-                <option>15</option>
-                <option>30</option>
+                <option value="1">1 ditë</option>
+                <option value="2">2 ditë</option>
+                <option value="3">3 ditë</option>
+                <option value="5">5 ditë</option>
+                <option value="7">7 ditë</option>
+                <option value="10">10 ditë</option>
+                <option value="14">14 ditë</option>
+                <option value="30">30 ditë</option>
               </select>
             </div>
 
-            <button
-              onClick={() => {}}
-              className="bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700 transition"
-            >
-              Filtro
-            </button>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                &nbsp;
+              </label>
+              <button
+                onClick={() => {
+                  // Add your filter logic here
+                  setToast({
+                    message: "Filtrat u aplikuan me sukses",
+                    type: "success"
+                  });
+                }}
+                className="w-full p-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition text-sm"
+              >
+                Filtro
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* Schools Table */}
+        {/* Responsive Table Container */}
         <div className="bg-white rounded-xl shadow overflow-hidden">
-          <table className="w-full">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Shkolla</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Shfrytëzimi i buxhetit</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Shuma e ndarjes</th>
-                <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900">Ndarja automatike</th>
-                <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900">Ndarja e fundit</th>
-                <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900">Veprime</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {schools.map((school) => (
-                <tr key={school.id}>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center">
-                      <BuildingLibraryIcon className="h-5 w-5 text-gray-400 mr-2" />
-                      <span className="font-medium">{school.emri}</span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="w-full bg-gray-200 rounded-full h-2.5">
-                      <div
-                        className={`h-2.5 rounded-full ${
-                          school.shfrytezimiAktual > 50 ? 'bg-red-600' : 'bg-green-600'
-                        }`}
-                        style={{ width: `${school.shfrytezimiAktual}%` }}
-                      ></div>
-                    </div>
-                    <span className="text-sm text-gray-500 mt-1">
-                      {school.shfrytezimiAktual}% / 100%
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className="font-semibold">{school.buxhetiTotal} € / %</span>
-                  </td>
-                  <td className="px-6 py-4 text-center">
-                    <input type="checkbox" className="h-4 w-4 text-indigo-600" />
-                  </td>
-                  <td className="px-6 py-4 text-center text-sm text-gray-500">
-                    25/05/2025
-                  </td>
-                  <td className="px-6 py-4 text-center">
-                    <button
-                      onClick={() => handleAllocation(school.id)}
-                      className="bg-indigo-600 text-white px-4 py-1 rounded-md text-sm hover:bg-indigo-700 transition"
-                    >
-                      Ndaj
-                    </button>
-                  </td>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold text-gray-900">Shkolla</th>
+                  <th className="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold text-gray-900">Shfrytëzimi i buxhetit</th>
+                  <th className="px-4 sm:px-6 py-3 sm:py-4 text-center text-xs sm:text-sm font-semibold text-gray-900">Shuma e ndarjes</th>
+                  <th className="hidden sm:table-cell px-4 sm:px-6 py-3 sm:py-4 text-center text-xs sm:text-sm font-semibold text-gray-900">Ndarja automatike</th>
+                  <th className="hidden md:table-cell px-4 sm:px-6 py-3 sm:py-4 text-center text-xs sm:text-sm font-semibold text-gray-900">Ndarja e fundit</th>
+                  <th className="px-4 sm:px-6 py-3 sm:py-4 text-center text-xs sm:text-sm font-semibold text-gray-900">Veprime</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {schools.map((school) => (
+                  <tr key={school.id} className="hover:bg-gray-50">
+                    <td className="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <BuildingLibraryIcon className="h-4 sm:h-5 w-4 sm:w-5 text-gray-400 mr-2 flex-shrink-0" />
+                        <span className="text-sm font-medium">{school.emri}</span>
+                      </div>
+                    </td>
+                    
+                    <td className="px-4 sm:px-6 py-3 sm:py-4">
+                      <div className="space-y-1">
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div
+                            className={`h-2 rounded-full ${
+                              school.shfrytezimiAktual > 50 ? 'bg-red-600' : 'bg-green-600'
+                            }`}
+                            style={{ width: `${school.shfrytezimiAktual}%` }}
+                          ></div>
+                        </div>
+                        <div className="flex justify-between text-xs sm:text-sm text-gray-500">
+                          <span>{school.buxhetiAktual}€</span>
+                          <span>{school.shfrytezimiAktual}%</span>
+                        </div>
+                      </div>
+                    </td>
+
+                    <td className="px-4 sm:px-6 py-3 sm:py-4">
+                      <div className="flex items-center justify-center gap-1 sm:gap-2">
+                        <input
+                          type="number"
+                          value={allocations[school.id]?.amount || ''}
+                          onChange={(e) => handleAllocationChange(school.id, e.target.value)}
+                          className="w-16 sm:w-24 p-1 sm:p-2 border border-gray-300 rounded-md text-xs sm:text-sm text-center"
+                          placeholder="Shuma"
+                        />
+                        <button
+                          onClick={() => handleAllocationTypeToggle(school.id)}
+                          className="px-1.5 sm:px-2 py-1 text-xs sm:text-sm text-gray-500 hover:text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50"
+                        >
+                          {allocations[school.id]?.isPercentage ? '%' : '€'}
+                        </button>
+                      </div>
+                    </td>
+
+                    <td className="hidden sm:table-cell px-4 sm:px-6 py-3 sm:py-4">
+                      <div className="flex justify-center">
+                        <input 
+                          type="checkbox" 
+                          className="h-4 w-4 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500"
+                        />
+                      </div>
+                    </td>
+
+                    <td className="hidden md:table-cell px-4 sm:px-6 py-3 sm:py-4 text-center whitespace-nowrap text-xs sm:text-sm text-gray-500">
+                      25/05/2025
+                    </td>
+
+                    <td className="px-4 sm:px-6 py-3 sm:py-4">
+                      <div className="flex justify-center">
+                        <button
+                          onClick={() => handleAllocation(school.id)}
+                          className="bg-indigo-600 text-white px-2 sm:px-4 py-1 sm:py-2 rounded-md text-xs sm:text-sm hover:bg-indigo-700 transition"
+                        >
+                          Ndaj
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </main>
     </div>
