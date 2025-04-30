@@ -182,9 +182,9 @@ function AuthForm(props: authFormProps) {
           </Formik>
 
           <p className="text-center mt-6">
-            Nuk keni llogari?{" "}
-            <Link to="/register" className="text-indigo-600 hover:underline">
-              Regjistrohu
+            Keni llogari?{" "}
+            <Link to="/signin" className="text-indigo-600 hover:underline">
+              Kyçu këtu
             </Link>
           </p>
 
