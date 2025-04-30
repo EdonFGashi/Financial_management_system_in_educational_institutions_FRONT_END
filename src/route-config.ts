@@ -24,6 +24,8 @@ import RaportetPorosi from "./pages/komuna/porosite/RaportetPorosi";
 import ListaShkollave from "./pages/komuna/shkollat/Shkollat";
 import ShtoShkolle from "./pages/komuna/shkollat/ShtoShkolle"; 
 import NdarjaBuxhetit from "./pages/komuna/buxheti/NdarjaBuxhetit";
+import BuxhetiHistoriku from "./pages/komuna/buxheti/Historiku";
+import KomunaListaKompanive from "./pages/komuna/kompanite/ListaKompanive";
 
 /*
 * Shkolla routes
@@ -86,12 +88,24 @@ const routes = [
     component: RaportetPorosi,
     allowedRoles: ["komun", "admin"],
   },
+  {
+  path: "/komuna/buxheti/historiku",
+  component: BuxhetiHistoriku,
+  allowedRoles: ["komun", "admin"]
+  },
+
 // Add to your route-config.ts
   { 
     path: "/komuna/buxheti",
     component: NdarjaBuxhetit,
     allowedRoles: ["komun", "admin"]
   },
+
+  {
+  path: "/komuna/kompanite",
+  component: KomunaListaKompanive,
+  allowedRoles: ["komun", "admin"],
+},
 
 
   // Shkolla

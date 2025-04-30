@@ -191,9 +191,9 @@ function Sidebar() {
                   <AdjustmentsVerticalIcon className="w-4 h-4" /> Ndarja e Buxhetit
                 </Link>
                 <Link
-                  to="/komuna/historiku"
+                  to="/komuna/buxheti/historiku"
                   className={`flex items-center gap-3 px-4 py-2 rounded-lg text-sm transition ${isActive(
-                    "/komuna/historiku"
+                    "/komuna/buxheti/historiku"
                   )}`}
                 >
                   <ClockIcon className="w-4 h-4" /> Historiku
