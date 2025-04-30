@@ -25,7 +25,7 @@ import ListaShkollave from "./pages/komuna/shkollat/Shkollat";
 import ShtoShkolle from "./pages/komuna/shkollat/ShtoShkolle"; 
 import NdarjaBuxhetit from "./pages/komuna/buxheti/NdarjaBuxhetit";
 import BuxhetiHistoriku from "./pages/komuna/buxheti/Historiku";
-import KomunaListaKompanive from "./pages/komuna/kompanite/ListaKompanive";
+import KomunaListaKompanive from "./pages/komuna/kontraktoret/ListaKompanive";
 
 /*
 * Shkolla routes
@@ -94,7 +94,6 @@ const routes = [
   allowedRoles: ["komun", "admin"]
   },
 
-// Add to your route-config.ts
   { 
     path: "/komuna/buxheti",
     component: NdarjaBuxhetit,

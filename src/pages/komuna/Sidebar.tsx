@@ -14,6 +14,7 @@ import {
   XMarkIcon,
   BuildingLibraryIcon,
   ClockIcon,
+  BuildingOffice2Icon,
 } from "@heroicons/react/24/outline";
 import { useState } from "react";
 import Authorized from "../../auth/Authorized";
@@ -28,6 +29,7 @@ function Sidebar() {
   const [schoolsHovered, setSchoolsHovered] = useState(false);
   const [isOpen, setIsOpen] = useState(true);
   const [financatHovered, setFinancatHovered] = useState(false);
+  const [kontraktoretHovered, setKontraktoretHovered] = useState(false);
 
   const {update, claims} = useContext(AuthenticationContext);
   const navigate = useNavigate();
@@ -201,20 +203,50 @@ function Sidebar() {
               </div>
             </div>
 
+            
+            <div
+              onMouseEnter={() => setKontraktoretHovered(true)}
+              onMouseLeave={() => setKontraktoretHovered(false)}
+              className="relative"
+            >
+              <div className="flex items-center justify-between px-4 py-2 rounded-lg hover:bg-gray-100 cursor-pointer">
+                <span className="flex items-center gap-3 text-sm text-gray-700">
+                  <BriefcaseIcon className="w-5 h-5" /> Kontraktorët
+                </span>
+                <ChevronDownIcon
+                  className={`w-4 h-4 transform transition-transform duration-200 ${
+                    kontraktoretHovered ? "rotate-180" : "rotate-0"
+                  }`}
+                />
+              </div>
+              <div
+                className={`overflow-hidden transition-all duration-300 ${
+                  kontraktoretHovered ? "max-h-40 opacity-100" : "max-h-0 opacity-0"
+                } ml-4 mt-1 space-y-1`}
+              >
+                <Link
+                  to="/komuna/kompanite"
+                  className={`flex items-center gap-3 px-4 py-2 rounded-lg text-sm transition ${isActive(
+                    "/komuna/kompanite"
+                  )}`}
+                >
+                  <BuildingOffice2Icon className="w-4 h-4" /> Lista e Kontraktorëve
+                </Link>
+                <Link
+                  to="/komuna/kontraktoret/shto"
+                  className={`flex items-center gap-3 px-4 py-2 rounded-lg text-sm transition ${isActive(
+                    "/komuna/kontraktoret/shto"
+                  )}`}
+                >
+                  <DocumentDuplicateIcon className="w-4 h-4" /> Shto Kontraktor
+                </Link>
+              </div>
+            </div>
+
             <Authorized
               allowedRoles={["admin"]}
               authorized={
                 <>
-                  <Link
-                    to="/komuna/kontraktoret"
-                    className={`flex items-center gap-3 px-4 py-2 rounded-lg transition ${isActive(
-                      "/komuna/kontraktoret"
-                    )}`}
-                  >
-                    <BriefcaseIcon className="w-5 h-5" />
-                    <span className="text-sm">Kontraktorët</span>
-                  </Link>
-
                   <Link
                     to="/komuna/financat"
                     className={`flex items-center gap-3 px-4 py-2 rounded-lg transition ${isActive(

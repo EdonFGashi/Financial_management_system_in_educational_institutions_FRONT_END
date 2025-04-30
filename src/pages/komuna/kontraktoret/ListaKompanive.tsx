@@ -178,34 +178,36 @@ function ListaKompanive() {
           {kompanite.length > 0 ? (
             kompanite.map((kompania) => (
               <div key={kompania.id} className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition duration-200">
-                {/* Date Badge */}
-                <div className="absolute top-3 right-3 bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-xs font-semibold">
-                  {new Date(kompania.dataKrijimit).toLocaleDateString('sq-AL')}
-                </div>
-
-                {/* Company Info */}
                 <div className="space-y-4">
-                  <h3 className="text-xl font-bold text-gray-800 border-b pb-2">{kompania.emri}</h3>
+                  {/* Header with title and date */}
+                  <div className="flex justify-between items-start">
+                    <h3 className="text-xl font-bold text-gray-800">{kompania.emri}</h3>
+                    <span className="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-xs font-semibold">
+                      {new Date(kompania.dataKrijimit).toLocaleDateString('sq-AL')}
+                    </span>
+                  </div>
                   
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-gray-600">
-                      <MapPinIcon className="h-5 w-5" />
-                      <span>{kompania.lokacioni}</span>
-                    </div>
-                    
-                    <div className="flex items-center gap-2 text-gray-600">
-                      <WrenchScrewdriverIcon className="h-5 w-5" />
-                      <span>{kompania.sherbimi}</span>
-                    </div>
-                    
-                    <div className="flex items-center gap-2 text-gray-600">
-                      <CalendarDaysIcon className="h-5 w-5" />
-                      <span>{new Date(kompania.dataKrijimit).toLocaleDateString('sq-AL')}</span>
+                  <div className="border-t pt-4">
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2 text-gray-600">
+                        <MapPinIcon className="h-5 w-5" />
+                        <span>{kompania.lokacioni}</span>
+                      </div>
+                      
+                      <div className="flex items-center gap-2 text-gray-600">
+                        <WrenchScrewdriverIcon className="h-5 w-5" />
+                        <span>{kompania.sherbimi}</span>
+                      </div>
+                      
+                      <div className="flex items-center gap-2 text-gray-600">
+                        <CalendarDaysIcon className="h-5 w-5" />
+                        <span>{new Date(kompania.dataKrijimit).toLocaleDateString('sq-AL')}</span>
+                      </div>
                     </div>
                   </div>
 
                   {/* Actions */}
-                  <div className="flex gap-3 mt-4 pt-4 border-t">
+                  <div className="flex gap-3 pt-4 border-t">
                     <Link
                       to={`/komuna/kompanite/modifiko/${kompania.id}`}
                       className="flex-1 bg-indigo-500 hover:bg-indigo-600 text-white py-2 rounded-lg text-sm font-semibold transition flex items-center justify-center gap-2"
