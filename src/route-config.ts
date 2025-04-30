@@ -21,6 +21,7 @@ import Home from "./pages/Home";
 import KomunaDashboard from "./pages/komuna/KomunaDashboard";
 import ListaPorosive from "./pages/komuna/porosite/ListaPorosive";
 import RaportetPorosi from "./pages/komuna/porosite/RaportetPorosi";
+import ListaShkollave from "./pages/komuna/shkollat/Shkollat";
 
 /*
 * Shkolla routes
@@ -57,6 +58,10 @@ const routes = [
   },
 
   // Komuna
+
+  { path: "/komuna/shkolla/listashkollave",
+   component: ListaShkollave ,
+   allowedRoles: ["komun", "admin"]},
 
   {
     path: "/komuna/dashboard",

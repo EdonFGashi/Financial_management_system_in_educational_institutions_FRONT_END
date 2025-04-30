@@ -1,0 +1,203 @@
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { BuildingLibraryIcon } from "@heroicons/react/24/outline";
+import Sidebar from "../Sidebar";
+import Toast from "../../../components/Toast";
+
+// Mock data
+const mockSchools = [
+  {
+    id: 1,
+    emri: "Shkolla Fillore 'Hasan Prishtina'",
+    lokacioni: "Prishtinë",
+    nrNxenesve: 850,
+    buxheti: 150000
+  },
+  {
+    id: 2,
+    emri: "Shkolla Fillore 'Gjergj Fishta'",
+    lokacioni: "Prishtinë",
+    nrNxenesve: 720,
+    buxheti: 130000
+  },
+  {
+    id: 3,
+    emri: "Shkolla Fillore 'Naim Frashëri'",
+    lokacioni: "Fushë Kosovë",
+    nrNxenesve: 650,
+    buxheti: 120000
+  }
+];
+
+function Shkollat() {
+  const [schools, setSchools] = useState(mockSchools);
+  const [loading, setLoading] = useState(false);
+  const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
+  const [filters, setFilters] = useState({
+    emri: "",
+    lokacioni: "",
+    nrNxenesve: "",
+    buxheti: "",
+  });
+
+  const handleFilter = () => {
+    let filteredSchools = [...mockSchools];
+
+    if (filters.emri) {
+      filteredSchools = filteredSchools.filter(school => 
+        school.emri.toLowerCase().includes(filters.emri.toLowerCase())
+      );
+    }
+
+    if (filters.lokacioni) {
+      filteredSchools = filteredSchools.filter(school => 
+        school.lokacioni.toLowerCase().includes(filters.lokacioni.toLowerCase())
+      );
+    }
+
+    if (filters.nrNxenesve) {
+      filteredSchools = filteredSchools.filter(school => 
+        school.nrNxenesve >= parseInt(filters.nrNxenesve)
+      );
+    }
+
+    if (filters.buxheti) {
+      filteredSchools = filteredSchools.filter(school => 
+        school.buxheti >= parseInt(filters.buxheti)
+      );
+    }
+
+    setSchools(filteredSchools);
+  };
+
+  const handleDelete = (id: number) => {
+    setSchools(prevSchools => prevSchools.filter(school => school.id !== id));
+    setToast({ message: "Shkolla u fshi me sukses!", type: "success" });
+  };
+
+  const handleEdit = (id: number) => {
+    // For now just show a toast message
+    setToast({ message: "Funksioni i modifikimit do të implementohet së shpejti!", type: "error" });
+  };
+
+  return (
+    <div className="flex flex-col md:flex-row min-h-screen bg-gray-50 text-gray-800">
+      <Sidebar />
+
+      <main className="flex-1 p-4 sm:p-6 md:p-10 relative">
+        {toast && (
+          <div className="fixed top-5 right-5 z-50">
+            <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />
+          </div>
+        )}
+
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+          <h2 className="text-2xl sm:text-3xl font-bold flex items-center gap-2">
+            <BuildingLibraryIcon className="w-6 sm:w-7 h-6 sm:h-7 text-indigo-600" />
+            Shkollat
+          </h2>
+          <Link
+            to="/komuna/shto-shkolle"
+            className="bg-indigo-600 text-white px-4 py-2 rounded-md shadow hover:bg-indigo-700 transition text-sm"
+          >
+            + Shto Shkollë
+          </Link>
+        </div>
+
+        <div className="bg-white rounded-xl shadow p-6 mb-8 space-y-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+            <input
+              type="text"
+              value={filters.emri}
+              onChange={(e) => setFilters({ ...filters, emri: e.target.value })}
+              placeholder="Emri i shkollës..."
+              className="p-3 border border-gray-300 rounded-md text-sm"
+            />
+            <input
+              type="text"
+              value={filters.lokacioni}
+              onChange={(e) => setFilters({ ...filters, lokacioni: e.target.value })}
+              placeholder="Lokacioni..."
+              className="p-3 border border-gray-300 rounded-md text-sm"
+            />
+            <input
+              type="number"
+              value={filters.nrNxenesve}
+              onChange={(e) => setFilters({ ...filters, nrNxenesve: e.target.value })}
+              placeholder="Nr. i nxënësve..."
+              className="p-3 border border-gray-300 rounded-md text-sm"
+            />
+            <input
+              type="number"
+              value={filters.buxheti}
+              onChange={(e) => setFilters({ ...filters, buxheti: e.target.value })}
+              placeholder="Buxheti..."
+              className="p-3 border border-gray-300 rounded-md text-sm"
+            />
+          </div>
+
+          <div className="mt-4">
+            <button
+              onClick={handleFilter}
+              className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-md transition"
+            >
+              Filtro
+            </button>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl shadow-lg overflow-x-auto">
+          {loading ? (
+            <div className="p-6 text-center text-gray-600">Duke ngarkuar të dhënat...</div>
+          ) : (
+            <table className="w-full text-sm text-left border-collapse">
+              <thead className="bg-gradient-to-r from-indigo-600 to-indigo-700 text-white">
+                <tr>
+                  <th className="px-6 py-4 font-semibold border-b border-indigo-500">Emri i shkollës</th>
+                  <th className="px-6 py-4 font-semibold border-b border-indigo-500">Lokacioni</th>
+                  <th className="px-6 py-4 font-semibold border-b border-indigo-500">Nr. i nxënësve</th>
+                  <th className="px-6 py-4 font-semibold border-b border-indigo-500">Buxheti</th>
+                  <th className="px-6 py-4 font-semibold border-b border-indigo-500">Veprimet</th>
+                </tr>
+              </thead>
+              <tbody>
+                {schools.map((school, index) => (
+                  <tr
+                    key={school.id}
+                    className={`
+                      border-b border-gray-200 hover:bg-indigo-50 transition-colors
+                      ${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}
+                    `}
+                  >
+                    <td className="px-6 py-4">{school.emri}</td>
+                    <td className="px-6 py-4">{school.lokacioni}</td>
+                    <td className="px-6 py-4">{school.nrNxenesve}</td>
+                    <td className="px-6 py-4">{school.buxheti.toLocaleString()} €</td>
+                    <td className="px-6 py-4">
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleEdit(school.id)}
+                          className="text-indigo-600 hover:text-indigo-800"
+                        >
+                          Modifiko
+                        </button>
+                        <button
+                          onClick={() => handleDelete(school.id)}
+                          className="text-red-600 hover:text-red-800"
+                        >
+                          Fshij
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      </main>
+    </div>
+  );
+}
+
+export default Shkollat;
