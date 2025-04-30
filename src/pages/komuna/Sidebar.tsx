@@ -142,17 +142,17 @@ function Sidebar() {
                 } ml-4 mt-1 space-y-1`}
               >
                 <Link
-                  to="/komuna/shkollat/listashkollave"
+                  to="/komuna/shkolla/listashkollave"
                   className={`flex items-center gap-3 px-4 py-2 rounded-lg text-sm transition ${isActive(
-                    "/komuna/shkollat/listashkollave"
+                    "/komuna/shkolla/listashkollave"
                   )}`}
                 >
                   <DocumentDuplicateIcon className="w-4 h-4" /> Lista e Shkollave
                 </Link>
                 <Link
-                  to="/komuna/shkollat/shto"
+                  to="/komuna/shkolla/shto"
                   className={`flex items-center gap-3 px-4 py-2 rounded-lg text-sm transition ${isActive(
-                    "/komuna/shkollat/shto"
+                    "/komuna/shkolla/shto"
                   )}`}
                 >
                   <ClipboardDocumentListIcon className="w-4 h-4" /> Shto Shkollë

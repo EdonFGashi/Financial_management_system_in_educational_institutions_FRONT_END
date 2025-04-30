@@ -104,42 +104,55 @@ function Shkollat() {
           </Link>
         </div>
 
-        <div className="bg-white rounded-xl shadow p-6 mb-8 space-y-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-            <input
-              type="text"
-              value={filters.emri}
-              onChange={(e) => setFilters({ ...filters, emri: e.target.value })}
-              placeholder="Emri i shkollës..."
-              className="p-3 border border-gray-300 rounded-md text-sm"
-            />
-            <input
-              type="text"
-              value={filters.lokacioni}
-              onChange={(e) => setFilters({ ...filters, lokacioni: e.target.value })}
-              placeholder="Lokacioni..."
-              className="p-3 border border-gray-300 rounded-md text-sm"
-            />
-            <input
-              type="number"
-              value={filters.nrNxenesve}
-              onChange={(e) => setFilters({ ...filters, nrNxenesve: e.target.value })}
-              placeholder="Nr. i nxënësve..."
-              className="p-3 border border-gray-300 rounded-md text-sm"
-            />
-            <input
-              type="number"
-              value={filters.buxheti}
-              onChange={(e) => setFilters({ ...filters, buxheti: e.target.value })}
-              placeholder="Buxheti..."
-              className="p-3 border border-gray-300 rounded-md text-sm"
-            />
-          </div>
+        <div className="bg-white rounded-xl shadow p-6 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 items-end">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Emri i shkollës</label>
+              <input
+                type="text"
+                value={filters.emri}
+                onChange={(e) => setFilters({ ...filters, emri: e.target.value })}
+                placeholder="Emri i shkollës..."
+                className="w-full p-2 border border-gray-300 rounded-md text-sm"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Lokacioni</label>
+              <input
+                type="text"
+                value={filters.lokacioni}
+                onChange={(e) => setFilters({ ...filters, lokacioni: e.target.value })}
+                placeholder="Lokacioni..."
+                className="w-full p-2 border border-gray-300 rounded-md text-sm"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Nr. i nxënësve</label>
+              <input
+                type="number"
+                value={filters.nrNxenesve}
+                onChange={(e) => setFilters({ ...filters, nrNxenesve: e.target.value })}
+                placeholder="Nr. i nxënësve..."
+                className="w-full p-2 border border-gray-300 rounded-md text-sm"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Buxheti ($)</label>
+              <input
+                type="number"
+                value={filters.buxheti}
+                onChange={(e) => setFilters({ ...filters, buxheti: e.target.value })}
+                placeholder="Buxheti..."
+                className="w-full p-2 border border-gray-300 rounded-md text-sm"
+              />
+            </div>
 
-          <div className="mt-4">
             <button
               onClick={handleFilter}
-              className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-md transition"
+              className="bg-indigo-600 text-white px-6 py-2 rounded-md hover:bg-indigo-700 transition h-[38px]"
             >
               Filtro
             </button>
