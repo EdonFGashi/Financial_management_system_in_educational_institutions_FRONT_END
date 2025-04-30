@@ -16,14 +16,15 @@ function Navbar() {
 
   const navLinks = [
     { to: "/", label: "Ballina" },
-    { to: "/komuna/dashboard", label: "Komuna" },
   ];
 
   const authorizedLinks = [
-    { to: "/shkolla/dashboard", label: "Shkolla" },
-    { to: "/kompania/dashboard", label: "Kompanite" },
-    { to: "/perdoruesit", label: "Perdoruesit" }
+    { to: "/komuna/dashboard", label: "Komuna" , roles: ["admin", "komun"]},
+    { to: "/shkolla/dashboard", label: "Shkolla" , roles: ["admin", "shkoll"]},
+    { to: "/kompania/dashboard", label: "Kompanite" , roles: ["admin", "kompani"]},
+    { to: "/perdoruesit", label: "Perdoruesit" ,  roles: ["admin"]}
   ];
+
 
   const isActive = (path: string) =>
     location.pathname === path
@@ -31,6 +32,8 @@ function Navbar() {
       : "text-black";
 
   return (
+    <>
+
     <nav className="bg-white px-6 py-4 shadow-md flex items-center justify-between border-b border-gray-200">
       {/* Brand */}
       <Link
@@ -52,27 +55,59 @@ function Navbar() {
           >
             {link.label}
           </Link>
-        ))}
+        ))}     
 
 
-          {/* Authorized Links (only visible to admin) */}
-        <Authorized
-          // role="admin"
-          authorized={
-            <>
-              {authorizedLinks.map((link) => (
-                <Link
-                  key={link.to}
-                  to={link.to}
-                  className={`relative text-lg font-medium transition duration-200 ${isActive(link.to)} after:content-[''] after:absolute after:left-0 after:-bottom-1 after:w-0 after:h-[2px] after:bg-black hover:after:w-full after:transition-all after:duration-300`}
-                >
-                  {link.label}
-                </Link>
-              ))}
-              <span className="nav-link">Hello, {getUserEmail()}</span>
+
+
+  {authorizedLinks.map((link) => (
+    
+    <Authorized
+      key={link.to}
+      allowedRoles={link.roles}
+      authorized={
+        <>
+        <Link
+          to={link.to}
+          className={`relative text-lg font-medium transition duration-200 ${isActive(link.to)} after:content-[''] after:absolute after:left-0 after:-bottom-1 after:w-0 after:h-[2px] after:bg-black hover:after:w-full after:transition-all after:duration-300`}
+        >
+          {link.label}
+        </Link>
+        {/* <span className="nav-link">Hello, {getUserEmail()}</span>
               <Button 
               onClick={() =>{
                 logout();
+                update([]);
+              }}
+              className="nav-link btn btn-link"
+              >Log Out</Button> */}
+        </>
+      }
+    //   notAuthorized={<>
+    //     <Link
+    //   to="/register"
+    //   className="px-5 py-2 bg-black text-white rounded-xl font-medium shadow-md hover:bg-gray-800 transition"
+    // >
+    //   Register
+    // </Link>
+    //     <Link
+    //   to="/signin"
+    //   className="px-5 py-2 bg-black text-white rounded-xl font-medium shadow-md hover:bg-gray-800 transition"
+    // >
+    //   Log In
+    // </Link>
+    //   </>}
+    />
+  ))}
+
+         <Authorized
+          // role="admin"
+          authorized={
+            <>
+              <span className="nav-link">Hello, {getUserEmail()}</span>
+              <Button 
+              onClick={() =>{
+                logout(update);
                 update([]);
               }}
               className="nav-link btn btn-link"
@@ -95,8 +130,8 @@ function Navbar() {
           </>}
         />
 
-        {/* Login Button */}
-        {/* <Link
+        {/* Login Button
+        <Link
           to="/signin"
           className="px-5 py-2 bg-black text-white rounded-xl font-medium shadow-md hover:bg-gray-800 transition"
         >
@@ -104,6 +139,8 @@ function Navbar() {
         </Link> */}
       </div>
     </nav>
+
+    </>
   );
 }
 
