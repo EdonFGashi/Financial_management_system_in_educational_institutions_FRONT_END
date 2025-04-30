@@ -114,20 +114,24 @@ function Navbar() {
             </>
           }
           notAuthorized={
-            <>
+            <div className="flex items-center space-x-4">
               <Link
                 to="/register"
-                className="px-5 py-2 bg-black text-white rounded-xl font-medium shadow-md hover:bg-gray-800 transition"
+                className="px-6 py-2.5 bg-white text-black border-2 border-black rounded-lg font-medium 
+                hover:bg-black hover:text-white transition-all duration-200 ease-in-out transform 
+                hover:scale-105 active:scale-95 shadow-sm"
               >
-                Register
+                Regjistrohu
               </Link>
               <Link
                 to="/signin"
-                className="px-5 py-2 bg-black text-white rounded-xl font-medium shadow-md hover:bg-gray-800 transition"
+                className="px-6 py-2.5 bg-indigo-600 text-white rounded-lg font-medium 
+                hover:bg-indigo-700 transition-all duration-200 ease-in-out transform 
+                hover:scale-105 active:scale-95 shadow-md"
               >
-                Log In
+                Kyçu
               </Link>
-            </>
+            </div>
           }
         />
       </div>

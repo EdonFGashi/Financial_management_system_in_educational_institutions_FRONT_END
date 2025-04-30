@@ -1,7 +1,5 @@
 
 import Home from "./pages/Home";
-import SignIn from "./pages/SignIn";
-import SignUp from "./pages/SignUp";
 import KomunaDashboard from "./pages/komuna/KomunaDashboard";
 import RaportetPorosi from "./pages/komuna/porosite/RaportetPorosi";
 import ListaPorosive from "./pages/komuna/porosite/ListaPorosive";
@@ -19,6 +17,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import AuthenticationContext from "./auth/AuthenticationContext";
 import { claim } from "./auth/auth.models";
 import { getClaims } from "./auth/handleJWT";
+
 
 import RegjistriProdukteve from "./pages/Kompania/produktet/regjistriProdukteve";
 

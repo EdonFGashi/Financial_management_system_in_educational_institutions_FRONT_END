@@ -13,6 +13,7 @@ import {
   Bars3Icon,
   XMarkIcon,
   BuildingLibraryIcon,
+  ClockIcon,
 } from "@heroicons/react/24/outline";
 import { useState } from "react";
 import Authorized from "../../auth/Authorized";
@@ -26,6 +27,7 @@ function Sidebar() {
   const [hovered, setHovered] = useState(false);
   const [schoolsHovered, setSchoolsHovered] = useState(false);
   const [isOpen, setIsOpen] = useState(true);
+  const [financatHovered, setFinancatHovered] = useState(false);
 
   const {update, claims} = useContext(AuthenticationContext);
   const navigate = useNavigate();
@@ -150,9 +152,9 @@ function Sidebar() {
                   <DocumentDuplicateIcon className="w-4 h-4" /> Lista e Shkollave
                 </Link>
                 <Link
-                  to="/komuna/shkolla/shto"
+                  to="/komuna/shto-shkolle"
                   className={`flex items-center gap-3 px-4 py-2 rounded-lg text-sm transition ${isActive(
-                    "/komuna/shkolla/shto"
+                    "/komuna/shto-shkolle"
                   )}`}
                 >
                   <ClipboardDocumentListIcon className="w-4 h-4" /> Shto Shkollë
@@ -160,15 +162,44 @@ function Sidebar() {
               </div>
             </div>
 
-            <Link
-              to="/komuna/buxheti"
-              className={`flex items-center gap-3 px-4 py-2 rounded-lg transition ${isActive(
-                "/komuna/buxheti"
-              )}`}
+            <div
+              onMouseEnter={() => setFinancatHovered(true)}
+              onMouseLeave={() => setFinancatHovered(false)}
+              className="relative"
             >
-              <AdjustmentsVerticalIcon className="w-5 h-5" />
-              <span className="text-sm">Ndarja e Buxhetit</span>
-            </Link>
+              <div className="flex items-center justify-between px-4 py-2 rounded-lg hover:bg-gray-100 cursor-pointer">
+                <span className="flex items-center gap-3 text-sm text-gray-700">
+                  <BanknotesIcon className="w-5 h-5" /> Financat
+                </span>
+                <ChevronDownIcon
+                  className={`w-4 h-4 transform transition-transform duration-200 ${
+                    financatHovered ? "rotate-180" : "rotate-0"
+                  }`}
+                />
+              </div>
+              <div
+                className={`overflow-hidden transition-all duration-300 ${
+                  financatHovered ? "max-h-40 opacity-100" : "max-h-0 opacity-0"
+                } ml-4 mt-1 space-y-1`}
+              >
+                <Link
+                  to="/komuna/buxheti"
+                  className={`flex items-center gap-3 px-4 py-2 rounded-lg text-sm transition ${isActive(
+                    "/komuna/buxheti"
+                  )}`}
+                >
+                  <AdjustmentsVerticalIcon className="w-4 h-4" /> Ndarja e Buxhetit
+                </Link>
+                <Link
+                  to="/komuna/historiku"
+                  className={`flex items-center gap-3 px-4 py-2 rounded-lg text-sm transition ${isActive(
+                    "/komuna/historiku"
+                  )}`}
+                >
+                  <ClockIcon className="w-4 h-4" /> Historiku
+                </Link>
+              </div>
+            </div>
 
             <Authorized
               allowedRoles={["admin"]}
@@ -201,16 +232,17 @@ function Sidebar() {
 
         {/* Sign Out */}
         <div className="pt-6 border-t mt-8">
-        <Button 
-              onClick={() =>{
-                logout(update);
-                update([]);
-                navigate("/");
-               
-              }}
-              
-              className="nav-link btn btn-link"
-              >Dilni nga llogaia</Button>
+          <button
+            onClick={() => {
+              logout(update);
+              update([]);
+              navigate("/");
+            }}
+            className="w-full flex items-center gap-3 px-4 py-2 rounded-lg text-sm text-red-600 hover:bg-red-50 transition-colors duration-200"
+          >
+            <ArrowLeftOnRectangleIcon className="w-5 h-5" />
+            <span>Dilni nga llogaria</span>
+          </button>
         </div>
       </aside>
     </>
