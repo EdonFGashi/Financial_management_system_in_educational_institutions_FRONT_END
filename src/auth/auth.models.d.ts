@@ -10,15 +10,6 @@ export interface userCredentials {
   password: string;
 }
 
-export interface userRegisterCredentials {
-  organisationName: string;
-  role: string;
-  email: string;
-  password: string;
-  confirmPassword: string;
-}
-
-
 export interface authenticationResponse{
   token: string;
   expiration: Date;

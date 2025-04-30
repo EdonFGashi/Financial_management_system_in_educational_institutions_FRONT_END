@@ -22,7 +22,6 @@ export default function Login(){
             saveToken(response.data);
             update(getClaims());
             navigate('/');
-            console.log(credentials);
             console.log(response.data);
         }
         catch(error){
@@ -32,6 +31,7 @@ export default function Login(){
 
     return (
         <>
+            <h3>Login</h3>
             <AuthForm model={{email: '', password: ''}}
                 onSubmit={async values => await login(values)}
             />

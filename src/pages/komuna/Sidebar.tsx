@@ -1,4 +1,4 @@
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import {
   FolderOpenIcon,
   AdjustmentsVerticalIcon,
@@ -15,19 +15,11 @@ import {
 } from "@heroicons/react/24/outline";
 import { useState } from "react";
 import Authorized from "../../auth/Authorized";
-import Button from "../../components/Button";
-import { logout } from "../../auth/handleJWT";
-import AuthenticationContext from "../../auth/AuthenticationContext";
-import { useContext } from "react";
 
 function Sidebar() {
   const location = useLocation();
   const [hovered, setHovered] = useState(false);
   const [isOpen, setIsOpen] = useState(true);
-
-  const {update, claims} = useContext(AuthenticationContext);
-  const navigate = useNavigate();
-
 
   const isActive = (path: string) =>
     location.pathname === path
@@ -128,7 +120,7 @@ function Sidebar() {
             </Link>
 
             <Authorized
-              allowedRoles={["admin"]}
+              role="admin"
               authorized={
                 <>
                   <Link
@@ -158,16 +150,13 @@ function Sidebar() {
 
         {/* Sign Out */}
         <div className="pt-6 border-t mt-8">
-        <Button 
-              onClick={() =>{
-                logout(update);
-                update([]);
-                navigate("/");
-               
-              }}
-              
-              className="nav-link btn btn-link"
-              >Dilni nga llogaia</Button>
+          <Link
+            to="/signin"
+            className="flex items-center gap-3 px-4 py-2 text-sm text-gray-600 hover:text-red-500 transition"
+          >
+            <ArrowLeftOnRectangleIcon className="w-5 h-5" />
+            Dilni nga llogaria
+          </Link>
         </div>
       </aside>
     </>
