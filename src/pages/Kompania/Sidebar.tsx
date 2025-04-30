@@ -69,8 +69,8 @@ function Sidebar() {
               onMouseLeave={() => setHoveredPorosite(false)}
               className="relative"
             >
-              <div className="flex items-center justify-between px-4 py-2 rounded-lg hover:bg-gray-100 cursor-pointer">
-                <span className="flex items-center gap-3 text-sm text-gray-700">
+              <div className={`flex items-center justify-between px-4 py-2 rounded-lg  cursor-pointer ${isActive("/kompania/porosite/lista")} ${isActive("/kompania/porosite/raporte")}`}>
+                <span className="flex items-center gap-3 text-sm ">
                   <WalletIcon className="w-5 h-5" /> Porositë
                 </span>
                 <ChevronDownIcon
@@ -82,13 +82,13 @@ function Sidebar() {
               >
                 <Link
                   to="/kompania/porosite/lista"
-                  className={`flex items-center gap-3 px-4 py-2 rounded-lg text-sm transition ${isActive("/komuna/porosite/lista")}`}
+                  className={`flex items-center gap-3 px-4 py-2 rounded-lg text-sm transition ${isActive("/kompania/porosite/lista")}`}
                 >
                   <ClipboardDocumentListIcon className="w-4 h-4" /> Lista e Porosive
                 </Link>
                 <Link
                   to="/kompania/porosite/raporte"
-                  className={`flex items-center gap-3 px-4 py-2 rounded-lg text-sm transition ${isActive("/komuna/porosite/raporte")}`}
+                  className={`flex items-center gap-3 px-4 py-2 rounded-lg text-sm transition ${isActive("/kompania/porosite/raporte")}`}
                 >
                   <DocumentIcon className="w-4 h-4" /> Raportet e Porosive
                 </Link>
@@ -96,7 +96,7 @@ function Sidebar() {
             </div>
             <Link
               to="/kompania/regjistri"
-              className={`flex items-center gap-3 px-4 py-2 rounded-lg transition ${isActive("/komuna/regjistri")}`}
+              className={`flex items-center gap-3 px-4 py-2 rounded-lg transition ${isActive("/kompania/regjistri")}`}
             >
               <CubeIcon className="w-5 h-5" />
               <span className="text-sm">Menaxho Produktet</span>

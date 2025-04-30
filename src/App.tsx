@@ -24,8 +24,10 @@ import RegjistriProdukteve from "./pages/Kompania/produktet/regjistriProdukteve"
 
 
 
+
 function App() {
   const [claims, setClaims] = useState<claim[]>([]);
+
 
   useEffect(() => {
     setClaims(getClaims());
