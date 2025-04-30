@@ -1,6 +1,6 @@
 import axios from "axios";
 import { urlAccounts } from "./endpoints";
-import { authenticationResponse, userCredentials } from "./auth/auth.models";
+import { authenticationResponse, userCredentials, userRegisterCredentials } from "./auth/auth.models";
 import { useContext, useState } from "react";
 import AuthForm from "./AuthForm";
 // import { getClaims, saveToken } from "./handleJWT";
@@ -14,19 +14,25 @@ export default function Register() {
   const { update } = useContext(AuthenticationContext);
   const navigate = useNavigate();
 
-  async function register(credentials: userCredentials) {
+  async function register(registerCredentials: userRegisterCredentials) {
     try {
       setErrors([]);
-      console.log(credentials);
+      console.log(registerCredentials);
       const response = await axios.post<authenticationResponse>(
         `${urlAccounts}/create`,
-        credentials
+        registerCredentials
       );
       saveToken(response.data);
       update(getClaims());
       navigate("/");
       console.log(response);
-    } catch (error) {}
+    } catch (error: any) {
+      if (error.response && error.response.data) {
+        setErrors(error.response.data);
+      } else {
+        setErrors(["Unknown error occurred."]);
+      }
+    }
   }
   return ( 
     <>
