@@ -12,6 +12,7 @@ import {
   ArrowLeftOnRectangleIcon,
   Bars3Icon,
   XMarkIcon,
+  BuildingLibraryIcon,
 } from "@heroicons/react/24/outline";
 import { useState } from "react";
 import Authorized from "../../auth/Authorized";
@@ -19,6 +20,7 @@ import Authorized from "../../auth/Authorized";
 function Sidebar() {
   const location = useLocation();
   const [hovered, setHovered] = useState(false);
+  const [schoolsHovered, setSchoolsHovered] = useState(false);
   const [isOpen, setIsOpen] = useState(true);
 
   const isActive = (path: string) =>
@@ -69,6 +71,7 @@ function Sidebar() {
               <span className="text-sm">Dashboard</span>
             </Link>
 
+            {/* Orders dropdown */}
             <div
               onMouseEnter={() => setHovered(true)}
               onMouseLeave={() => setHovered(false)}
@@ -105,6 +108,46 @@ function Sidebar() {
                 >
                   <ClipboardDocumentListIcon className="w-4 h-4" /> Raportet e
                   Porosive
+                </Link>
+              </div>
+            </div>
+
+            {/* Schools Section */}
+            <div
+              onMouseEnter={() => setSchoolsHovered(true)}
+              onMouseLeave={() => setSchoolsHovered(false)}
+              className="relative"
+            >
+              <div className="flex items-center justify-between px-4 py-2 rounded-lg hover:bg-gray-100 cursor-pointer">
+                <span className="flex items-center gap-3 text-sm text-gray-700">
+                  <BuildingLibraryIcon className="w-5 h-5" /> Shkollat
+                </span>
+                <ChevronDownIcon
+                  className={`w-4 h-4 transform transition-transform duration-200 ${
+                    schoolsHovered ? "rotate-180" : "rotate-0"
+                  }`}
+                />
+              </div>
+              <div
+                className={`overflow-hidden transition-all duration-300 ${
+                  schoolsHovered ? "max-h-40 opacity-100" : "max-h-0 opacity-0"
+                } ml-4 mt-1 space-y-1`}
+              >
+                <Link
+                  to="/komuna/shkollat/listashkollave"
+                  className={`flex items-center gap-3 px-4 py-2 rounded-lg text-sm transition ${isActive(
+                    "/komuna/shkollat/listashkollave"
+                  )}`}
+                >
+                  <DocumentDuplicateIcon className="w-4 h-4" /> Lista e Shkollave
+                </Link>
+                <Link
+                  to="/komuna/shkollat/shto"
+                  className={`flex items-center gap-3 px-4 py-2 rounded-lg text-sm transition ${isActive(
+                    "/komuna/shkollat/shto"
+                  )}`}
+                >
+                  <ClipboardDocumentListIcon className="w-4 h-4" /> Shto Shkollë
                 </Link>
               </div>
             </div>
