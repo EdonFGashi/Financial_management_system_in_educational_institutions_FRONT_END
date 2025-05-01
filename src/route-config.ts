@@ -10,8 +10,8 @@ import Login from "./auth/Login";
 /*
 * Home routes
 */
-import SignIn from "./pages/SignIn";
-import SignUp from "./pages/SignUp";
+
+
 import Home from "./pages/Home";
 
 /*
@@ -22,6 +22,10 @@ import KomunaDashboard from "./pages/komuna/KomunaDashboard";
 import ListaPorosive from "./pages/komuna/porosite/ListaPorosive";
 import RaportetPorosi from "./pages/komuna/porosite/RaportetPorosi";
 import ListaShkollave from "./pages/komuna/shkollat/Shkollat";
+import ShtoShkolle from "./pages/komuna/shkollat/ShtoShkolle"; 
+import NdarjaBuxhetit from "./pages/komuna/buxheti/NdarjaBuxhetit";
+import BuxhetiHistoriku from "./pages/komuna/buxheti/Historiku";
+import KomunaListaKompanive from "./pages/komuna/kontraktoret/ListaKompanive";
 
 /*
 * Shkolla routes
@@ -58,10 +62,16 @@ const routes = [
   },
 
   // Komuna
-
-  { path: "/komuna/shkolla/listashkollave",
-   component: ListaShkollave ,
-   allowedRoles: ["komun", "admin"]},
+  { 
+    path: "/komuna/shkolla/listashkollave",
+    component: ListaShkollave,
+    allowedRoles: ["komun", "admin"]
+  },
+  { 
+    path: "/komuna/shto-shkolle",
+    component: ShtoShkolle,
+    allowedRoles: ["komun", "admin"]
+  },
 
   {
     path: "/komuna/dashboard",
@@ -78,7 +88,23 @@ const routes = [
     component: RaportetPorosi,
     allowedRoles: ["komun", "admin"],
   },
+  {
+  path: "/komuna/buxheti/historiku",
+  component: BuxhetiHistoriku,
+  allowedRoles: ["komun", "admin"]
+  },
 
+  { 
+    path: "/komuna/buxheti",
+    component: NdarjaBuxhetit,
+    allowedRoles: ["komun", "admin"]
+  },
+
+  {
+  path: "/komuna/kompanite",
+  component: KomunaListaKompanive,
+  allowedRoles: ["komun", "admin"],
+},
 
 
   // Shkolla

@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { BuildingLibraryIcon } from "@heroicons/react/24/outline";
 import Sidebar from "../Sidebar";
 import Toast from "../../../components/Toast";
+import Swal from 'sweetalert2';
 
 // Mock data
 const mockSchools = [
@@ -11,21 +12,27 @@ const mockSchools = [
     emri: "Shkolla Fillore 'Hasan Prishtina'",
     lokacioni: "Prishtinë",
     nrNxenesve: 850,
-    buxheti: 150000
+    nrPersonalDrejtorit: "1234567890",
+    email: "hasan.prishtina@shkolla.com",
+    buxheti: 50000
   },
   {
     id: 2,
     emri: "Shkolla Fillore 'Gjergj Fishta'",
     lokacioni: "Prishtinë",
     nrNxenesve: 720,
-    buxheti: 130000
+    nrPersonalDrejtorit: "0987654321",
+    email: "gjergj.fishta@shkolla.com",
+    buxheti: 45000
   },
   {
     id: 3,
     emri: "Shkolla Fillore 'Naim Frashëri'",
     lokacioni: "Fushë Kosovë",
     nrNxenesve: 650,
-    buxheti: 120000
+    nrPersonalDrejtorit: "5678901234",
+    email: "naim.frasheri@shkolla.com",
+    buxheti: 40000
   }
 ];
 
@@ -35,7 +42,7 @@ function Shkollat() {
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
   const [filters, setFilters] = useState({
     emri: "",
-    lokacioni: "",
+    nrPersonalDrejtorit: "",
     nrNxenesve: "",
     buxheti: "",
   });
@@ -49,9 +56,9 @@ function Shkollat() {
       );
     }
 
-    if (filters.lokacioni) {
+    if (filters.nrPersonalDrejtorit) {
       filteredSchools = filteredSchools.filter(school => 
-        school.lokacioni.toLowerCase().includes(filters.lokacioni.toLowerCase())
+        school.nrPersonalDrejtorit.includes(filters.nrPersonalDrejtorit)
       );
     }
 
@@ -70,9 +77,39 @@ function Shkollat() {
     setSchools(filteredSchools);
   };
 
-  const handleDelete = (id: number) => {
-    setSchools(prevSchools => prevSchools.filter(school => school.id !== id));
-    setToast({ message: "Shkolla u fshi me sukses!", type: "success" });
+  const handleDelete = async (id: number) => {
+    const result = await Swal.fire({
+      title: 'A jeni të sigurt?',
+      text: "Nuk mund ta ktheni këtë veprim!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#4F46E5',
+      cancelButtonColor: '#EF4444',
+      confirmButtonText: 'Po, fshije!',
+      cancelButtonText: 'Anulo'
+    });
+
+    if (result.isConfirmed) {
+      try {
+        // Add your API call here
+        // For now, we'll just remove from state
+        setSchools(prevSchools => prevSchools.filter(school => school.id !== id));
+        
+        Swal.fire({
+          title: 'E fshirë!',
+          text: 'Shkolla u fshi me sukses.',
+          icon: 'success',
+          confirmButtonColor: '#4F46E5'
+        });
+      } catch (error) {
+        Swal.fire({
+          title: 'Gabim!',
+          text: 'Ndodhi një gabim gjatë fshirjes së shkollës',
+          icon: 'error',
+          confirmButtonColor: '#EF4444'
+        });
+      }
+    }
   };
 
   const handleEdit = (id: number) => {
@@ -104,42 +141,55 @@ function Shkollat() {
           </Link>
         </div>
 
-        <div className="bg-white rounded-xl shadow p-6 mb-8 space-y-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-            <input
-              type="text"
-              value={filters.emri}
-              onChange={(e) => setFilters({ ...filters, emri: e.target.value })}
-              placeholder="Emri i shkollës..."
-              className="p-3 border border-gray-300 rounded-md text-sm"
-            />
-            <input
-              type="text"
-              value={filters.lokacioni}
-              onChange={(e) => setFilters({ ...filters, lokacioni: e.target.value })}
-              placeholder="Lokacioni..."
-              className="p-3 border border-gray-300 rounded-md text-sm"
-            />
-            <input
-              type="number"
-              value={filters.nrNxenesve}
-              onChange={(e) => setFilters({ ...filters, nrNxenesve: e.target.value })}
-              placeholder="Nr. i nxënësve..."
-              className="p-3 border border-gray-300 rounded-md text-sm"
-            />
-            <input
-              type="number"
-              value={filters.buxheti}
-              onChange={(e) => setFilters({ ...filters, buxheti: e.target.value })}
-              placeholder="Buxheti..."
-              className="p-3 border border-gray-300 rounded-md text-sm"
-            />
-          </div>
+        <div className="bg-white rounded-xl shadow p-6 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 items-end">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Emri i shkollës</label>
+              <input
+                type="text"
+                value={filters.emri}
+                onChange={(e) => setFilters({ ...filters, emri: e.target.value })}
+                placeholder="Emri i shkollës..."
+                className="w-full p-2 border border-gray-300 rounded-md text-sm"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Nr. personal i drejtorit</label>
+              <input
+                type="text"
+                value={filters.nrPersonalDrejtorit}
+                onChange={(e) => setFilters({ ...filters, nrPersonalDrejtorit: e.target.value })}
+                placeholder="Nr. personal i drejtorit..."
+                className="w-full p-2 border border-gray-300 rounded-md text-sm"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Nr. i nxënësve</label>
+              <input
+                type="number"
+                value={filters.nrNxenesve}
+                onChange={(e) => setFilters({ ...filters, nrNxenesve: e.target.value })}
+                placeholder="Nr. i nxënësve..."
+                className="w-full p-2 border border-gray-300 rounded-md text-sm"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Buxheti ($)</label>
+              <input
+                type="number"
+                value={filters.buxheti}
+                onChange={(e) => setFilters({ ...filters, buxheti: e.target.value })}
+                placeholder="Buxheti..."
+                className="w-full p-2 border border-gray-300 rounded-md text-sm"
+              />
+            </div>
 
-          <div className="mt-4">
             <button
               onClick={handleFilter}
-              className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-md transition"
+              className="bg-indigo-600 text-white px-6 py-2 rounded-md hover:bg-indigo-700 transition h-[38px]"
             >
               Filtro
             </button>
@@ -172,7 +222,7 @@ function Shkollat() {
                     <td className="px-6 py-4">{school.emri}</td>
                     <td className="px-6 py-4">{school.lokacioni}</td>
                     <td className="px-6 py-4">{school.nrNxenesve}</td>
-                    <td className="px-6 py-4">{school.buxheti.toLocaleString()} €</td>
+                    <td className="px-6 py-4">{school.buxheti} €</td>
                     <td className="px-6 py-4">
                       <div className="flex gap-2">
                         <button

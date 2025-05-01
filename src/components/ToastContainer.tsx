@@ -14,7 +14,7 @@ interface ToastContainerProps {
 
 const ToastContainer = ({ toasts, removeToast }: ToastContainerProps) => {
   return (
-    <div className="fixed top-6 right-6 space-y-3 z-50">
+    <div className="fixed top-6 right-6 space-y-4 z-50">
       <AnimatePresence>
         {toasts.map((toast) => (
           <Toast
