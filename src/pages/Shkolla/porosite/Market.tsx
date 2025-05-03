@@ -22,81 +22,47 @@ interface Product {
     dateAdded: string;
 }
 
+
+
 function ShkollaMarket() {
+    useEffect(() => {
+        const fetchProducts = async () => {
+            try {
+                const token = localStorage.getItem("token");
+                const response = await fetch("http://localhost:3000/api/produkti", {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+    
+                if (!response.ok) {
+                    throw new Error("Nuk u morën produktet");
+                }
+    
+                const data = await response.json();
+                // Shembull strukture: përshtat sipas backend-it
+                const transformed = data.map((p: any) => ({
+                    id: p.id,
+                    name: p.emri,
+                    description: p.pershkrimi,
+                    price: p.cmimi,
+                    company: p.kompania.emri, // nëse është i lidhur përmes relacioneve
+                    category: p.kategoria,
+                    subcategory: p.nenkategoria,
+                    image: p.fotoUrl || "https://via.placeholder.com/150?text=Produkt",
+                    dateAdded: p.dataKrijimit,
+                }));
+    
+                setAllProducts(transformed);
+            } catch (err) {
+                console.error("Gabim gjatë marrjes së produkteve:", err);
+            }
+        };
+    
+        fetchProducts();
+    }, []);
     // Lista e produkteve
-    const [allProducts, setAllProducts] = useState<Product[]>([
-        {
-            id: 1,
-            name: "Banka shkollore",
-            description: "Banka moderne me ngjyra të ndryshme, material i qëndrueshëm",
-            price: 25,
-            company: "EduSupplies AL",
-            category: "mobilier",
-            subcategory: "banka",
-            image: "https://via.placeholder.com/150?text=Banka",
-            dateAdded: "2023-05-15",
-        },
-        {
-            id: 2,
-            name: "Shkumës whiteboard",
-            description: "Shkumës efektiv për tabela të bardha, pa lëndë toksike",
-            price: 3.5,
-            company: "CleanTools KS",
-            category: "aksesore",
-            subcategory: "pastrim",
-            image: "https://via.placeholder.com/150?text=Shkumes",
-            dateAdded: "2023-06-20",
-
-        },
-        {
-            id: 3,
-            name: "Laptop edukativ",
-            description: "Kompjuter portativ me specifikime të mira për nxënësit",
-            price: 450,
-            company: "TechEdu MK",
-            category: "teknologji",
-            subcategory: "kompjutere",
-            image: "https://via.placeholder.com/150?text=Laptop",
-            dateAdded: "2023-04-10",
-
-        },
-        {
-            id: 4,
-            name: "Tabelë e zezë",
-            description: "Tabelë tradicionale me sipërfaqe të qëndrueshme",
-            price: 120,
-            company: "ClassicEdu AL",
-            category: "mobilier",
-            subcategory: "tavolina",
-            image: "https://via.placeholder.com/150?text=Tabela",
-            dateAdded: "2023-07-01",
-
-        },
-        {
-            id: 5,
-            name: "Libra shkollore",
-            description: "Set librash për klasën e 5-të, të gjitha lëndët",
-            price: 35,
-            company: "EduPress AL",
-            category: "libra",
-            subcategory: "tekste",
-            image: "https://via.placeholder.com/150?text=Libra",
-            dateAdded: "2023-03-25",
-
-        },
-        {
-            id: 6,
-            name: "Printer",
-            description: "Printer me shumëfunksionalitet për nevojat shkollore",
-            price: 280,
-            company: "TechEdu MK",
-            category: "teknologji",
-            subcategory: "printera",
-            image: "https://via.placeholder.com/150?text=Printer",
-            dateAdded: "2023-08-12",
-
-        },
-    ]);
+    const [allProducts, setAllProducts] = useState<Product[]>([]);
 
     // State për filtrimin dhe kërkimin
     const [searchTerm, setSearchTerm] = useState("");
@@ -119,7 +85,7 @@ function ShkollaMarket() {
         "libra": ["të gjitha", "tekste", "atlase"],
     };
 
-    const companies = ["të gjitha", "EduSupplies AL", "CleanTools KS", "TechEdu MK", "ClassicEdu AL", "EduPress AL"];
+    const companies = ["të gjitha", ...Array.from(new Set(allProducts.map(p => p.company)))];
 
     // Funksioni për ndryshimin e sasisë
     const handleQuantityChange = (productId: number, value: number) => {

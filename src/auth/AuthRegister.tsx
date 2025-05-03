@@ -15,7 +15,7 @@ function AuthRegister(props: authFormProps) {
   const [passwordVisible, setPasswordVisible] = useState(false);
   const fullText = "Krijoni një llogari për të menaxhuar financat lehtësisht.";
 
-  const roles = ["admin", "komun", "shkoll", "kompani"];
+  const roles = ["admin", "komune", "shkolle", "kompani"];
 
   useEffect(() => {
     let i = 0;
