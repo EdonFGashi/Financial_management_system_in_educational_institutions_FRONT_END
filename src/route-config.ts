@@ -31,6 +31,7 @@ import KomunaListaKompanive from "./pages/komuna/kontraktoret/ListaKompanive";
 * Shkolla routes
 */
 import ShkollaDashboard from "./pages/Shkolla/ShkollaDashboard";
+import InventariAktual from "./pages/Shkolla/InventariAktual";
 import Historiku from "./pages/Shkolla/porosite/Historiku";
 import Market from "./pages/Shkolla/porosite/Market";
 import Shporta from "./pages/Shkolla/porosite/Shporta";
@@ -111,6 +112,11 @@ const routes = [
   {
     path: "/shkolla/dashboard",
     component: ShkollaDashboard,
+    allowedRoles: ["shkoll", "admin"],
+  },
+  {
+    path: "/shkolla/inventari",
+    component: InventariAktual,
     allowedRoles: ["shkoll", "admin"],
   },
   {

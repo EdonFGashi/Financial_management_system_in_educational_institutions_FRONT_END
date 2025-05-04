@@ -1,5 +1,6 @@
-﻿import { useState, useEffect } from "react";
-import Sidebar from "../Sidebar";
+﻿import { useState } from "react";
+import Sidebar from "./Sidebar";
+import { Formik, Form, Field } from "formik";
 import { ChevronLeftIcon, ChevronRightIcon, TrashIcon } from "@heroicons/react/24/outline";
 
 interface Inventar {
@@ -11,75 +12,17 @@ interface Inventar {
     createdAt: string;
 }
 
-// Mock data fillestare
-const initialMockData: Inventar[] = [
-    { inventariId: 1, emri: "Laptop Dell", pershkrimi: "Laptop për mësues", sasia: 5, shifra: "SHF1001", createdAt: new Date(2025, 3, 1).toISOString() },
-    { inventariId: 2, emri: "Printer Canon", pershkrimi: "Printer për zyrë", sasia: 2, shifra: "SHF1002", createdAt: new Date(2025, 3, 2).toISOString() },
-    { inventariId: 3, emri: "Projektor Epson", pershkrimi: "Projektor për sallë", sasia: 1, shifra: "SHF1003", createdAt: new Date(2025, 3, 3).toISOString() },
-    { inventariId: 4, emri: "Router TP-Link", pershkrimi: "Router për rrjet", sasia: 3, shifra: "SHF1004", createdAt: new Date(2025, 3, 4).toISOString() },
-    { inventariId: 5, emri: "Tabela e Bardhë", pershkrimi: "Tabela për klasë", sasia: 4, shifra: "SHF1005", createdAt: new Date(2025, 3, 5).toISOString() },
-    { inventariId: 6, emri: "Switch Cisco", pershkrimi: "Switch për rrjet", sasia: 2, shifra: "SHF1006", createdAt: new Date(2025, 3, 6).toISOString() },
-    { inventariId: 7, emri: "Karrige Zyre", pershkrimi: "Karrige komode për zyrë", sasia: 10, shifra: "SHF1007", createdAt: new Date(2025, 3, 7).toISOString() },
-    { inventariId: 8, emri: "Smart TV Samsung", pershkrimi: "TV për prezantime", sasia: 2, shifra: "SHF1008", createdAt: new Date(2025, 3, 8).toISOString() },
-    { inventariId: 9, emri: "Lapsa Bic", pershkrimi: "Pako me lapsa shkollorë", sasia: 50, shifra: "SHF1009", createdAt: new Date(2025, 3, 9).toISOString() },
-    { inventariId: 10, emri: "Projektor BenQ", pershkrimi: "Projektor rezervë", sasia: 1, shifra: "SHF1010", createdAt: new Date(2025, 3, 10).toISOString() },
-];
-
-let inventariIdCounter = initialMockData.length + 1;
+let inventariIdCounter = 1;
 
 function InventariAktual() {
-    const [inventariList, setInventariList] = useState<Inventar[]>(() => {
-        const stored = localStorage.getItem("inventariList");
-        return stored && JSON.parse(stored).length > 0 ? JSON.parse(stored) : initialMockData;
-    });
-
-    const [formData, setFormData] = useState({
-        emri: "",
-        pershkrimi: "",
-        sasia: 0,
-        shifra: "",
-    });
-
+    const [inventariList, setInventariList] = useState<Inventar[]>([]);
     const [filterEmri, setFilterEmri] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 5;
 
-    useEffect(() => {
-        localStorage.setItem("inventariList", JSON.stringify(inventariList));
-    }, [inventariList]);
-
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        const { name, value } = e.target;
-        setFormData({
-            ...formData,
-            [name]: name === "sasia" ? Number(value) : value,
-        });
-    };
-
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        const newItem: Inventar = {
-            inventariId: inventariIdCounter++,
-            emri: formData.emri,
-            pershkrimi: formData.pershkrimi,
-            sasia: formData.sasia,
-            shifra: formData.shifra,
-            createdAt: new Date().toISOString(),
-        };
-        setInventariList([newItem, ...inventariList]);
-        setFormData({
-            emri: "",
-            pershkrimi: "",
-            sasia: 0,
-            shifra: "",
-        });
-        setCurrentPage(1);
-    };
-
     const handleDelete = (id: number) => {
         const updatedList = inventariList.filter((i) => i.inventariId !== id);
         setInventariList(updatedList);
-
         const newTotalPages = Math.ceil(updatedList.length / itemsPerPage);
         if (currentPage > newTotalPages) {
             setCurrentPage(newTotalPages > 0 ? newTotalPages : 1);
@@ -123,66 +66,80 @@ function InventariAktual() {
                     <p className="text-base sm:text-lg text-green-100">Shto dhe menaxho inventarin</p>
                 </div>
 
-                {/* Form */}
+                {/* Formik Form */}
                 <div className="px-6 py-6">
-                    <form
-                        onSubmit={handleSubmit}
-                        className="bg-white p-6 rounded-lg shadow space-y-4 md:max-w-3xl mx-auto"
+                    <Formik
+                        initialValues={{
+                            emri: "",
+                            pershkrimi: "",
+                            sasia: 0,
+                            shifra: "",
+                        }}
+                        onSubmit={(values, { resetForm }) => {
+                            const newItem: Inventar = {
+                                inventariId: inventariIdCounter++,
+                                emri: values.emri,
+                                pershkrimi: values.pershkrimi,
+                                sasia: values.sasia,
+                                shifra: values.shifra,
+                                createdAt: new Date().toISOString(),
+                            };
+                            setInventariList([newItem, ...inventariList]);
+                            resetForm();
+                            setCurrentPage(1);
+                        }}
                     >
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label className="block mb-1 font-medium">Emri</label>
-                                <input
-                                    type="text"
-                                    name="emri"
-                                    value={formData.emri}
-                                    onChange={handleInputChange}
-                                    className="w-full border border-gray-300 p-2 rounded"
-                                    required
-                                />
-                            </div>
-                            <div>
-                                <label className="block mb-1 font-medium">Shifra</label>
-                                <input
-                                    type="text"
-                                    name="shifra"
-                                    value={formData.shifra}
-                                    onChange={handleInputChange}
-                                    className="w-full border border-gray-300 p-2 rounded"
-                                    required
-                                />
-                            </div>
-                            <div>
-                                <label className="block mb-1 font-medium">Sasia</label>
-                                <input
-                                    type="number"
-                                    name="sasia"
-                                    value={formData.sasia}
-                                    onChange={handleInputChange}
-                                    className="w-full border border-gray-300 p-2 rounded"
-                                    required
-                                />
-                            </div>
-                            <div className="md:col-span-2">
-                                <label className="block mb-1 font-medium">Përshkrimi</label>
-                                <textarea
-                                    name="pershkrimi"
-                                    value={formData.pershkrimi}
-                                    onChange={handleInputChange}
-                                    className="w-full border border-gray-300 p-2 rounded"
-                                    required
-                                />
-                            </div>
-                        </div>
-                        <div className="flex justify-end pt-4">
-                            <button
-                                type="submit"
-                                className="bg-green-600 text-white px-5 py-2 rounded hover:bg-green-700 transition"
-                            >
-                                Shto Invertar
-                            </button>
-                        </div>
-                    </form>
+                        {() => (
+                            <Form className="bg-white p-6 rounded-lg shadow space-y-4 md:max-w-3xl mx-auto">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label className="block mb-1 font-medium">Emri</label>
+                                        <Field
+                                            name="emri"
+                                            type="text"
+                                            className="w-full border border-gray-300 p-2 rounded"
+                                            required
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block mb-1 font-medium">Shifra</label>
+                                        <Field
+                                            name="shifra"
+                                            type="text"
+                                            className="w-full border border-gray-300 p-2 rounded"
+                                            required
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block mb-1 font-medium">Sasia</label>
+                                        <Field
+                                            name="sasia"
+                                            type="number"
+                                            className="w-full border border-gray-300 p-2 rounded"
+                                            required
+                                        />
+                                    </div>
+                                    <div className="md:col-span-2">
+                                        <label className="block mb-1 font-medium">Përshkrimi</label>
+                                        <Field
+                                            name="pershkrimi"
+                                            as="textarea"
+                                            className="w-full border border-gray-300 p-2 rounded"
+                                            required
+                                        />
+                                    </div>
+                                </div>
+                                <div className="flex justify-end pt-4">
+                                    <button
+                                        type="submit"
+                                        className="bg-green-600 text-white px-5 py-2 rounded hover:bg-green-700 transition"
+                                    >
+                                        Shto Inventar
+                                    </button>
+                                </div>
+                            </Form>
+                        )}
+                    </Formik>
                 </div>
 
                 {/* Filters */}
@@ -222,7 +179,9 @@ function InventariAktual() {
                                             <input
                                                 type="text"
                                                 value={item.emri}
-                                                onChange={(e) => handleInlineEdit(item.inventariId, "emri", e.target.value)}
+                                                onChange={(e) =>
+                                                    handleInlineEdit(item.inventariId, "emri", e.target.value)
+                                                }
                                                 className="border rounded px-2 py-1 w-full"
                                             />
                                         </td>
@@ -230,7 +189,9 @@ function InventariAktual() {
                                             <input
                                                 type="text"
                                                 value={item.pershkrimi}
-                                                onChange={(e) => handleInlineEdit(item.inventariId, "pershkrimi", e.target.value)}
+                                                onChange={(e) =>
+                                                    handleInlineEdit(item.inventariId, "pershkrimi", e.target.value)
+                                                }
                                                 className="border rounded px-2 py-1 w-full"
                                             />
                                         </td>
@@ -238,7 +199,9 @@ function InventariAktual() {
                                             <input
                                                 type="number"
                                                 value={item.sasia}
-                                                onChange={(e) => handleInlineEdit(item.inventariId, "sasia", e.target.value)}
+                                                onChange={(e) =>
+                                                    handleInlineEdit(item.inventariId, "sasia", e.target.value)
+                                                }
                                                 className="border rounded px-2 py-1 w-full"
                                             />
                                         </td>
@@ -246,7 +209,9 @@ function InventariAktual() {
                                             <input
                                                 type="text"
                                                 value={item.shifra}
-                                                onChange={(e) => handleInlineEdit(item.inventariId, "shifra", e.target.value)}
+                                                onChange={(e) =>
+                                                    handleInlineEdit(item.inventariId, "shifra", e.target.value)
+                                                }
                                                 className="border rounded px-2 py-1 w-full"
                                             />
                                         </td>
