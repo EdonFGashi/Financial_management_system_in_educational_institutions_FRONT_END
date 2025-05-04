@@ -10,6 +10,7 @@ import Shporta from "./pages/Shkolla/porosite/Shporta";
 import Historiku from "./pages/Shkolla/porosite/Historiku";
 import StafiShkolles from "./pages/Shkolla/stafi/ListaStafit";
 import OretShtese from "./pages/Shkolla/stafi/OretShtese"
+import Ndalesat from "./pages/Shkolla/stafi/Ndalesat"
 import InventariAktual from "./pages/Shkolla/InventariAktual";
 import KompaniaDashboard from "./pages/Kompania/KompaniaDashboard";
 import routes from "./route-config";
