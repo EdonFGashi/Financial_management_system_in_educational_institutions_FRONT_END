@@ -17,6 +17,7 @@ function ShkollaSidebar() {
     const [isOpen, setIsOpen] = useState(true);
     const [hoveredPorosite, setHoveredPorosite] = useState(false);
     const [hoveredStafi, setHoveredStafi] = useState(false);
+    const [hoveredInventari, setHoveredInventari] = useState(false);
 
     const isActive = (path: string) =>
         location.pathname === path
@@ -34,9 +35,8 @@ function ShkollaSidebar() {
             </button>
 
             <aside
-                className={`fixed md:static z-40 top-0 left-0 h-screen bg-white border-r shadow-sm px-6 py-8 flex flex-col justify-between transition-transform duration-300 w-64 ${
-                    isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
-                }`}
+                className={`fixed md:static z-40 top-0 left-0 h-screen bg-white border-r shadow-sm px-6 py-8 flex flex-col justify-between transition-transform duration-300 w-64 ${isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
+                    }`}
             >
                 <div>
                     {/* User Info */}
@@ -65,19 +65,17 @@ function ShkollaSidebar() {
                             className="relative"
                         >
                             <div className="flex items-center justify-between px-4 py-2 rounded-lg hover:bg-gray-100 cursor-pointer">
-                <span className="flex items-center gap-3 text-sm text-gray-700">
-                  <ShoppingCartIcon className="w-5 h-5" /> Porositë
-                </span>
+                                <span className="flex items-center gap-3 text-sm text-gray-700">
+                                    <ShoppingCartIcon className="w-5 h-5" /> Porositë
+                                </span>
                                 <ChevronDownIcon
-                                    className={`w-4 h-4 transform transition-transform duration-200 ${
-                                        hoveredPorosite ? "rotate-180" : "rotate-0"
-                                    }`}
+                                    className={`w-4 h-4 transform transition-transform duration-200 ${hoveredPorosite ? "rotate-180" : "rotate-0"
+                                        }`}
                                 />
                             </div>
                             <div
-                                className={`overflow-hidden transition-all duration-300 ${
-                                    hoveredPorosite ? "max-h-40 opacity-100" : "max-h-0 opacity-0"
-                                } ml-4 mt-1 space-y-1`}
+                                className={`overflow-hidden transition-all duration-300 ${hoveredPorosite ? "max-h-40 opacity-100" : "max-h-0 opacity-0"
+                                    } ml-4 mt-1 space-y-1`}
                             >
                                 <Link
                                     to="/shkolla/porosite/market"
@@ -97,12 +95,6 @@ function ShkollaSidebar() {
                                 >
                                     Historiku i porosive
                                 </Link>
-                                <Link
-                                    to="/shkolla/porosite/inventari"
-                                    className={`flex items-center gap-3 px-4 py-2 rounded-lg text-sm transition ${isActive("/shkolla/porosite/inventari")}`}
-                                >
-                                    Inventari Aktual
-                                </Link>
                             </div>
                         </div>
 
@@ -113,26 +105,24 @@ function ShkollaSidebar() {
                             className="relative"
                         >
                             <div className="flex items-center justify-between px-4 py-2 rounded-lg hover:bg-gray-100 cursor-pointer">
-                <span className="flex items-center gap-3 text-sm text-gray-700">
-                  <UsersIcon className="w-5 h-5" /> Stafi
-                </span>
+                                <span className="flex items-center gap-3 text-sm text-gray-700">
+                                    <UsersIcon className="w-5 h-5" /> Stafi
+                                </span>
                                 <ChevronDownIcon
-                                    className={`w-4 h-4 transform transition-transform duration-200 ${
-                                        hoveredStafi ? "rotate-180" : "rotate-0"
-                                    }`}
+                                    className={`w-4 h-4 transform transition-transform duration-200 ${hoveredStafi ? "rotate-180" : "rotate-0"
+                                        }`}
                                 />
                             </div>
                             <div
-                                className={`overflow-hidden transition-all duration-300 ${
-                                    hoveredStafi ? "max-h-40 opacity-100" : "max-h-0 opacity-0"
-                                } ml-4 mt-1 space-y-1`}
+                                className={`overflow-hidden transition-all duration-300 ${hoveredStafi ? "max-h-40 opacity-100" : "max-h-0 opacity-0"
+                                    } ml-4 mt-1 space-y-1`}
                             >
                                 <Link
-                                     to="/shkolla/stafi/menaxhimi"
-                                     className={`flex items-center gap-3 px-4 py-2 rounded-lg text-sm transition ${isActive("/shkolla/stafi/menaxhimi")}`}
-                                 >
-                                     Menaxhimi i Stafit
-                                 </Link>
+                                    to="/shkolla/stafi/menaxhimi"
+                                    className={`flex items-center gap-3 px-4 py-2 rounded-lg text-sm transition ${isActive("/shkolla/stafi/menaxhimi")}`}
+                                >
+                                    Menaxhimi i Stafit
+                                </Link>
                                 <Link
                                     to="/shkolla/stafi/ndalesat"
                                     className={`flex items-center gap-3 px-4 py-2 rounded-lg text-sm transition ${isActive("/shkolla/stafi/ndalesat")}`}
@@ -144,6 +134,34 @@ function ShkollaSidebar() {
                                     className={`flex items-center gap-3 px-4 py-2 rounded-lg text-sm transition ${isActive("/shkolla/stafi/oret-shtese")}`}
                                 >
                                     Orët shtesë
+                                </Link>
+                            </div>
+                        </div>
+
+                        {/* Inventari Dropdown */}
+                        <div
+                            onMouseEnter={() => setHoveredInventari(true)}
+                            onMouseLeave={() => setHoveredInventari(false)}
+                            className="relative"
+                        >
+                            <div className="flex items-center justify-between px-4 py-2 rounded-lg hover:bg-gray-100 cursor-pointer">
+                                <span className="flex items-center gap-3 text-sm text-gray-700">
+                                    <ArchiveBoxIcon className="w-5 h-5" /> Inventari
+                                </span>
+                                <ChevronDownIcon
+                                    className={`w-4 h-4 transform transition-transform duration-200 ${hoveredInventari ? "rotate-180" : "rotate-0"
+                                        }`}
+                                />
+                            </div>
+                            <div
+                                className={`overflow-hidden transition-all duration-300 ${hoveredInventari ? "max-h-40 opacity-100" : "max-h-0 opacity-0"
+                                    } ml-4 mt-1 space-y-1`}
+                            >
+                                <Link
+                                    to="/shkolla/inventari"
+                                    className={`flex items-center gap-3 px-4 py-2 rounded-lg text-sm transition ${isActive("/shkolla/inventari/aktual")}`}
+                                >
+                                    Inventari Aktual
                                 </Link>
                             </div>
                         </div>

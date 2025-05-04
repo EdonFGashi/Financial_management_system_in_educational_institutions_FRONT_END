@@ -9,7 +9,7 @@ import Market from "./pages/Shkolla/porosite/Market";
 import Shporta from "./pages/Shkolla/porosite/Shporta";
 import Historiku from "./pages/Shkolla/porosite/Historiku";
 import StafiShkolles from "./pages/Shkolla/stafi/ListaStafit";
-import InventariAktual from "./pages/Shkolla/porosite/InventariAktual";
+import InventariAktual from "./pages/Shkolla/InventariAktual";
 import KompaniaDashboard from "./pages/Kompania/KompaniaDashboard";
 import routes from "./route-config";
 import { useEffect, useState } from "react";
