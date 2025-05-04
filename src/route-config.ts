@@ -37,6 +37,7 @@ import Market from "./pages/Shkolla/porosite/Market";
 import Shporta from "./pages/Shkolla/porosite/Shporta";
 import StafiShkolles from "./pages/Shkolla/stafi/ListaStafit";
 import OretShtese from "./pages/Shkolla/stafi/OretShtese";
+import Ndalesat from "./pages/Shkolla/stafi/Ndalesat";
 import UsersManagement from "./admin/UsersManagement";
 
 /*
@@ -139,6 +140,11 @@ const routes = [
   {
     path: "/shkolla/stafi/oret-shtese",
     component: OretShtese,
+    allowedRoles: ["shkoll", "admin"],
+  },
+  {
+    path: "/shkolla/stafi/ndalesat",
+    component: Ndalesat,
     allowedRoles: ["shkoll", "admin"],
   },
 
