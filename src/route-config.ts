@@ -36,11 +36,8 @@ import Historiku from "./pages/Shkolla/porosite/Historiku";
 import Market from "./pages/Shkolla/porosite/Market";
 import Shporta from "./pages/Shkolla/porosite/Shporta";
 import StafiShkolles from "./pages/Shkolla/stafi/ListaStafit";
-
+import OretShtese from "./pages/Shkolla/stafi/OretShtese";
 import UsersManagement from "./admin/UsersManagement";
-
-
-
 
 /*
 * Kompania routes
@@ -137,6 +134,11 @@ const routes = [
   {
     path: "/shkolla/stafi/menaxhimi",
     component: StafiShkolles,
+    allowedRoles: ["shkoll", "admin"],
+  },
+  {
+    path: "/shkolla/stafi/oret-shtese",
+    component: OretShtese,
     allowedRoles: ["shkoll", "admin"],
   },
 
