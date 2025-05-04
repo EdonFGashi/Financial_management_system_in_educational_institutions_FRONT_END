@@ -1,5 +1,6 @@
-﻿import { useState, useEffect } from "react";
+﻿import { useState } from "react";
 import Sidebar from "../Sidebar";
+import { Formik, Form, Field } from "formik";
 import { ChevronLeftIcon, ChevronRightIcon, TrashIcon } from "@heroicons/react/24/outline";
 
 interface Staff {
@@ -12,84 +13,27 @@ interface Staff {
     numriOreve: number;
 }
 
-let staffIdCounter = 3;
+let staffIdCounter = 1;
 
 function StafiShkolles() {
-    const [staffList, setStaffList] = useState<Staff[]>(() => {
-        const stored = localStorage.getItem("staffList");
-        return stored ? JSON.parse(stored) : [
-            {
-                stafId: 1,
-                emri: "Trim",
-                mbiemri: "Krasniqi",
-                numriPersonal: "123456789",
-                pozita: "Mësues",
-                paga: 520,
-                numriOreve: 18,
-            },
-            {
-                stafId: 2,
-                emri: "Blerta",
-                mbiemri: "Gashi",
-                numriPersonal: "987654321",
-                pozita: "Psikolog",
-                paga: 580,
-                numriOreve: 20,
-            }
-        ];
-    });
-
-    const [formData, setFormData] = useState({
-        emri: "",
-        mbiemri: "",
-        numriPersonal: "",
-        pozita: "",
-        paga: 0,
-        numriOreve: 0,
-    });
-
+    const [staffList, setStaffList] = useState<Staff[]>([]);
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10;
     const [filterPozita, setFilterPozita] = useState("");
 
-    const uniquePozitat = Array.from(new Set(staffList.map((s) => s.pozita)));
-
-    useEffect(() => {
-        localStorage.setItem("staffList", JSON.stringify(staffList));
-    }, [staffList]);
-
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
-        setFormData({
-            ...formData,
-            [name]: name === "paga" || name === "numriOreve" ? Number(value) : value,
-        });
-    };
-
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        const newStaff: Staff = {
-            stafId: staffIdCounter++,
-            ...formData,
-        };
-        setStaffList([newStaff, ...staffList]);
-        setFormData({
-            emri: "",
-            mbiemri: "",
-            numriPersonal: "",
-            pozita: "",
-            paga: 0,
-            numriOreve: 0,
-        });
-    };
-
     const handleDelete = (id: number) => {
-        setStaffList(staffList.filter((s) => s.stafId !== id));
+        const updatedList = staffList.filter((s) => s.stafId !== id);
+        setStaffList(updatedList);
+
+        const newTotalPages = Math.max(Math.ceil(updatedList.length / itemsPerPage), 1);
+        if (currentPage > newTotalPages) {
+            setCurrentPage(newTotalPages);
+        }
     };
 
     const handleInlineEdit = (
         id: number,
-        field: "pozita" | "paga" | "numriOreve",
+        field: keyof Omit<Staff, "stafId" | "numriPersonal" | "emri" | "mbiemri">,
         value: string | number
     ) => {
         setStaffList((prev) =>
@@ -108,11 +52,13 @@ function StafiShkolles() {
         (s) => !filterPozita || s.pozita.toLowerCase() === filterPozita.toLowerCase()
     );
 
-    const totalPages = Math.ceil(filteredList.length / itemsPerPage);
+    const totalPages = Math.max(Math.ceil(filteredList.length / itemsPerPage), 1);
     const paginatedStaff = filteredList.slice(
         (currentPage - 1) * itemsPerPage,
         currentPage * itemsPerPage
     );
+
+    const uniquePozitat = Array.from(new Set(staffList.map((s) => s.pozita)));
 
     return (
         <div className="flex min-h-screen bg-gray-50 text-gray-800">
@@ -127,74 +73,88 @@ function StafiShkolles() {
                     <p className="text-base sm:text-lg text-green-100">Lista dhe menaxhimi i stafit</p>
                 </div>
 
-                {/* Form */}
+                {/* Formik Form */}
                 <div className="px-6 py-6">
-                    <form
-                        onSubmit={handleSubmit}
-                        className="bg-white p-6 rounded-lg shadow space-y-4 md:max-w-3xl mx-auto"
+                    <Formik
+                        initialValues={{
+                            numriPersonal: "",
+                            pozita: "",
+                            paga: 0,
+                            numriOreve: 0,
+                        }}
+                        onSubmit={(values, { resetForm }) => {
+                            const newStaff: Staff = {
+                                stafId: staffIdCounter++,
+                                emri: "",
+                                mbiemri: "",
+                                ...values,
+                            };
+                            setStaffList([newStaff, ...staffList]);
+                            resetForm();
+                            setCurrentPage(1);
+                        }}
                     >
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label className="block mb-1 font-medium">Numri Personal</label>
-                                <input
-                                    type="text"
-                                    name="numriPersonal"
-                                    value={formData.numriPersonal}
-                                    onChange={handleInputChange}
-                                    className="w-full border border-gray-300 p-2 rounded"
-                                    required
-                                />
-                            </div>
-                            <div>
-                                <label className="block mb-1 font-medium">Pozita</label>
-                                <input
-                                    type="text"
-                                    name="pozita"
-                                    value={formData.pozita}
-                                    onChange={handleInputChange}
-                                    className="w-full border border-gray-300 p-2 rounded"
-                                    required
-                                />
-                            </div>
-                            <div>
-                                <label className="block mb-1 font-medium">Paga (€)</label>
-                                <input
-                                    type="number"
-                                    name="paga"
-                                    value={formData.paga}
-                                    onChange={handleInputChange}
-                                    className="w-full border border-gray-300 p-2 rounded"
-                                    required
-                                />
-                            </div>
-                            <div>
-                                <label className="block mb-1 font-medium">Numri i orëve</label>
-                                <input
-                                    type="number"
-                                    name="numriOreve"
-                                    value={formData.numriOreve}
-                                    onChange={handleInputChange}
-                                    className="w-full border border-gray-300 p-2 rounded"
-                                    required
-                                />
-                            </div>
-                        </div>
-                        <div className="flex justify-end pt-4">
-                            <button
-                                type="submit"
-                                className="bg-green-600 text-white px-5 py-2 rounded hover:bg-green-700 transition"
-                            >
-                                Shto Stafin
-                            </button>
-                        </div>
-                    </form>
+                        {() => (
+                            <Form className="bg-white p-6 rounded-lg shadow space-y-4 md:max-w-3xl mx-auto">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label className="block mb-1 font-medium">Numri Personal</label>
+                                        <Field
+                                            name="numriPersonal"
+                                            type="text"
+                                            className="w-full border border-gray-300 p-2 rounded"
+                                            required
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block mb-1 font-medium">Pozita</label>
+                                        <Field
+                                            name="pozita"
+                                            type="text"
+                                            className="w-full border border-gray-300 p-2 rounded"
+                                            required
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block mb-1 font-medium">Paga (€)</label>
+                                        <Field
+                                            name="paga"
+                                            type="number"
+                                            className="w-full border border-gray-300 p-2 rounded"
+                                            required
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block mb-1 font-medium">Numri i orëve</label>
+                                        <Field
+                                            name="numriOreve"
+                                            type="number"
+                                            className="w-full border border-gray-300 p-2 rounded"
+                                            required
+                                        />
+                                    </div>
+                                </div>
+                                <div className="flex justify-end pt-4">
+                                    <button
+                                        type="submit"
+                                        className="bg-green-600 text-white px-5 py-2 rounded hover:bg-green-700 transition"
+                                    >
+                                        Shto Stafin
+                                    </button>
+                                </div>
+                            </Form>
+                        )}
+                    </Formik>
                 </div>
 
                 {/* Filters */}
                 <div className="px-6 pb-4 flex justify-end">
                     <select
                         value={filterPozita}
-                        onChange={(e) => setFilterPozita(e.target.value)}
+                        onChange={(e) => {
+                            setFilterPozita(e.target.value);
+                            setCurrentPage(1);
+                        }}
                         className="border border-gray-300 px-4 py-2 rounded"
                     >
                         <option value="">Filtro sipas pozitës</option>

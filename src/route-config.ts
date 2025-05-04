@@ -10,8 +10,8 @@ import Login from "./auth/Login";
 /*
 * Home routes
 */
-import SignIn from "./pages/SignIn";
-import SignUp from "./pages/SignUp";
+
+
 import Home from "./pages/Home";
 
 /*
@@ -21,20 +21,24 @@ import Home from "./pages/Home";
 import KomunaDashboard from "./pages/komuna/KomunaDashboard";
 import ListaPorosive from "./pages/komuna/porosite/ListaPorosive";
 import RaportetPorosi from "./pages/komuna/porosite/RaportetPorosi";
+import ListaShkollave from "./pages/komuna/shkollat/Shkollat";
+import ShtoShkolle from "./pages/komuna/shkollat/ShtoShkolle"; 
+import NdarjaBuxhetit from "./pages/komuna/buxheti/NdarjaBuxhetit";
+import BuxhetiHistoriku from "./pages/komuna/buxheti/Historiku";
+import KomunaListaKompanive from "./pages/komuna/kontraktoret/ListaKompanive";
 
 /*
 * Shkolla routes
 */
 import ShkollaDashboard from "./pages/Shkolla/ShkollaDashboard";
+import InventariAktual from "./pages/Shkolla/InventariAktual";
 import Historiku from "./pages/Shkolla/porosite/Historiku";
 import Market from "./pages/Shkolla/porosite/Market";
 import Shporta from "./pages/Shkolla/porosite/Shporta";
 import StafiShkolles from "./pages/Shkolla/stafi/ListaStafit";
-
+import OretShtese from "./pages/Shkolla/stafi/OretShtese";
+import Ndalesat from "./pages/Shkolla/stafi/Ndalesat";
 import UsersManagement from "./admin/UsersManagement";
-
-
-
 
 /*
 * Kompania routes
@@ -57,6 +61,16 @@ const routes = [
   },
 
   // Komuna
+  { 
+    path: "/komuna/shkolla/listashkollave",
+    component: ListaShkollave,
+    allowedRoles: ["komun", "admin"]
+  },
+  { 
+    path: "/komuna/shto-shkolle",
+    component: ShtoShkolle,
+    allowedRoles: ["komun", "admin"]
+  },
 
   {
     path: "/komuna/dashboard",
@@ -73,13 +87,34 @@ const routes = [
     component: RaportetPorosi,
     allowedRoles: ["komun", "admin"],
   },
+  {
+  path: "/komuna/buxheti/historiku",
+  component: BuxhetiHistoriku,
+  allowedRoles: ["komun", "admin"]
+  },
 
+  { 
+    path: "/komuna/buxheti",
+    component: NdarjaBuxhetit,
+    allowedRoles: ["komun", "admin"]
+  },
+
+  {
+  path: "/komuna/kompanite",
+  component: KomunaListaKompanive,
+  allowedRoles: ["komun", "admin"],
+},
 
 
   // Shkolla
   {
     path: "/shkolla/dashboard",
     component: ShkollaDashboard,
+    allowedRoles: ["shkoll", "admin"],
+  },
+  {
+    path: "/shkolla/inventari",
+    component: InventariAktual,
     allowedRoles: ["shkoll", "admin"],
   },
   {
@@ -100,6 +135,16 @@ const routes = [
   {
     path: "/shkolla/stafi/menaxhimi",
     component: StafiShkolles,
+    allowedRoles: ["shkoll", "admin"],
+  },
+  {
+    path: "/shkolla/stafi/oret-shtese",
+    component: OretShtese,
+    allowedRoles: ["shkoll", "admin"],
+  },
+  {
+    path: "/shkolla/stafi/ndalesat",
+    component: Ndalesat,
     allowedRoles: ["shkoll", "admin"],
   },
 

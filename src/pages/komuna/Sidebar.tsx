@@ -12,6 +12,9 @@ import {
   ArrowLeftOnRectangleIcon,
   Bars3Icon,
   XMarkIcon,
+  BuildingLibraryIcon,
+  ClockIcon,
+  BuildingOffice2Icon,
 } from "@heroicons/react/24/outline";
 import { useState } from "react";
 import Authorized from "../../auth/Authorized";
@@ -23,7 +26,10 @@ import { useContext } from "react";
 function Sidebar() {
   const location = useLocation();
   const [hovered, setHovered] = useState(false);
+  const [schoolsHovered, setSchoolsHovered] = useState(false);
   const [isOpen, setIsOpen] = useState(true);
+  const [financatHovered, setFinancatHovered] = useState(false);
+  const [kontraktoretHovered, setKontraktoretHovered] = useState(false);
 
   const {update, claims} = useContext(AuthenticationContext);
   const navigate = useNavigate();
@@ -77,6 +83,7 @@ function Sidebar() {
               <span className="text-sm">Dashboard</span>
             </Link>
 
+            {/* Orders dropdown */}
             <div
               onMouseEnter={() => setHovered(true)}
               onMouseLeave={() => setHovered(false)}
@@ -117,30 +124,129 @@ function Sidebar() {
               </div>
             </div>
 
-            <Link
-              to="/komuna/buxheti"
-              className={`flex items-center gap-3 px-4 py-2 rounded-lg transition ${isActive(
-                "/komuna/buxheti"
-              )}`}
+            {/* Schools Section */}
+            <div
+              onMouseEnter={() => setSchoolsHovered(true)}
+              onMouseLeave={() => setSchoolsHovered(false)}
+              className="relative"
             >
-              <AdjustmentsVerticalIcon className="w-5 h-5" />
-              <span className="text-sm">Ndarja e Buxhetit</span>
-            </Link>
+              <div className="flex items-center justify-between px-4 py-2 rounded-lg hover:bg-gray-100 cursor-pointer">
+                <span className="flex items-center gap-3 text-sm text-gray-700">
+                  <BuildingLibraryIcon className="w-5 h-5" /> Shkollat
+                </span>
+                <ChevronDownIcon
+                  className={`w-4 h-4 transform transition-transform duration-200 ${
+                    schoolsHovered ? "rotate-180" : "rotate-0"
+                  }`}
+                />
+              </div>
+              <div
+                className={`overflow-hidden transition-all duration-300 ${
+                  schoolsHovered ? "max-h-40 opacity-100" : "max-h-0 opacity-0"
+                } ml-4 mt-1 space-y-1`}
+              >
+                <Link
+                  to="/komuna/shkolla/listashkollave"
+                  className={`flex items-center gap-3 px-4 py-2 rounded-lg text-sm transition ${isActive(
+                    "/komuna/shkolla/listashkollave"
+                  )}`}
+                >
+                  <DocumentDuplicateIcon className="w-4 h-4" /> Lista e Shkollave
+                </Link>
+                <Link
+                  to="/komuna/shto-shkolle"
+                  className={`flex items-center gap-3 px-4 py-2 rounded-lg text-sm transition ${isActive(
+                    "/komuna/shto-shkolle"
+                  )}`}
+                >
+                  <ClipboardDocumentListIcon className="w-4 h-4" /> Shto Shkollë
+                </Link>
+              </div>
+            </div>
+
+            <div
+              onMouseEnter={() => setFinancatHovered(true)}
+              onMouseLeave={() => setFinancatHovered(false)}
+              className="relative"
+            >
+              <div className="flex items-center justify-between px-4 py-2 rounded-lg hover:bg-gray-100 cursor-pointer">
+                <span className="flex items-center gap-3 text-sm text-gray-700">
+                  <BanknotesIcon className="w-5 h-5" /> Financat
+                </span>
+                <ChevronDownIcon
+                  className={`w-4 h-4 transform transition-transform duration-200 ${
+                    financatHovered ? "rotate-180" : "rotate-0"
+                  }`}
+                />
+              </div>
+              <div
+                className={`overflow-hidden transition-all duration-300 ${
+                  financatHovered ? "max-h-40 opacity-100" : "max-h-0 opacity-0"
+                } ml-4 mt-1 space-y-1`}
+              >
+                <Link
+                  to="/komuna/buxheti"
+                  className={`flex items-center gap-3 px-4 py-2 rounded-lg text-sm transition ${isActive(
+                    "/komuna/buxheti"
+                  )}`}
+                >
+                  <AdjustmentsVerticalIcon className="w-4 h-4" /> Ndarja e Buxhetit
+                </Link>
+                <Link
+                  to="/komuna/buxheti/historiku"
+                  className={`flex items-center gap-3 px-4 py-2 rounded-lg text-sm transition ${isActive(
+                    "/komuna/buxheti/historiku"
+                  )}`}
+                >
+                  <ClockIcon className="w-4 h-4" /> Historiku
+                </Link>
+              </div>
+            </div>
+
+            
+            <div
+              onMouseEnter={() => setKontraktoretHovered(true)}
+              onMouseLeave={() => setKontraktoretHovered(false)}
+              className="relative"
+            >
+              <div className="flex items-center justify-between px-4 py-2 rounded-lg hover:bg-gray-100 cursor-pointer">
+                <span className="flex items-center gap-3 text-sm text-gray-700">
+                  <BriefcaseIcon className="w-5 h-5" /> Kontraktorët
+                </span>
+                <ChevronDownIcon
+                  className={`w-4 h-4 transform transition-transform duration-200 ${
+                    kontraktoretHovered ? "rotate-180" : "rotate-0"
+                  }`}
+                />
+              </div>
+              <div
+                className={`overflow-hidden transition-all duration-300 ${
+                  kontraktoretHovered ? "max-h-40 opacity-100" : "max-h-0 opacity-0"
+                } ml-4 mt-1 space-y-1`}
+              >
+                <Link
+                  to="/komuna/kompanite"
+                  className={`flex items-center gap-3 px-4 py-2 rounded-lg text-sm transition ${isActive(
+                    "/komuna/kompanite"
+                  )}`}
+                >
+                  <BuildingOffice2Icon className="w-4 h-4" /> Lista e Kontraktorëve
+                </Link>
+                <Link
+                  to="/komuna/kontraktoret/shto"
+                  className={`flex items-center gap-3 px-4 py-2 rounded-lg text-sm transition ${isActive(
+                    "/komuna/kontraktoret/shto"
+                  )}`}
+                >
+                  <DocumentDuplicateIcon className="w-4 h-4" /> Shto Kontraktor
+                </Link>
+              </div>
+            </div>
 
             <Authorized
               allowedRoles={["admin"]}
               authorized={
                 <>
-                  <Link
-                    to="/komuna/kontraktoret"
-                    className={`flex items-center gap-3 px-4 py-2 rounded-lg transition ${isActive(
-                      "/komuna/kontraktoret"
-                    )}`}
-                  >
-                    <BriefcaseIcon className="w-5 h-5" />
-                    <span className="text-sm">Kontraktorët</span>
-                  </Link>
-
                   <Link
                     to="/komuna/financat"
                     className={`flex items-center gap-3 px-4 py-2 rounded-lg transition ${isActive(
@@ -158,16 +264,17 @@ function Sidebar() {
 
         {/* Sign Out */}
         <div className="pt-6 border-t mt-8">
-        <Button 
-              onClick={() =>{
-                logout(update);
-                update([]);
-                navigate("/");
-               
-              }}
-              
-              className="nav-link btn btn-link"
-              >Dilni nga llogaia</Button>
+          <button
+            onClick={() => {
+              logout(update);
+              update([]);
+              navigate("/");
+            }}
+            className="w-full flex items-center gap-3 px-4 py-2 rounded-lg text-sm text-red-600 hover:bg-red-50 transition-colors duration-200"
+          >
+            <ArrowLeftOnRectangleIcon className="w-5 h-5" />
+            <span>Dilni nga llogaria</span>
+          </button>
         </div>
       </aside>
     </>

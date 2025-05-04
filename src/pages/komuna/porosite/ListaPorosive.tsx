@@ -69,11 +69,11 @@ function ListaPorosive() {
     if (result.isConfirmed) {
       try {
         const res = await axios.patch(`${urlPorosite}/paguaj/${id}`);
-        setToast({ message: res.data.message || "✅ Porosia u pagua me sukses!", type: "success" });
+        setToast({ message: res.data.message || "Porosia u pagua me sukses!", type: "success" });
         fetchPorosite();
       } catch (error) {
         console.error("Gabim gjatë pagesës:", error);
-        setToast({ message: "❌ Veprimi nuk u krye me sukses!", type: "error" });
+        setToast({ message: "Veprimi nuk u krye me sukses!", type: "error" });
       }
     }
   };
@@ -93,11 +93,11 @@ function ListaPorosive() {
     if (result.isConfirmed) {
       try {
         const res = await axios.patch(`${urlPorosite}/fshij/${id}`);
-        setToast({ message: res.data.message || "✅ Porosia u fshi me sukses!", type: "success" });
+        setToast({ message: res.data.message || "Porosia u fshi me sukses!", type: "success" });
         fetchPorosite();
       } catch (error) {
         console.error("Gabim gjatë fshirjes:", error);
-        setToast({ message: "❌ Veprimi nuk u krye me sukses!", type: "error" });
+        setToast({ message: "Veprimi nuk u krye me sukses!", type: "error" });
       }
     }
   };
