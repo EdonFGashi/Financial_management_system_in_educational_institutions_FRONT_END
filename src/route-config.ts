@@ -57,7 +57,7 @@ const routes = [
   {
     path: "/perdoruesit",
     component: UsersManagement,
-    allowedRoles: ["admin"],
+    allowedRoles: ["admin", "shkolle"],
   },
 
   // Komuna
