@@ -57,52 +57,52 @@ const routes = [
   {
     path: "/perdoruesit",
     component: UsersManagement,
-    allowedRoles: ["admin"],
+    allowedRoles: ["admin", "shkolle", "kompani", "komun"],
   },
 
   // Komuna
   { 
     path: "/komuna/shkolla/listashkollave",
     component: ListaShkollave,
-    allowedRoles: ["komun", "admin"]
+    allowedRoles: ["komune", "admin"]
   },
   { 
     path: "/komuna/shto-shkolle",
     component: ShtoShkolle,
-    allowedRoles: ["komun", "admin"]
+    allowedRoles: ["komune", "admin"]
   },
 
   {
     path: "/komuna/dashboard",
     component: KomunaDashboard,
-    allowedRoles: ["komun", "admin"],
+    allowedRoles: ["komune", "admin"],
   },
   {
     path: "/komuna/porosite/lista",
     component: ListaPorosive,
-    allowedRoles: ["komun", "admin"],
+    allowedRoles: ["komune", "admin"],
   },
   {
     path: "/komuna/porosite/raporte",
     component: RaportetPorosi,
-    allowedRoles: ["komun", "admin"],
+    allowedRoles: ["komune", "admin"],
   },
   {
   path: "/komuna/buxheti/historiku",
   component: BuxhetiHistoriku,
-  allowedRoles: ["komun", "admin"]
+  allowedRoles: ["komune", "admin"]
   },
 
   { 
     path: "/komuna/buxheti",
     component: NdarjaBuxhetit,
-    allowedRoles: ["komun", "admin"]
+    allowedRoles: ["komune", "admin"]
   },
 
   {
   path: "/komuna/kompanite",
   component: KomunaListaKompanive,
-  allowedRoles: ["komun", "admin"],
+  allowedRoles: ["komune", "admin"],
 },
 
 
@@ -110,42 +110,42 @@ const routes = [
   {
     path: "/shkolla/dashboard",
     component: ShkollaDashboard,
-    allowedRoles: ["shkoll", "admin"],
+    allowedRoles: ["shkolle", "admin"],
   },
   {
     path: "/shkolla/inventari",
     component: InventariAktual,
-    allowedRoles: ["shkoll", "admin"],
+    allowedRoles: ["shkolle", "admin"],
   },
   {
     path: "/shkolla/porosite/market",
     component: Market,
-    allowedRoles: ["shkoll", "admin"],
+    allowedRoles: ["shkolle", "admin"],
   },
   {
     path: "/shkolla/porosite/shporta",
     component: Shporta,
-    allowedRoles: ["shkoll", "admin"],
+    allowedRoles: ["shkolle", "admin"],
   },
   {
     path: "/shkolla/porosite/historiku",
     component: Historiku,
-    allowedRoles: ["shkoll", "admin"],
+    allowedRoles: ["shkolle", "admin"],
   },
   {
     path: "/shkolla/stafi/menaxhimi",
     component: StafiShkolles,
-    allowedRoles: ["shkoll", "admin"],
+    allowedRoles: ["shkolle", "admin"],
   },
   {
     path: "/shkolla/stafi/oret-shtese",
     component: OretShtese,
-    allowedRoles: ["shkoll", "admin"],
+    allowedRoles: ["shkolle", "admin"],
   },
   {
     path: "/shkolla/stafi/ndalesat",
     component: Ndalesat,
-    allowedRoles: ["shkoll", "admin"],
+    allowedRoles: ["shkolle", "admin"],
   },
 
   // Kompania
