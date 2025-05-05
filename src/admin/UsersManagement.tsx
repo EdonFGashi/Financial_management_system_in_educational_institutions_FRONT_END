@@ -4,7 +4,6 @@ import Sidebar from "../pages/Kompania/Sidebar";
 import { ClipboardDocumentCheckIcon } from "@heroicons/react/24/outline";
 import Pagination from "../components/Pagination"; // Assure-toi d'importer correctement
 import axios from "axios";
-import Swal from "sweetalert2";
 
 const roles = ["admin", "komun", "shkoll", "kompani"];
 
@@ -39,36 +38,9 @@ export default function UsersManagement() {
   }
 
   async function updateRole(email: string) {
-    try{
     const newRole = rolesMap[email];
     await axios.put(`http://localhost:5102/api/accounts/updateRole`, { email, role: newRole });
-    Swal.fire({
-      title: 'Role Updated!',
-      text: `Role for ${email} has been updated to ${newRole}.`,
-      icon: 'success',
-      confirmButtonText: 'OK',
-      confirmButtonColor: '#3085d6'
-    });
-  } catch (error: any) {
-    if (error.response && error.response.status === 403) {
-      Swal.fire({
-        title: 'User Not Found!',
-        text: `Ju nuk jeni të autorizuar për ta ndryshuar rolin e tij.`,
-        icon: 'error',
-        confirmButtonText: 'OK',
-        confirmButtonColor: '#d33'
-      });
-    } else {
-      Swal.fire({
-        title: 'Error!',
-        text: 'An unexpected error occurred.',
-        icon: 'error',
-        confirmButtonText: 'OK',
-        confirmButtonColor: '#d33'
-      });
-    }
-  }
-    // alert(`Role for ${email} updated to ${newRole}`);
+    alert(`Role for ${email} updated to ${newRole}`);
   }
 
   return (
@@ -124,7 +96,6 @@ export default function UsersManagement() {
                     >
                       Update role
                     </button>
-
                   </td>
                 </tr>
               ))}

@@ -45,8 +45,8 @@ function Navbar() {
   ];
 
   const authorizedLinks = [
-    { to: "/komuna/dashboard", label: "Komuna" , roles: ["admin", "komune"]},
-    { to: "/shkolla/dashboard", label: "Shkolla" , roles: ["admin", "shkolle"]},
+    { to: "/komuna/dashboard", label: "Komuna" , roles: ["admin", "komun"]},
+    { to: "/shkolla/dashboard", label: "Shkolla" , roles: ["admin", "shkoll"]},
     { to: "/kompania/dashboard", label: "Kompanite" , roles: ["admin", "kompani"]},
     { to: "/perdoruesit", label: "Perdoruesit" ,  roles: ["admin"]}
   ];
@@ -80,27 +80,19 @@ function Navbar() {
           </Link>
         ))}     
 
-{authorizedLinks.map((link) => (
-     
-     <Authorized
-       key={link.to}
-       allowedRoles={link.roles}
-       authorized={
-         <>
-         <Link
-           to={link.to}
-           className={`relative text-lg font-medium transition duration-200 ${isActive(link.to)} after:content-[''] after:absolute after:left-0 after:-bottom-1 after:w-0 after:h-[2px] after:bg-black hover:after:w-full after:transition-all after:duration-300`}
-         >
-           {link.label}
-         </Link>
-         </>
-       }
-     />
-   ))}
-
-<Authorized
+        <Authorized
           authorized={
             <>
+              {authorizedLinks.map((link) => (
+                <Link
+                  key={link.to}
+                  to={link.to}
+                  className={`relative text-lg font-medium transition duration-200 ${isActive(link.to)} after:content-[''] after:absolute after:left-0 after:-bottom-1 after:w-0 after:h-[2px] after:bg-black hover:after:w-full after:transition-all after:duration-300`}
+                >
+                  {link.label}
+                </Link>
+              ))}
+              
               {/* Updated email display */}
               <div className="flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-lg">
                 <UserCircleIcon className="w-5 h-5 text-gray-600" />
@@ -142,7 +134,6 @@ function Navbar() {
             </div>
           }
         />
-
       </div>
     </nav>
   );

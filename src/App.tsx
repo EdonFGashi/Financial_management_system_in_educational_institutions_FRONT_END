@@ -22,9 +22,8 @@ import { getClaims } from "./auth/handleJWT";
 
 
 import RegjistriProdukteve from "./pages/Kompania/produktet/regjistriProdukteve";
-import configureIntercetor from "./auth/httpInterceptors";
 
-configureIntercetor();
+
 
 
 function App() {
