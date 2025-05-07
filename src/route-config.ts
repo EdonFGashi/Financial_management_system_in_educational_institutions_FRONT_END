@@ -47,6 +47,8 @@ import KompaniaDashboard from "./pages/Kompania/KompaniaDashboard";
 import RegjistriProdukteve from "./pages/Kompania/produktet/regjistriProdukteve";
 import ListaPorosiveKompani from "./pages/Kompania/porosite/listaPorosive";
 import RaportiPorosiveKompani from "./pages/Kompania/porosite/raportiPorosive";
+import OperationsList from "./admin/OperationsList";
+import RolePermissions from "./admin/RolePermissions";
 
 
 const routes = [
@@ -57,7 +59,17 @@ const routes = [
   {
     path: "/perdoruesit",
     component: UsersManagement,
-    allowedRoles: ["admin", "shkolle"],
+    allowedRoles: ["admin"],
+  },
+  {
+    path: "/operations",
+    component: OperationsList,
+    allowedRoles: ["admin"],
+  },
+  {
+    path: "/rolePermissions",
+    component: RolePermissions,
+    allowedRoles: ["admin"],
   },
 
   // Komuna
