@@ -20,7 +20,7 @@ interface UserClaims{
 }
 
 interface Operation {
-  operationId: number;
+  operationId?: number;
   name: string;
   verb: string;
   resource: string;
@@ -32,9 +32,9 @@ interface RolePermission {
   name: string;
   verb: string;
   resource: string;
-  email: string;
-//   claimId: number;
-//   operationId: number;
+  userName: string;
+  claimId: number;
+  operationId: number;
 //     userId: number;
 }
 
@@ -48,6 +48,7 @@ const RolePermissions = () => {
   const [usersClaims, setUsers] = useState<UserClaims[]>([]);
   const [operations, setOperations] = useState<Operation[]>([]);
   const [rolePermissions, setRolePermissions] = useState<RolePermission[]>([]);
+  const [rolePermissionsUpdate, setRolePermissionsUpdate] = useState<RolePermissionFormValues[]>([]);
   const [filteredRolePermissions, setFilteredRolePermissions] = useState<
     RolePermission[]
   >([]);
@@ -87,6 +88,16 @@ const RolePermissions = () => {
     } catch (error) {
       console.error("Failed to load operations:", error);
     }
+
+    // try {
+    //   const response = await axios.get(
+    //     "http://localhost:5102/api/Endpoints/all"
+    //   );
+      
+    //   setOperations(response.data);
+    // } catch (error) {
+    //   console.error("Failed to load operations:", error);
+    // }
   }
 
   async function loadRolePermissions() {
@@ -124,8 +135,28 @@ const RolePermissions = () => {
       loadRolePermissions();
       Swal.fire("Success", "Role Permission added successfully!", "success");
     } catch (error: any) {
-      console.error("Failed to add role permission:", error);
-      throw error;
+      console.error("Update error:", error);
+  
+      if (axios.isAxiosError(error) && error.response) {
+        const status = error.response.status;
+        const rawMessage = error.response.data;
+  
+        // Handle string or object response
+        const message =
+          typeof rawMessage === "string"
+            ? rawMessage
+            : rawMessage?.message || "Invalid input data.";
+  
+        if (status === 400) {
+          Swal.fire("Bad Request", message, "error");
+        } else if (status === 404) {
+          Swal.fire("Not Found", "The operation does not exist.", "warning");
+        } else {
+          Swal.fire("Error", "Failed to update operation", "error");
+        }
+      } else {
+        Swal.fire("Unexpected Error", "Something went wrong.", "error");
+      }
     }
   }
 
@@ -147,6 +178,81 @@ const RolePermissions = () => {
     window.scrollTo({ top: 0, behavior: "smooth" }); // Scroll to form if needed
   };
 
+  const handleUpdate = async (data: RolePermissionFormValues) => {
+    try {
+      const response = await axios.put(
+        `http://localhost:5102/api/role-permissions/${data.rolePermissionId}`,
+        data
+      );
+      loadRolePermissions();
+console.log("u editua: ", data);
+      const updated = response.data;
+      setRolePermissionsUpdate((prev) =>
+        prev.map((op) =>
+          op.operationId === updated.operationId ? updated : op
+        )
+      );
+      setFilteredRolePermissions((prev) =>
+        prev.map((op) =>
+          op.operationId === updated.operationId ? updated : op
+        )
+      );
+      setSelectedRolePermission(null)
+      }catch (error: any) {
+    console.error("Update error:", error);
+
+    if (axios.isAxiosError(error) && error.response) {
+      const status = error.response.status;
+      const rawMessage = error.response.data;
+
+      // Handle string or object response
+      const message =
+        typeof rawMessage === "string"
+          ? rawMessage
+          : rawMessage?.message || "Invalid input data.";
+
+      if (status === 400) {
+        Swal.fire("Bad Request", message, "error");
+      } else if (status === 404) {
+        Swal.fire("Not Found", "The operation does not exist.", "warning");
+      } else {
+        Swal.fire("Error", "Failed to update operation", "error");
+      }
+    } else {
+      Swal.fire("Unexpected Error", "Something went wrong.", "error");
+    }
+  }
+    };
+
+    async function reloadEndpoints() {
+      // try {
+      //   const response = await axios.get(
+      //     "http://localhost:5102/api/operations/getOperations"
+      //   );
+      //   setOperations(response.data);
+      // } catch (error) {
+      //   console.error("Failed to load operations:", error);
+      // }
+  
+      try {
+        const response = await axios.post(
+          "http://localhost:5102/api/Endpoints/reload"
+        );
+      
+        const { addedCount, removedCount } = response.data;
+      
+        loadOperations();
+      
+        Swal.fire(
+          "Success",
+          `Endpoints u ringarkuan me sukses.\nTë shtuara: ${addedCount}, Të fshira: ${removedCount}`,
+          "success"
+        );
+      } catch (error) {
+        console.error("Failed to load operations:", error);
+      }
+    }
+    
   return (
     <div className="flex flex-col md:flex-row min-h-screen bg-gray-50">
       <Sidebar />
@@ -230,7 +336,14 @@ const RolePermissions = () => {
       claimId: values.claimId ? Number(values.claimId) : 0,
       operationId: values.operationId ? Number(values.operationId) : 0,
     };
-    handleSubmit(formattedValues);
+      if (selectedRolePermission) {
+        console.log("u editua: ", formattedValues);
+        handleUpdate(formattedValues);
+      } else {
+        handleSubmit(formattedValues);
+  
+      }
+    // handleSubmit(formattedValues);
     resetForm();
     setSelectedRolePermission(null);
   }}
@@ -266,7 +379,7 @@ const RolePermissions = () => {
                         key={operation.operationId}
                         value={operation.operationId}
                       >
-                        {operation.name}
+                        {operation.name + " - " + operation.verb + " - " + operation.resource}
                       </option>
                     ))}
                   </Field>
@@ -289,6 +402,13 @@ const RolePermissions = () => {
                       Cancel
                     </button>
                   )}
+                  <button
+                      type="button"
+                      onClick={() => reloadEndpoints()}
+                      className="bg-gray-400 text-white px-4 py-2 rounded-md hover:bg-gray-500"
+                    >
+                      Reload Endpoints
+                    </button>
                 </div>
               </Form>
             </Formik>
@@ -313,14 +433,19 @@ const RolePermissions = () => {
                   : rolePermissions
                 ).map((rp) => (
                   <tr key={rp.rolePermissionId}>
-                    <td className="px-4 py-2 border">{rp.email}</td>
+                    
+                    <td className="px-4 py-2 border">{rp.userName}</td>
                     <td className="px-4 py-2 border">{rp.role}</td>
                     <td className="px-4 py-2 border">{rp.name}</td>
                     <td className="px-4 py-2 border">{rp.verb}</td>
                     <td className="px-4 py-2 border">{rp.resource}</td>
                     <td className="px-4 py-2 border text-center">
                       <button
-                        // onClick={() => handleEdit(rp)}
+                        onClick={() =>   handleEdit({
+                          rolePermissionId: rp.rolePermissionId,
+                          claimId: rp.claimId/* you need to get this somehow */,
+                          operationId: rp.operationId/* you need to get this somehow */,
+                        })}
                         className="bg-yellow-500 text-white px-4 py-1 rounded-md mr-2"
                       >
                         Edit
