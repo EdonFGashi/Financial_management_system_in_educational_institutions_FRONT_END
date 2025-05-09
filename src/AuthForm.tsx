@@ -50,29 +50,20 @@ function AuthForm(props: authFormProps) {
   ];
 
   const validationSchema = Yup.object({
-    fullName: Yup.string().required("Emri i plotë është i detyrueshëm"),
     email: Yup.string()
-      .email("Email-i nuk është valid")
       .required("Email-i është i detyrueshëm"),
     password: Yup.string()
       .required("Fjalëkalimi është i detyrueshëm")
-      .min(8, "Të paktën 8 karaktere")
-      .matches(/[A-Z]/, "Duhet të përmbajë një shkronjë të madhe")
-      .matches(/[0-9]/, "Duhet të përmbajë një numër")
-      .matches(/[^A-Za-z0-9]/, "Duhet të përmbajë një karakter special"),
-    confirmPassword: Yup.string()
-      .oneOf([Yup.ref("password"), ""], "Fjalëkalimet nuk përputhen")
-      .required("Konfirmimi i fjalëkalimit është i detyrueshëm"),
   });
 
-  const checkStrength = (password: string) => {
-    let score = 0;
-    if (password.length >= 8) score++;
-    if (/[A-Z]/.test(password)) score++;
-    if (/[0-9]/.test(password)) score++;
-    if (/[^A-Za-z0-9]/.test(password)) score++;
-    setStrength(score);
-  };
+  // const checkStrength = (password: string) => {
+  //   let score = 0;
+  //   if (password.length >= 8) score++;
+  //   if (/[A-Z]/.test(password)) score++;
+  //   if (/[0-9]/.test(password)) score++;
+  //   if (/[^A-Za-z0-9]/.test(password)) score++;
+  //   setStrength(score);
+  // };
 
   return (
     <div className="min-h-screen flex">
@@ -88,7 +79,7 @@ function AuthForm(props: authFormProps) {
 
           <Formik
             initialValues={{ email: "", password: "" }}
-            // validationSchema={validationSchema}
+            validationSchema={validationSchema}
             onSubmit={props.onSubmit}
           >
             {({ values, handleChange, handleBlur }) => (
@@ -128,7 +119,6 @@ function AuthForm(props: authFormProps) {
                     className="w-full p-3 pl-10 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                       handleChange(e);
-                      checkStrength(e.target.value);
                     }}
                     onBlur={handleBlur}
                     value={values.password}
@@ -173,7 +163,6 @@ function AuthForm(props: authFormProps) {
                 <button
                   type="submit"
                   className="w-full bg-indigo-600 text-white p-3 rounded-lg hover:bg-indigo-700 transition"
-                  disabled={strength < 4}
                 >
                   Regjistrohu
                 </button>

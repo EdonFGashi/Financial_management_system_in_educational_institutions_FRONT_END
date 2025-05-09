@@ -4,6 +4,7 @@ import Sidebar from "../pages/Kompania/Sidebar";
 import { ClipboardDocumentCheckIcon } from "@heroicons/react/24/outline";
 import Pagination from "../components/Pagination"; // Assure-toi d'importer correctement
 import axios from "axios";
+import Swal from "sweetalert2";
 
 const roles = ["admin", "komun", "shkoll", "kompani"];
 
@@ -38,9 +39,37 @@ export default function UsersManagement() {
   }
 
   async function updateRole(email: string) {
+    try{
     const newRole = rolesMap[email];
     await axios.put(`http://localhost:5102/api/accounts/updateRole`, { email, role: newRole });
-    alert(`Role for ${email} updated to ${newRole}`);
+
+    Swal.fire(
+      'Sukses!',
+      `Roli për ${email} u ndryshua në ${newRole} !`,
+      'success'
+    );
+    // alert(`Role for ${email} updated to ${newRole}`);
+  } catch (error: any) {
+    if (error.response && error.response.status === 403) {
+      Swal.fire({
+        title: 'I pa autorizuar!',
+        text: `Ju nuk jeni të autorizuar për ta bërë këtë veprim !`,
+        icon: 'error',
+        confirmButtonText: 'OK',
+        confirmButtonColor: '#d33'
+      });
+    } else {
+      Swal.fire({
+        title: 'Error!',
+        text: 'Ndodhi një error !',
+        icon: 'error',
+        confirmButtonText: 'OK',
+        confirmButtonColor: '#d33'
+      });
+    }
+    
+  }
+    
   }
 
   return (

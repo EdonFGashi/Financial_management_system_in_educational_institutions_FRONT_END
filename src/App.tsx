@@ -1,4 +1,3 @@
-
 import Home from "./pages/Home";
 import KomunaDashboard from "./pages/komuna/KomunaDashboard";
 import RaportetPorosi from "./pages/komuna/porosite/RaportetPorosi";
@@ -9,8 +8,8 @@ import Market from "./pages/Shkolla/porosite/Market";
 import Shporta from "./pages/Shkolla/porosite/Shporta";
 import Historiku from "./pages/Shkolla/porosite/Historiku";
 import StafiShkolles from "./pages/Shkolla/stafi/ListaStafit";
-import OretShtese from "./pages/Shkolla/stafi/OretShtese"
-import Ndalesat from "./pages/Shkolla/stafi/Ndalesat"
+import OretShtese from "./pages/Shkolla/stafi/OretShtese";
+import Ndalesat from "./pages/Shkolla/stafi/Ndalesat";
 import InventariAktual from "./pages/Shkolla/InventariAktual";
 import KompaniaDashboard from "./pages/Kompania/KompaniaDashboard";
 import routes from "./route-config";
@@ -20,15 +19,13 @@ import AuthenticationContext from "./auth/AuthenticationContext";
 import { claim } from "./auth/auth.models";
 import { getClaims } from "./auth/handleJWT";
 
-
 import RegjistriProdukteve from "./pages/Kompania/produktet/regjistriProdukteve";
+import configureIntercetor from "./auth/httpInterceptors";
 
-
-
+configureIntercetor();
 
 function App() {
   const [claims, setClaims] = useState<claim[]>([]);
-
 
   useEffect(() => {
     setClaims(getClaims());
