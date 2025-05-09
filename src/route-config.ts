@@ -51,6 +51,130 @@ import OperationsList from "./admin/OperationsList";
 import RolePermissions from "./admin/RolePermissions";
 
 
+// const routes = [
+//   { path: "/", component: Home },
+//   { path: "/signin", component: Login },
+//   { path: "/register", component: Register },
+
+//   {
+//     path: "/perdoruesit",
+//     component: UsersManagement,
+//     allowedRoles: ["admin"],
+//   },
+//   {
+//     path: "/operations",
+//     component: OperationsList,
+//     allowedRoles: ["admin"],
+//   },
+//   {
+//     path: "/rolePermissions",
+//     component: RolePermissions,
+//     allowedRoles: ["admin"],
+//   },
+
+//   // Komuna
+//   { 
+//     path: "/komuna/shkolla/listashkollave",
+//     component: ListaShkollave,
+//     allowedRoles: ["komun", "admin"]
+//   },
+//   { 
+//     path: "/komuna/shto-shkolle",
+//     component: ShtoShkolle,
+//     allowedRoles: ["komun", "admin"]
+//   },
+
+//   {
+//     path: "/komuna/dashboard",
+//     component: KomunaDashboard,
+//     allowedRoles: ["komun", "admin"],
+//   },
+//   {
+//     path: "/komuna/porosite/lista",
+//     component: ListaPorosive,
+//     allowedRoles: ["komun", "admin"],
+//   },
+//   {
+//     path: "/komuna/porosite/raporte",
+//     component: RaportetPorosi,
+//     allowedRoles: ["komun", "admin"],
+//   },
+//   {
+//   path: "/komuna/buxheti/historiku",
+//   component: BuxhetiHistoriku,
+//   allowedRoles: ["komun", "admin"]
+//   },
+
+//   { 
+//     path: "/komuna/buxheti",
+//     component: NdarjaBuxhetit,
+//     allowedRoles: ["komun", "admin"]
+//   },
+
+//   {
+//   path: "/komuna/kompanite",
+//   component: KomunaListaKompanive,
+//   allowedRoles: ["komun", "admin"],
+// },
+
+
+//   // Shkolla
+//   {
+//     path: "/shkolla/dashboard",
+//     component: ShkollaDashboard,
+//     allowedRoles: ["shkoll", "admin"],
+//   },
+//   {
+//     path: "/shkolla/inventari",
+//     component: InventariAktual,
+//     allowedRoles: ["shkoll", "admin"],
+//   },
+//   {
+//     path: "/shkolla/porosite/market",
+//     component: Market,
+//     allowedRoles: ["shkoll", "admin"],
+//   },
+//   {
+//     path: "/shkolla/porosite/shporta",
+//     component: Shporta,
+//     allowedRoles: ["shkoll", "admin"],
+//   },
+//   {
+//     path: "/shkolla/porosite/historiku",
+//     component: Historiku,
+//     allowedRoles: ["shkoll", "admin"],
+//   },
+//   {
+//     path: "/shkolla/stafi/menaxhimi",
+//     component: StafiShkolles,
+//     allowedRoles: ["shkoll", "admin"],
+//   },
+//   {
+//     path: "/shkolla/stafi/oret-shtese",
+//     component: OretShtese,
+//     allowedRoles: ["shkoll", "admin"],
+//   },
+//   {
+//     path: "/shkolla/stafi/ndalesat",
+//     component: Ndalesat,
+//     allowedRoles: ["shkoll", "admin"],
+//   },
+
+//   // Kompania
+
+//   {
+//     path: "/kompania/dashboard",
+//     component: KompaniaDashboard,
+//     allowedRoles: ["kompani", "admin"],
+//   },
+//   { path: "/kompania/regjistri", component: RegjistriProdukteve, allowedRoles: ["kompani", "admin"], },
+//   { path: "/kompania/porosite/lista", component: ListaPorosiveKompani, allowedRoles: ["kompani", "admin"],},
+//   { path: "/kompania/porosite/raporte", component: RaportiPorosiveKompani, allowedRoles: ["kompani", "admin"], },
+    
+
+//   { path: "*", component: RedirectToLandingPage },
+// ];
+
 const routes = [
   { path: "/", component: Home },
   { path: "/signin", component: Login },
@@ -59,62 +183,62 @@ const routes = [
   {
     path: "/perdoruesit",
     component: UsersManagement,
-    allowedRoles: ["admin"],
+    allowedRoles: ["admin", "komune", "shkolle", "kompani"],
   },
   {
     path: "/operations",
     component: OperationsList,
-    allowedRoles: ["admin"],
+    allowedRoles: ["admin", "komune", "shkolle", "kompani"],
   },
   {
     path: "/rolePermissions",
     component: RolePermissions,
-    allowedRoles: ["admin"],
+    allowedRoles: ["admin", "komune", "shkolle", "kompani"],
   },
 
   // Komuna
   { 
     path: "/komuna/shkolla/listashkollave",
     component: ListaShkollave,
-    allowedRoles: ["komun", "admin"]
+    allowedRoles: ["admin", "komune", "shkolle", "kompani"]
   },
   { 
     path: "/komuna/shto-shkolle",
     component: ShtoShkolle,
-    allowedRoles: ["komun", "admin"]
+    allowedRoles: ["admin", "komune", "shkolle", "kompani"]
   },
 
   {
     path: "/komuna/dashboard",
     component: KomunaDashboard,
-    allowedRoles: ["komun", "admin"],
+    allowedRoles: ["admin", "komune", "shkolle", "kompani"],
   },
   {
     path: "/komuna/porosite/lista",
     component: ListaPorosive,
-    allowedRoles: ["komun", "admin"],
+    allowedRoles: ["admin", "komune", "shkolle", "kompani"],
   },
   {
     path: "/komuna/porosite/raporte",
     component: RaportetPorosi,
-    allowedRoles: ["komun", "admin"],
+    allowedRoles: ["admin", "komune", "shkolle", "kompani"],
   },
   {
   path: "/komuna/buxheti/historiku",
   component: BuxhetiHistoriku,
-  allowedRoles: ["komun", "admin"]
+  allowedRoles: ["admin", "komune", "shkolle", "kompani"]
   },
 
   { 
     path: "/komuna/buxheti",
     component: NdarjaBuxhetit,
-    allowedRoles: ["komun", "admin"]
+    allowedRoles: ["admin", "komune", "shkolle", "kompani"]
   },
 
   {
   path: "/komuna/kompanite",
   component: KomunaListaKompanive,
-  allowedRoles: ["komun", "admin"],
+  allowedRoles: ["admin", "komune", "shkolle", "kompani"],
 },
 
 
@@ -122,42 +246,42 @@ const routes = [
   {
     path: "/shkolla/dashboard",
     component: ShkollaDashboard,
-    allowedRoles: ["shkoll", "admin"],
+    allowedRoles: ["admin", "komune", "shkolle", "kompani"],
   },
   {
     path: "/shkolla/inventari",
     component: InventariAktual,
-    allowedRoles: ["shkoll", "admin"],
+    allowedRoles: ["admin", "komune", "shkolle", "kompani"],
   },
   {
     path: "/shkolla/porosite/market",
     component: Market,
-    allowedRoles: ["shkoll", "admin"],
+    allowedRoles: ["admin", "komune", "shkolle", "kompani"],
   },
   {
     path: "/shkolla/porosite/shporta",
     component: Shporta,
-    allowedRoles: ["shkoll", "admin"],
+    allowedRoles: ["admin", "komune", "shkolle", "kompani"],
   },
   {
     path: "/shkolla/porosite/historiku",
     component: Historiku,
-    allowedRoles: ["shkoll", "admin"],
+    allowedRoles: ["admin", "komune", "shkolle", "kompani"],
   },
   {
     path: "/shkolla/stafi/menaxhimi",
     component: StafiShkolles,
-    allowedRoles: ["shkoll", "admin"],
+    allowedRoles: ["admin", "komune", "shkolle", "kompani"],
   },
   {
     path: "/shkolla/stafi/oret-shtese",
     component: OretShtese,
-    allowedRoles: ["shkoll", "admin"],
+    allowedRoles: ["admin", "komune", "shkolle", "kompani"],
   },
   {
     path: "/shkolla/stafi/ndalesat",
     component: Ndalesat,
-    allowedRoles: ["shkoll", "admin"],
+    allowedRoles: ["admin", "komune", "shkolle", "kompani"],
   },
 
   // Kompania
@@ -165,11 +289,11 @@ const routes = [
   {
     path: "/kompania/dashboard",
     component: KompaniaDashboard,
-    allowedRoles: ["kompani", "admin"],
+    allowedRoles: ["admin", "komune", "shkolle", "kompani"],
   },
-  { path: "/kompania/regjistri", component: RegjistriProdukteve, allowedRoles: ["kompani", "admin"], },
-  { path: "/kompania/porosite/lista", component: ListaPorosiveKompani, allowedRoles: ["kompani", "admin"],},
-  { path: "/kompania/porosite/raporte", component: RaportiPorosiveKompani, allowedRoles: ["kompani", "admin"], },
+  { path: "/kompania/regjistri", component: RegjistriProdukteve, allowedRoles: ["admin", "komune", "shkolle", "kompani"], },
+  { path: "/kompania/porosite/lista", component: ListaPorosiveKompani, allowedRoles: ["admin", "komune", "shkolle", "kompani"],},
+  { path: "/kompania/porosite/raporte", component: RaportiPorosiveKompani, allowedRoles: ["admin", "komune", "shkolle", "kompani"], },
     
 
   { path: "*", component: RedirectToLandingPage },
