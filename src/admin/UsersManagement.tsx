@@ -5,6 +5,7 @@ import { ClipboardDocumentCheckIcon } from "@heroicons/react/24/outline";
 import Pagination from "../components/Pagination"; // Assure-toi d'importer correctement
 import axios from "axios";
 import Swal from "sweetalert2";
+import AdminSidebar from "./AdminSidebar";
 
 const roles = ["admin", "komun", "shkoll", "kompani"];
 
@@ -74,7 +75,8 @@ export default function UsersManagement() {
 
   return (
     <div className="flex flex-col md:flex-row min-h-screen bg-gray-50 text-gray-800">
-      <Sidebar />
+      
+      <AdminSidebar />
 
       <main className="flex-1 p-4 sm:p-6 md:p-10">
         {/* Header */}
