@@ -8,7 +8,23 @@ import Toast from "../../../components/Toast";
 import { generateOrdersPDF } from "../../../components/PdfGenerator";
 
 function RaportetPorosi() {
-  const [records, setRecords] = useState<any[]>([]);
+  interface Porosia {
+    cmimi: number;
+    dataPorosise: string;
+    emri: string;
+    id: number;
+    pershkrimi: string;
+    prodhuesi: string;
+    sasia: number;
+    shenime: string;
+    statusi: string;
+    kompania: string;
+    shkolla: string;
+    origjina: string;
+    selected?: boolean;
+  }
+
+  const [records, setRecords] = useState<Porosia[]>([]);
   const [selectAll, setSelectAll] = useState(false);
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
@@ -34,8 +50,10 @@ function RaportetPorosi() {
       if (filters.ngaData) params.append("ngaData", filters.ngaData);
       if (filters.deriData) params.append("deriData", filters.deriData);
       filters.statuset.forEach((status) => params.append("statuset", status));
+      console.log("Request: ", params.toString());
 
       const response = await axios.get(`${urlRaporti}?${params.toString()}`);
+      console.log("Response: ", response.data);
       setRecords((response.data.data || []).map((r: any) => ({ ...r, selected: false })));
     } catch (error) {
       console.error("Gabim gjatë marrjes së raporteve:", error);
@@ -71,11 +89,11 @@ function RaportetPorosi() {
   const handleGenerateRaportPDF = () => {
     generateOrdersPDF({
       records,
+      filters,
       onSuccess: (message) => setToast({ message, type: "success" }),
       onError: (message) => setToast({ message, type: "error" })
     });
   };
-
   return (
     <div className="flex flex-col md:flex-row min-h-screen bg-gray-50 text-gray-800">
       <Sidebar />
@@ -102,18 +120,29 @@ function RaportetPorosi() {
 
         <div className="bg-white rounded-xl shadow p-6 mb-8 space-y-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4">
-            <input
-              type="date"
-              value={filters.ngaData}
-              onChange={(e) => setFilters({ ...filters, ngaData: e.target.value })}
-              className="p-3 border border-gray-300 rounded-md text-sm"
-            />
-            <input
-              type="date"
-              value={filters.deriData}
-              onChange={(e) => setFilters({ ...filters, deriData: e.target.value })}
-              className="p-3 border border-gray-300 rounded-md text-sm"
-            />
+            <div className="flex flex-col">
+              <label htmlFor="ngaData" className="font-medium text-gray-700">Nga:</label>
+              <input
+                id="ngaData"
+                type="date"
+                value={filters.ngaData}
+                onChange={(e) => setFilters({ ...filters, ngaData: e.target.value })}
+                className="p-3 border border-gray-300 rounded-md text-sm"
+              />
+            </div>
+            <div className="flex flex-col">
+              <label htmlFor="deriData" className="font-medium text-gray-700">Deri:</label>
+              <input
+                id="deriData"
+                type="date"
+                value={filters.deriData}
+                onChange={(e) => setFilters({ ...filters, deriData: e.target.value })}
+                className="p-3 border border-gray-300 rounded-md text-sm"
+              />
+            </div>
+            <div className="flex flex-col">
+            <label htmlFor="kompania" className="font-medium text-gray-700">Kompania:</label>
+
             <input
               type="text"
               value={filters.kompania}
@@ -121,6 +150,10 @@ function RaportetPorosi() {
               placeholder="Kompania..."
               className="p-3 border border-gray-300 rounded-md text-sm"
             />
+            </div>
+            <div className="flex flex-col">
+            <label htmlFor="shkolla" className="font-medium text-gray-700">Shkolla:</label>
+
             <input
               type="text"
               value={filters.shkolla}
@@ -128,6 +161,7 @@ function RaportetPorosi() {
               placeholder="Shkolla..."
               className="p-3 border border-gray-300 rounded-md text-sm"
             />
+            </div>
             <div className="flex flex-col gap-1 text-sm">
               <label className="font-medium text-gray-700">Statusi</label>
               <div className="flex gap-3 flex-wrap">
@@ -154,7 +188,6 @@ function RaportetPorosi() {
             </button>
           </div>
         </div>
-
         <h3 className="text-lg font-semibold mb-3">Lista e Porosive:</h3>
         <div className="bg-white rounded-xl shadow-lg overflow-x-auto">
           {loading ? (
@@ -186,11 +219,11 @@ function RaportetPorosi() {
                       ${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}
                     `}
                   >
-                    <td className="px-6 py-4">{rec.porosia}</td>
+                    <td className="px-6 py-4">{rec.emri}</td>
                     <td className="px-6 py-4">{rec.sasia}</td>
                     <td className="px-6 py-4">{rec.kompania}</td>
                     <td className="px-6 py-4">{rec.shkolla}</td>
-                    <td className="px-6 py-4">{new Date(rec.data).toLocaleDateString("sq-AL")}</td>
+                    <td className="px-6 py-4">{new Date(rec.dataPorosise).toLocaleDateString("sq-AL")}</td>
                     <td className="px-6 py-4">
                       <span className={`
                         px-3 py-1 rounded-full text-xs font-medium
