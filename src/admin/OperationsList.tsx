@@ -4,6 +4,7 @@ import Swal from "sweetalert2";
 import Sidebar from "../pages/komuna/Sidebar";
 import { BuildingLibraryIcon } from "@heroicons/react/24/outline";
 import axios from "axios";
+import AdminSidebar from "./AdminSidebar";
 
 interface Operation {
   operationId: number;
@@ -136,7 +137,7 @@ console.log("u editua: ", data);
 
   return (
     <div className="flex flex-col md:flex-row min-h-screen bg-gray-50">
-      <Sidebar />
+      <AdminSidebar />
 
       <main className="flex-1 p-4 sm:p-6 md:p-10">
         <div className="max-w-5xl mx-auto">
