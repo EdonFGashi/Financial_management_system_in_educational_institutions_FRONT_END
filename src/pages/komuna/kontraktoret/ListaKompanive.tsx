@@ -7,67 +7,68 @@ import {
   WrenchScrewdriverIcon,
   CalendarDaysIcon,
   PencilSquareIcon,
-  TrashIcon
+  TrashIcon,
+  UserCircleIcon,
+  IdentificationIcon
 } from "@heroicons/react/24/outline";
 import Toast from "../../../components/Toast";
 import Swal from "sweetalert2";
+import axios from "axios";
+import { urlKompania } from "../../../endpoints";
 
 interface Kompania {
   id: number;
   emri: string;
-  lokacioni: string;
+  pronariId: number; // Changed from pronari string
   sherbimi: string;
-  dataKrijimit: string;
+  nrXhirologaris: number;
+  adresaId: number; // Added
+  userId: string; // Added
+  createdAt: string; // Changed from dataKrijimit
+  lokacioni?: string; // Made optional since it might come from a different table
 }
 
 function ListaKompanive() {
   const [kompanite, setKompanite] = useState<Kompania[]>([]);
   const [filters, setFilters] = useState({
     emri: "",
-    lokacioni: "",
+    nrXhirologaris: "", // Changed from lokacioni
     sherbimi: "",
     data: "",
   });
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    // Add mock data
-    const mockKompanite = [
-      {
-        id: 1,
-        emri: "Construction LLC",
-        lokacioni: "Prishtinë",
-        sherbimi: "Materiale shkollore",
-        dataKrijimit: "2025-01-15"
-      },
-      {
-        id: 2,
-        emri: "Tech Solutions",
-        lokacioni: "Prizren",
-        sherbimi: "Dru",
-        dataKrijimit: "2025-02-20"
-      },
-      {
-        id: 3,
-        emri: "School Supplies Co",
-        lokacioni: "Pejë",
-        sherbimi: "Materiale shkollore",
-        dataKrijimit: "2025-03-10"
-      }
-    ];
-    setKompanite(mockKompanite);
+    fetchKompanite();
   }, []);
 
-  const fetchKompanite = () => {
-    const filteredKompanite = kompanite.filter(kompania => {
-      return (
-        (!filters.emri || kompania.emri.toLowerCase().includes(filters.emri.toLowerCase())) &&
-        (!filters.lokacioni || kompania.lokacioni.toLowerCase().includes(filters.lokacioni.toLowerCase())) &&
-        (!filters.sherbimi || kompania.sherbimi.toLowerCase().includes(filters.sherbimi.toLowerCase())) &&
-        (!filters.data || kompania.dataKrijimit.includes(filters.data))
-      );
-    });
-    setKompanite(filteredKompanite);
+  const fetchKompanite = async () => {
+    try {
+      setLoading(true);
+      const params = new URLSearchParams();
+      if (filters.emri) params.append("emri", filters.emri);
+      if (filters.nrXhirologaris) params.append("nrXhirologaris", filters.nrXhirologaris); // Changed from lokacioni
+      if (filters.sherbimi) params.append("sherbimi", filters.sherbimi);
+      if (filters.data) params.append("data", filters.data);
+
+      const response = await axios.get(`${urlKompania}?${params.toString()}`);
+      console.log('API Response:', response); // Debug log
+      console.log('Response Data:', response.data); // Debug log
+      
+      // If the data is nested in a property, adjust accordingly
+      const data = Array.isArray(response.data) ? response.data : response.data.data;
+      setKompanite(data);
+      
+    } catch (error) {
+      console.error("Error fetching kompanite:", error);
+      setToast({
+        message: "Ndodhi një gabim gjatë marrjes së të dhënave",
+        type: "error"
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -96,10 +97,11 @@ function ListaKompanive() {
 
     if (result.isConfirmed) {
       try {
-        // simulim i api
-        setKompanite(prevKompanite => prevKompanite.filter(k => k.id !== id));
+        await axios.delete(`${urlKompania}/${id}`);
         setToast({ message: "Kompania u fshi me sukses!", type: "success" });
+        fetchKompanite(); // Refresh the list
       } catch (error) {
+        console.error("Error deleting kompania:", error);
         setToast({ message: "Veprimi nuk u krye me sukses!", type: "error" });
       }
     }
@@ -142,11 +144,11 @@ function ListaKompanive() {
               className="px-3 py-2 border border-gray-300 rounded-md text-sm"
             />
             <input
-              type="text"
-              name="lokacioni"
-              value={filters.lokacioni}
+              type="number" // Changed from text
+              name="nrXhirologaris" // Changed from lokacioni
+              value={filters.nrXhirologaris}
               onChange={handleInputChange}
-              placeholder="Lokacioni"
+              placeholder="Nr. Xhirologaris"
               className="px-3 py-2 border border-gray-300 rounded-md text-sm"
             />
             <input
@@ -174,64 +176,79 @@ function ListaKompanive() {
         </div>
 
         {/* Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {kompanite.length > 0 ? (
-            kompanite.map((kompania) => (
-              <div key={kompania.id} className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition duration-200">
-                <div className="space-y-4">
-                  {/* Header with title and date */}
-                  <div className="flex justify-between items-start">
-                    <h3 className="text-xl font-bold text-gray-800">{kompania.emri}</h3>
-                    <span className="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-xs font-semibold">
-                      {new Date(kompania.dataKrijimit).toLocaleDateString('sq-AL')}
-                    </span>
-                  </div>
-                  
-                  <div className="border-t pt-4">
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2 text-gray-600">
-                        <MapPinIcon className="h-5 w-5" />
-                        <span>{kompania.lokacioni}</span>
-                      </div>
-                      
-                      <div className="flex items-center gap-2 text-gray-600">
-                        <WrenchScrewdriverIcon className="h-5 w-5" />
-                        <span>{kompania.sherbimi}</span>
-                      </div>
-                      
-                      <div className="flex items-center gap-2 text-gray-600">
-                        <CalendarDaysIcon className="h-5 w-5" />
-                        <span>{new Date(kompania.dataKrijimit).toLocaleDateString('sq-AL')}</span>
+        {loading ? (
+          <div className="flex justify-center items-center h-64">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {kompanite.length > 0 ? (
+              kompanite.map((kompania) => (
+                <div key={kompania.id} className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition duration-200">
+                  <div className="space-y-4">
+                    {/* Header with title and status */}
+                    <div className="flex justify-between items-start">
+                      <h3 className="text-xl font-bold text-gray-800">{kompania.emri}</h3>
+                      <span className="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-xs font-semibold">
+                        {new Date(kompania.createdAt).toLocaleDateString('sq-AL')}
+                      </span>
+                    </div>
+                    
+                    <div className="border-t pt-4">
+                      <div className="grid grid-cols-1 gap-3">
+                        {kompania.pronariId && (
+                          <div className="flex items-center gap-2 text-gray-600">
+                            <UserCircleIcon className="h-5 w-5" />
+                            <span className="text-sm">Pronari ID: {kompania.pronariId}</span>
+                          </div>
+                        )}
+
+                        {kompania.lokacioni && (
+                          <div className="flex items-center gap-2 text-gray-600">
+                            <MapPinIcon className="h-5 w-5" />
+                            <span className="text-sm">{kompania.lokacioni}</span>
+                          </div>
+                        )}
+                        
+                        <div className="flex items-center gap-2 text-gray-600">
+                          <WrenchScrewdriverIcon className="h-5 w-5" />
+                          <span className="text-sm">{kompania.sherbimi}</span>
+                        </div>
+
+                        <div className="flex items-center gap-2 text-gray-600">
+                          <IdentificationIcon className="h-5 w-5" />
+                          <span className="text-sm">Nr. Xhirologaris: {kompania.nrXhirologaris}</span>
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  {/* Actions */}
-                  <div className="flex gap-3 pt-4 border-t">
-                    <Link
-                      to={`/komuna/kompanite/modifiko/${kompania.id}`}
-                      className="flex-1 bg-indigo-500 hover:bg-indigo-600 text-white py-2 rounded-lg text-sm font-semibold transition flex items-center justify-center gap-2"
-                    >
-                      <PencilSquareIcon className="h-4 w-4" />
-                      Modifiko
-                    </Link>
-                    <button
-                      onClick={() => handleFshij(kompania.id)}
-                      className="flex-1 bg-red-500 hover:bg-red-600 text-white py-2 rounded-lg text-sm font-semibold transition flex items-center justify-center gap-2"
-                    >
-                      <TrashIcon className="h-4 w-4" />
-                      Fshij
-                    </button>
+                    {/* Actions */}
+                    <div className="flex gap-3 pt-4 border-t">
+                      <Link
+                        to={`/komuna/kompanite/modifiko/${kompania.id}`}
+                        className="flex-1 bg-indigo-500 hover:bg-indigo-600 text-white py-2 rounded-lg text-sm font-semibold transition flex items-center justify-center gap-2"
+                      >
+                        <PencilSquareIcon className="h-4 w-4" />
+                        Modifiko
+                      </Link>
+                      <button
+                        onClick={() => handleFshij(kompania.id)}
+                        className="flex-1 bg-red-500 hover:bg-red-600 text-white py-2 rounded-lg text-sm font-semibold transition flex items-center justify-center gap-2"
+                      >
+                        <TrashIcon className="h-4 w-4" />
+                        Fshij
+                      </button>
+                    </div>
                   </div>
                 </div>
+              ))
+            ) : (
+              <div className="col-span-full text-center text-gray-500 py-8">
+                Nuk ka të dhëna për t'u shfaqur.
               </div>
-            ))
-          ) : (
-            <div className="col-span-full text-center text-gray-500 py-8">
-              Nuk ka të dhëna për t'u shfaqur.
-            </div>
-          )}
-        </div>
+            )}
+          </div>
+        )}
       </main>
     </div>
   );
