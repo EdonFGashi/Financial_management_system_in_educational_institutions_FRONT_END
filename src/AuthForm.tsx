@@ -71,10 +71,10 @@ function AuthForm(props: authFormProps) {
       <div className="w-full md:w-1/2 flex flex-col justify-center items-center px-10 py-16 bg-white">
         <div className="max-w-md w-full">
           <h1 className="text-4xl font-bold text-indigo-700 mb-4">
-            Regjistrohu
+            Kyçu
           </h1>
           <p className="text-gray-600 mb-8">
-            Krijoni një llogari të re për të vazhduar.
+            Kyçuni në llogarinë tuaj.
           </p>
 
           <Formik
@@ -164,7 +164,7 @@ function AuthForm(props: authFormProps) {
                   type="submit"
                   className="w-full bg-indigo-600 text-white p-3 rounded-lg hover:bg-indigo-700 transition"
                 >
-                  Regjistrohu
+                  Kyçu
                 </button>
               </Form>
             )}
