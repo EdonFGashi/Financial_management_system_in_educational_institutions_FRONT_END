@@ -3,5 +3,6 @@ export const urlKomuna = `${baseURL}/komuna`;
 export const urlShkolla = `${baseURL}/shkolla`;
 export const urlKompania = `${baseURL}/kompania`;
 export const urlAccounts = `http://localhost:5102/api/accounts`;
+export const urlListKomuna = `http://localhost:5102/api/Komuna`;
 export const urlPorosite = `http://localhost:5102/api/porosite`;
 export const urlRaporti = `http://localhost:5102/api/raporti`;

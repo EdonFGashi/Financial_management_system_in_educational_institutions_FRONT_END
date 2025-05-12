@@ -1,5 +1,3 @@
-import { StringLiteral } from "typescript";
-
 export interface claim {
   name: string;
   value: string;
@@ -10,16 +8,36 @@ export interface userCredentials {
   password: string;
 }
 
-export interface userRegisterCredentials {
-  organisationName: string;
-  role: string;
+export interface userRegisterCredentialsKomuna {
   email: string;
   password: string;
-  confirmPassword: string;
+  role: "Komunë";
+  qyteti: string;
+  nrPopullsis?: number | null;
+  buxhetiAktual?: number | null;
+  ditaNdarjesAuto?: boolean;
 }
 
+export interface userRegisterCredentialsShkolla {
+  email: string;
+  password: string;
+  role: "Shkolla";
+  shkollaName: string;
+  komunaId: string;
+  shkollaStreet: string;
+  drejtori: {
+    personalNumber: string;
+    name: string;
+    surname: string;
+    street: string;
+  };
+}
 
-export interface authenticationResponse{
+export type userRegisterCredentials =
+  | userRegisterCredentialsKomuna
+  | userRegisterCredentialsShkolla;
+
+export interface authenticationResponse {
   token: string;
   expiration: Date;
 }

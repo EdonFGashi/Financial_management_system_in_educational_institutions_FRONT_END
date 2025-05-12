@@ -1,9 +1,12 @@
-import axios from "axios";
+import axiosInstance from "./api/axiosInstance"; 
 import { urlAccounts } from "./endpoints";
-import { authenticationResponse, userCredentials, userRegisterCredentials } from "./auth/auth.models";
+import {
+  authenticationResponse,
+  userRegisterCredentials,
+  userRegisterCredentialsKomuna,
+  userRegisterCredentialsShkolla,
+} from "./auth/auth.models";
 import { useContext, useState } from "react";
-import AuthForm from "./AuthForm";
-// import { getClaims, saveToken } from "./handleJWT";
 import AuthenticationContext from "./auth/AuthenticationContext";
 import { useNavigate } from "react-router-dom";
 import { getClaims, saveToken } from "./auth/handleJWT";
@@ -14,32 +17,80 @@ export default function Register() {
   const { update } = useContext(AuthenticationContext);
   const navigate = useNavigate();
 
-  async function register(registerCredentials: userRegisterCredentials) {
+  async function register(values: userRegisterCredentials) {
+    console.log("Submitted values:", values);
     try {
       setErrors([]);
-      console.log(registerCredentials);
-      const response = await axios.post<authenticationResponse>(
-        `${urlAccounts}/create`,
-        registerCredentials
-      );
-      saveToken(response.data);
-      update(getClaims());
-      navigate("/");
-      console.log(response);
+      let response;
+
+      if (values.role === "Komunë") {
+        console.log("Registering a Komunë");
+        const dto: userRegisterCredentialsKomuna = {
+          email: values.email,
+          password: values.password,
+          role: values.role,
+          qyteti: values.qyteti,
+          nrPopullsis: values.nrPopullsis ?? 0,
+          buxhetiAktual: values.buxhetiAktual ?? 0,
+          ditaNdarjesAuto: false,
+        };
+        response = await axiosInstance.post(`${urlAccounts}/register-komuna`, dto);
+      } else if (values.role === "Shkolla") {
+        const dto: userRegisterCredentialsShkolla = {
+          email: values.email,
+          password: values.password,
+          role: values.role,
+          shkollaName: values.shkollaName,
+          komunaId: values.komunaId,
+          shkollaStreet: values.shkollaStreet,
+          drejtori: {
+            personalNumber: values.drejtori.personalNumber,
+            name: values.drejtori.name,
+            surname: values.drejtori.surname,
+            street: values.drejtori.street,
+          },
+        };
+        response = await axiosInstance.post(`${urlAccounts}/register-shkolla`, dto);
+      }
+
+      if (response) {
+        saveToken(response.data);
+        update(getClaims());
+        navigate("/");
+      }
     } catch (error: any) {
-      if (error.response && error.response.data) {
+      if (error.response?.data) {
         setErrors(error.response.data);
       } else {
         setErrors(["Unknown error occurred."]);
       }
     }
   }
-  return ( 
+
+  return (
     <>
       <AuthRegister
-        model={{ email: "", password: "" , organisationName: "", confirmPassword: "", role: ""}}
-        onSubmit={async (values) => await register(values)}
-      />
+  model={{
+    email: "",
+    password: "",
+    confirmPassword: "",
+    role: "Komunë",
+    qyteti: "",
+    nrPopullsis: null,
+    buxhetiAktual: null,
+    ditaNdarjesAuto: false,
+    shkollaName: "",
+    komunaId: "",
+    shkollaStreet: "",
+    drejtori: {
+      personalNumber: "",
+      name: "",
+      surname: "",
+      street: "",
+    },
+  } as userRegisterCredentials}
+  onSubmit={register}
+/>
     </>
   );
 }

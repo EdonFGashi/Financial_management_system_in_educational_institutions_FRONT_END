@@ -183,7 +183,7 @@ const routes = [
   {
     path: "/perdoruesit",
     component: UsersManagement,
-    allowedRoles: ["admin", "komune", "shkolle", "kompani"],
+    allowedRoles: ["SuperAdmin","admin", "komune", "shkolle", "kompani"],
   },
   {
     path: "/operations",
@@ -200,45 +200,45 @@ const routes = [
   { 
     path: "/komuna/shkolla/listashkollave",
     component: ListaShkollave,
-    allowedRoles: ["admin", "komune", "shkolle", "kompani"]
+    allowedRoles: ["SuperAdmin","admin", "komune", "shkolle", "kompani"]
   },
   { 
     path: "/komuna/shto-shkolle",
     component: ShtoShkolle,
-    allowedRoles: ["admin", "komune", "shkolle", "kompani"]
+    allowedRoles: ["SuperAdmin","admin", "komune", "shkolle", "kompani"]
   },
 
   {
     path: "/komuna/dashboard",
     component: KomunaDashboard,
-    allowedRoles: ["admin", "komune", "shkolle", "kompani"],
+    allowedRoles: ["SuperAdmin","admin", "komune", "shkolle", "kompani"],
   },
   {
     path: "/komuna/porosite/lista",
     component: ListaPorosive,
-    allowedRoles: ["admin", "komune", "shkolle", "kompani"],
+    allowedRoles: ["SuperAdmin","admin", "komune", "shkolle", "kompani"],
   },
   {
     path: "/komuna/porosite/raporte",
     component: RaportetPorosi,
-    allowedRoles: ["admin", "komune", "shkolle", "kompani"],
+    allowedRoles: ["SuperAdmin","admin", "komune", "shkolle", "kompani"],
   },
   {
   path: "/komuna/buxheti/historiku",
   component: BuxhetiHistoriku,
-  allowedRoles: ["admin", "komune", "shkolle", "kompani"]
+  allowedRoles: ["SuperAdmin","admin", "komune", "shkolle", "kompani"]
   },
 
   { 
     path: "/komuna/buxheti",
     component: NdarjaBuxhetit,
-    allowedRoles: ["admin", "komune", "shkolle", "kompani"]
+    allowedRoles: ["SuperAdmin","admin", "komune", "shkolle", "kompani"]
   },
 
   {
   path: "/komuna/kompanite",
   component: KomunaListaKompanive,
-  allowedRoles: ["admin", "komune", "shkolle", "kompani"],
+  allowedRoles: ["SuperAdmin","admin", "komune", "shkolle", "kompani"],
 },
 
 
@@ -246,7 +246,7 @@ const routes = [
   {
     path: "/shkolla/dashboard",
     component: ShkollaDashboard,
-    allowedRoles: ["admin", "komune", "shkolle", "kompani"],
+    allowedRoles: ["SuperAdmin","admin", "komune", "shkolle", "kompani"],
   },
   {
     path: "/shkolla/inventari",
@@ -256,22 +256,22 @@ const routes = [
   {
     path: "/shkolla/porosite/market",
     component: Market,
-    allowedRoles: ["admin", "komune", "shkolle", "kompani"],
+    allowedRoles: ["SuperAdmin","admin", "komune", "shkolle", "kompani"],
   },
   {
     path: "/shkolla/porosite/shporta",
     component: Shporta,
-    allowedRoles: ["admin", "komune", "shkolle", "kompani"],
+    allowedRoles: ["SuperAdmin","admin", "komune", "shkolle", "kompani"],
   },
   {
     path: "/shkolla/porosite/historiku",
     component: Historiku,
-    allowedRoles: ["admin", "komune", "shkolle", "kompani"],
+    allowedRoles: ["SuperAdmin","admin", "komune", "shkolle", "kompani"],
   },
   {
     path: "/shkolla/stafi/menaxhimi",
     component: StafiShkolles,
-    allowedRoles: ["admin", "komune", "shkolle", "kompani"],
+    allowedRoles: ["SuperAdmin","admin", "komune", "shkolle", "kompani"],
   },
   {
     path: "/shkolla/stafi/oret-shtese",
@@ -289,11 +289,11 @@ const routes = [
   {
     path: "/kompania/dashboard",
     component: KompaniaDashboard,
-    allowedRoles: ["admin", "komune", "shkolle", "kompani"],
+    allowedRoles: ["SuperAdmin","admin", "komune", "shkolle", "kompani"],
   },
-  { path: "/kompania/regjistri", component: RegjistriProdukteve, allowedRoles: ["admin", "komune", "shkolle", "kompani"], },
-  { path: "/kompania/porosite/lista", component: ListaPorosiveKompani, allowedRoles: ["admin", "komune", "shkolle", "kompani"],},
-  { path: "/kompania/porosite/raporte", component: RaportiPorosiveKompani, allowedRoles: ["admin", "komune", "shkolle", "kompani"], },
+  { path: "/kompania/regjistri", component: RegjistriProdukteve, allowedRoles: ["SuperAdmin","admin", "komune", "shkolle", "kompani"], },
+  { path: "/kompania/porosite/lista", component: ListaPorosiveKompani, allowedRoles: ["SuperAdmin","admin", "komune", "shkolle", "kompani"],},
+  { path: "/kompania/porosite/raporte", component: RaportiPorosiveKompani, allowedRoles: ["SuperAdmin","admin", "komune", "shkolle", "kompani"], },
     
 
   { path: "*", component: RedirectToLandingPage },

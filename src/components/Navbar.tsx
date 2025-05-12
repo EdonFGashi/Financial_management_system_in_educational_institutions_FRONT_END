@@ -6,6 +6,7 @@ import { logout } from "../auth/handleJWT";
 import { useContext } from "react";
 import AuthenticationContext from "../auth/AuthenticationContext";
 import Swal from 'sweetalert2';
+import { Label } from "@headlessui/react";
 
 function Navbar() {
   const location = useLocation();
@@ -45,10 +46,11 @@ function Navbar() {
   ];
 
   const authorizedLinks = [
-    { to: "/komuna/dashboard", label: "Komuna" , roles: ["admin", "komune"]},
-    { to: "/shkolla/dashboard", label: "Shkolla" , roles: ["admin", "shkolle"]},
-    { to: "/kompania/dashboard", label: "Kompanite" , roles: ["admin", "kompani"]},
-    { to: "/perdoruesit", label: "Perdoruesit" ,  roles: ["admin"]}
+    {to: "/register", label: "Regjistro", roles:["SuperAdmin","admin","kompani"]},
+    { to: "/komuna/dashboard", label: "Komuna" , roles: ["SuperAdmin","admin", "komun"]},
+    { to: "/shkolla/dashboard", label: "Shkolla" , roles: ["SuperAdmin","admin", "shkoll"]},
+    { to: "/kompania/dashboard", label: "Kompanite" , roles: ["SuperAdmin","admin", "kompani"]},
+    { to: "/perdoruesit", label: "Perdoruesit" ,  roles: ["SuperAdmin","admin"]}
   ];
 
 
