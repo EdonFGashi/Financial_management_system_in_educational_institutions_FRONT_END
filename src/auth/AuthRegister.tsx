@@ -5,6 +5,8 @@ import * as Yup from "yup";
 import * as FiIcons from "react-icons/fi";
 import { userRegisterCredentialsShkolla, userRegisterCredentialsKomuna } from "./auth.models";
 import { useKomunaOptions } from "../hooks/useKomunaOptions";
+import { fetchPersonByNrPersonal } from "../hooks/grabPersonDetails";
+
 
 
 const FiUser = FiIcons.FiUser as unknown as React.FC<React.SVGProps<SVGSVGElement>>;
@@ -25,9 +27,9 @@ type FormValues = {
   ditaNdarjesAuto?: boolean;
 
   // Optional for Shkollë
-  shkollaName?: string;
+  EmriShkolles?: string;
   komunaId?: string;
-  shkollaStreet?: string;
+  ShkollaRruga?: string;
   drejtori?: {
     personalNumber?: string;
     name?: string;
@@ -38,13 +40,15 @@ type FormValues = {
 
 
 function AuthRegister(props: authFormProps) {
+  const [drejtorFetched, setDrejtorFetched] = useState(false);
+  const [loadingDrejtor, setLoadingDrejtor] = useState(false);
   const komunaOptions = useKomunaOptions();
   const [strength, setStrength] = useState(0);
   const [animatedText, setAnimatedText] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
   const fullText = "Krijoni një llogari për të menaxhuar financat lehtësisht.";
 
-  const roles = ["admin", "komune", "shkolle", "kompani"];
+  const roles = ["Admin", "Komunë", "Shkollë"];
 
   useEffect(() => {
     let i = 0;
@@ -87,13 +91,13 @@ function AuthRegister(props: authFormProps) {
     qyteti: Yup.string().when("role", ([role], schema) =>
       role === "Komunë" ? schema.required("Emri Komunës është i detyrueshëm") : schema
     ),
-    shkollaName: Yup.string().when("role", ([role], schema) =>
+    EmriShkolles: Yup.string().when("role", ([role], schema) =>
       role === "Shkollë" ? schema.required("Emri Shkollës është i detyrueshëm") : schema
     ),
     komunaId: Yup.string().when("role", ([role], schema) =>
       role === "Shkollë" ? schema.required("Komuna duhet të zgjidhet") : schema
     ),
-    shkollaStreet: Yup.string().when("role", ([role], schema) =>
+    ShkollaRruga: Yup.string().when("role", ([role], schema) =>
       role === "Shkollë" ? schema.required("Rruga e shkollës është e detyrueshme") : schema
     ),
     drejtori: Yup.object({
@@ -139,9 +143,9 @@ function AuthRegister(props: authFormProps) {
     nrPopullsis: null,
     buxhetiAktual: null,
     ditaNdarjesAuto: false,
-    shkollaName: "",
+    EmriShkolles: "",
     komunaId: "",
-    shkollaStreet: "",
+    ShkollaRruga: "",
     drejtori: {
       personalNumber: "",
       name: "",
@@ -162,7 +166,7 @@ function AuthRegister(props: authFormProps) {
 >
 
 
-            {({ values, handleChange, handleBlur }) => (
+            {({ values, handleChange, handleBlur, setFieldValue }) => (
               <Form className="space-y-5">
 
                 
@@ -246,9 +250,9 @@ function AuthRegister(props: authFormProps) {
                     <>
                   <div className="relative">
                   <FiBook className="w-5 h-5 text-gray-400 absolute left-3 top-3.5" />
-                  <Field name="shkollaName" placeholder="Emri i Shkollës" className="w-full p-3 pl-10 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  <Field name="EmriShkolles" placeholder="Emri i Shkollës" className="w-full p-3 pl-10 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   />
-                  <ErrorMessage name="shkollaName" component="p" className="text-red-500 text-sm mt-1" />
+                  <ErrorMessage name="EmriShkolles" component="p" className="text-red-500 text-sm mt-1" />
                   </div>
                   <div className="relative">
                   <FiHouse className="w-5 h-5 text-gray-400 absolute left-3 top-3.5" />
@@ -262,33 +266,79 @@ function AuthRegister(props: authFormProps) {
                   </div>
                   <div className="relative">
                   <FiRoad className="w-5 h-5 text-gray-400 absolute left-3 top-3.5" />
-                  <Field name="shkollaStreet" placeholder="Rruga e Shkollës" className="w-full p-3 pl-10 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"/>
-                  <ErrorMessage name="shkollaStreet" component="p" className="text-red-500 text-sm mt-1" />
+                  <Field name="ShkollaRruga" placeholder="Rruga e Shkollës" className="w-full p-3 pl-10 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"/>
+                  <ErrorMessage name="ShkollaRruga" component="p" className="text-red-500 text-sm mt-1" />
                   </div>
 
                    {/* Drejtori Info */}
                     <div className="relative">
-                    <FiLicense className="w-5 h-5 text-gray-400 absolute left-3 top-3.5" />
-                    <Field name="drejtori.personalNumber" placeholder="Nr Personal Drejtorit" className="w-full p-3 pl-10 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-                    <ErrorMessage name="drejtori.personalNumber" component="p" className="text-red-500 text-sm mt-1" />
+                      <FiLicense className="w-5 h-5 text-gray-400 absolute left-3 top-3.5" />
+                      <Field
+                        name="drejtori.personalNumber"
+                        placeholder="Nr Personal Drejtorit"
+                        className="w-full p-3 pl-10 rounded-lg border border-gray-300"
+                        onBlur={async (e: React.FocusEvent<HTMLInputElement>) => {
+                          const nr = e.target.value;
+                          if (!nr) return;
+                          setLoadingDrejtor(true);
+                            const person = await fetchPersonByNrPersonal(nr);
+                            if (person) {
+                              setFieldValue("drejtori.name", person.emri);
+                              setFieldValue("drejtori.surname", person.mbiemri);
+                              setFieldValue("drejtori.street", person.adresa?.rruga || "");
+
+                              setDrejtorFetched(true);
+                            } else {
+                              setFieldValue("drejtori.name", "");
+                              setFieldValue("drejtori.surname", "");
+                              setFieldValue("drejtori.street", "");
+                              setDrejtorFetched(false);
+                            }
+                            setLoadingDrejtor(false);
+                        }}
+                      />
+                      <ErrorMessage name="drejtori.personalNumber" component="p" className="text-red-500 text-sm mt-1" />
                     </div>
-                    <div className="relative">
-                      <FiUser className="w-5 h-5 text-gray-400 absolute left-3 top-3.5" />
-                      <Field name="drejtori.name" placeholder="Emri i Drejtorit" className="w-full p-3 pl-10 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-                      <ErrorMessage name="drejtori.name" component="p" className="text-red-500 text-sm mt-1" />
-                    </div>
-                    <div className="relative">
-                      <FiUser className="w-5 h-5 text-gray-400 absolute left-3 top-3.5" />
-                      <Field name="drejtori.surname" placeholder="Mbiemri i Drejtorit" className="w-full p-3 pl-10 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-                      <ErrorMessage name="drejtori.surname" component="p" className="text-red-500 text-sm mt-1" />
-                    </div>
-                    <div className="relative">
-                      <FiRoad className="w-5 h-5 text-gray-400 absolute left-3 top-3.5" />
-                      <Field name="drejtori.street" placeholder="Rruga e Drejtorit" className="w-full p-3 pl-10 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-                      <ErrorMessage name="drejtori.street" component="p" className="text-red-500 text-sm mt-1" />
-                    </div>
+                    {loadingDrejtor && (
+                      <p className="text-indigo-500 text-sm mt-1">Duke kërkuar drejtorin...</p>
+                    )}
+                    {drejtorFetched && !loadingDrejtor && (
+                        <>
+                          <div className="relative">
+                            <FiUser className="w-5 h-5 text-gray-400 absolute left-3 top-3.5" />
+                            <Field
+                              name="drejtori.name"
+                              placeholder="Emri i Drejtorit"
+                              readOnly
+                              className="w-full p-3 pl-10 rounded-lg border border-gray-300 bg-gray-100 cursor-not-allowed"
+                            />
+                            <ErrorMessage name="drejtori.name" component="p" className="text-red-500 text-sm mt-1" />
+                          </div>
+                          <div className="relative">
+                            <FiUser className="w-5 h-5 text-gray-400 absolute left-3 top-3.5" />
+                            <Field
+                              name="drejtori.surname"
+                              placeholder="Mbiemri i Drejtorit"
+                              readOnly
+                              className="w-full p-3 pl-10 rounded-lg border border-gray-300 bg-gray-100 cursor-not-allowed"
+                            />
+                            <ErrorMessage name="drejtori.surname" component="p" className="text-red-500 text-sm mt-1" />
+                          </div>
+                          <div className="relative">
+                            <FiRoad className="w-5 h-5 text-gray-400 absolute left-3 top-3.5" />
+                            <Field
+                              name="drejtori.street"
+                              placeholder="Rruga e Drejtorit"
+                              readOnly
+                              className="w-full p-3 pl-10 rounded-lg border border-gray-300 bg-gray-100 cursor-not-allowed"
+                            />
+                            <ErrorMessage name="drejtori.street" component="p" className="text-red-500 text-sm mt-1" />
+                          </div>
+                        </>
+                      )}
+
                   </>
-                          )}
+                )}
 
                 <button
                   type="submit"

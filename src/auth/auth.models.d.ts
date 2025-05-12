@@ -21,16 +21,11 @@ export interface userRegisterCredentialsKomuna {
 export interface userRegisterCredentialsShkolla {
   email: string;
   password: string;
-  role: "Shkolla";
-  shkollaName: string;
+  role: "Shkollë";
+  EmriShkolles: string;
   komunaId: string;
-  shkollaStreet: string;
-  drejtori: {
-    personalNumber: string;
-    name: string;
-    surname: string;
-    street: string;
-  };
+  ShkollaRruga: string;
+  personalNumber: string;
 }
 
 export type userRegisterCredentials =

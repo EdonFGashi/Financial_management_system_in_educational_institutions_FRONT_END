@@ -1,5 +1,5 @@
 import axiosInstance from "./api/axiosInstance"; 
-import { urlAccounts } from "./endpoints";
+import { urlListShkolla, urlListKomuna } from "./endpoints";
 import {
   authenticationResponse,
   userRegisterCredentials,
@@ -34,23 +34,19 @@ export default function Register() {
           buxhetiAktual: values.buxhetiAktual ?? 0,
           ditaNdarjesAuto: false,
         };
-        response = await axiosInstance.post(`${urlAccounts}/register-komuna`, dto);
-      } else if (values.role === "Shkolla") {
-        const dto: userRegisterCredentialsShkolla = {
-          email: values.email,
-          password: values.password,
-          role: values.role,
-          shkollaName: values.shkollaName,
-          komunaId: values.komunaId,
-          shkollaStreet: values.shkollaStreet,
-          drejtori: {
-            personalNumber: values.drejtori.personalNumber,
-            name: values.drejtori.name,
-            surname: values.drejtori.surname,
-            street: values.drejtori.street,
-          },
+        response = await axiosInstance.post(`${urlListKomuna}/register-komuna`, dto);
+      } else if (values.role === "Shkollë") {
+        const dto = {
+          Email: values.email,
+          Password: values.password,
+          EmriShkolles: values.EmriShkolles,
+          NrNxenesve: null,
+          Qyteti: parseInt(values.komunaId), // converting to int as backend expects int
+          DrejtoriNumriPersonal: values.personalNumber,
+          KodiPostal: "", // optional, default to empty
+          ShkollaRruga: values.ShkollaRruga
         };
-        response = await axiosInstance.post(`${urlAccounts}/register-shkolla`, dto);
+        response = await axiosInstance.post(`${urlListShkolla}/register-shkolla`, dto);
       }
 
       if (response) {
@@ -82,12 +78,7 @@ export default function Register() {
     shkollaName: "",
     komunaId: "",
     shkollaStreet: "",
-    drejtori: {
-      personalNumber: "",
-      name: "",
-      surname: "",
-      street: "",
-    },
+    personalNumber: "",
   } as userRegisterCredentials}
   onSubmit={register}
 />

@@ -188,12 +188,12 @@ const routes = [
   {
     path: "/operations",
     component: OperationsList,
-    allowedRoles: ["admin", "komune", "shkolle", "kompani"],
+    allowedRoles: ["SuperAdmin","admin", "komune", "shkolle", "kompani"],
   },
   {
     path: "/rolePermissions",
     component: RolePermissions,
-    allowedRoles: ["admin", "komune", "shkolle", "kompani"],
+    allowedRoles: ["SuperAdmin","admin", "komune", "shkolle", "kompani"],
   },
 
   // Komuna
