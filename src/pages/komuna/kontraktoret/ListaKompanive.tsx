@@ -43,7 +43,7 @@ function ListaKompanive() {
     emri: "",
     nrXhirologaris: "",
     sherbimi: "",
-    data: "",
+    data: ""
   });
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
   const [loading, setLoading] = useState(false);
@@ -71,8 +71,17 @@ function ListaKompanive() {
       if (filters.data) params.append("data", filters.data);
 
       const response = await axios.get(`${urlKompania}?${params.toString()}`);
-      const data = Array.isArray(response.data) ? response.data : response.data.data;
-      setKompanite(data);
+      
+      // Update to handle the new Response<List<KompaniaDto>> structure
+      if (response.data && response.data.data) {
+        setKompanite(response.data.data);
+      } else {
+        setKompanite([]);
+        setToast({
+          message: "Nuk u gjetën të dhëna",
+          type: "error"
+        });
+      }
     } catch (error) {
       console.error("Error fetching kompanite:", error);
       setToast({
@@ -88,12 +97,25 @@ function ListaKompanive() {
     const { name, value } = e.target;
     setFilters(prev => ({
       ...prev,
-      [name]: value,
+      [name]: name === 'nrXhirologaris' ? (value === '' ? '' : value) : value
     }));
   };
 
-  const handleFilter = () => {
-    fetchKompanite();
+  const handleFilter = async () => {
+    const cardsContainer = document.querySelector('#cardsContainer') as HTMLDivElement;
+    if (cardsContainer) {
+      // First fade out existing cards
+      const existingCards = cardsContainer.querySelectorAll('.card-appear-cascade');
+      existingCards.forEach((card, i) => {
+        (card as HTMLElement).style.animation = `fadeOutSlide 0.3s ${i * 50}ms forwards`;
+      });
+
+      // Wait for fadeout
+      await new Promise(resolve => setTimeout(resolve, existingCards.length * 50 + 300));
+      
+      // Fetch new data
+      await fetchKompanite();
+    }
   };
 
   const handleFshij = async (id: number) => {
@@ -151,19 +173,32 @@ function ListaKompanive() {
     e.preventDefault();
     if (!selectedKompania) return;
   
-    try {
-      const payload = {
-        ...formData,
-        nrXhirologaris: Number(formData.nrXhirologaris)
-      };
+    const result = await Swal.fire({
+      title: 'A jeni i sigurt?',
+      text: 'Dëshironi të modifikoni të dhënat e kompanisë?',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#4f46e5',
+      cancelButtonColor: '#6b7280',
+      confirmButtonText: 'Po, Modifiko',
+      cancelButtonText: 'Anulo'
+    });
   
-      const response = await axios.put(`${urlKompania}/${selectedKompania.id}`, payload);
-      setToast({ message: "Kompania u modifikua me sukses!", type: "success" });
-      handleModalClose();
-      fetchKompanite();
-    } catch (error) {
-      console.error("Error updating kompania:", error);
-      setToast({ message: "Ndodhi një gabim gjatë modifikimit!", type: "error" });
+    if (result.isConfirmed) {
+      try {
+        const payload = {
+          ...formData,
+          nrXhirologaris: Number(formData.nrXhirologaris)
+        };
+  
+        await axios.put(`${urlKompania}/${selectedKompania.id}`, payload);
+        setToast({ message: "Kompania u modifikua me sukses!", type: "success" });
+        handleModalClose();
+        fetchKompanite();
+      } catch (error) {
+        console.error("Error updating kompania:", error);
+        setToast({ message: "Ndodhi një gabim gjatë modifikimit!", type: "error" });
+      }
     }
   };
 
@@ -227,8 +262,9 @@ function ListaKompanive() {
               className="px-3 py-2 border border-gray-300 rounded-md text-sm"
             />
             <button
+              id="filterButton"
               onClick={handleFilter}
-              className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition"
+              className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition transform active:scale-95"
             >
               Filtro
             </button>
@@ -241,10 +277,24 @@ function ListaKompanive() {
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div 
+            id="cardsContainer" 
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+            style={{ 
+              animation: 'fadeInSlide 0.3s ease-out',
+              transformOrigin: 'center'
+            }}
+          >
             {kompanite.length > 0 ? (
-              kompanite.map((kompania) => (
-                <div key={kompania.id} className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition duration-200">
+              kompanite.map((kompania, index) => (
+                <div 
+                  key={kompania.id} 
+                  className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition duration-200 card-appear-cascade"
+                  style={{ 
+                    animationDelay: `${index * 100}ms`,
+                    animation: 'cardAppear 0.5s cubic-bezier(0.23, 1, 0.32, 1) forwards'
+                  }}
+                >
                   <div className="space-y-4">
                     {/* Header with title and status */}
                     <div className="flex justify-between items-start">
@@ -337,6 +387,48 @@ function ListaKompanive() {
                       opacity: 1;
                       transform: scale(1) translateY(0);
                     }
+                  }
+                  @keyframes fadeOutSlide {
+                    0% {
+                      opacity: 1;
+                      transform: translateY(0) scale(1);
+                    }
+                    100% {
+                      opacity: 0;
+                      transform: translateY(-20px) scale(0.95);
+                    }
+                  }
+              
+                  @keyframes fadeInSlide {
+                    0% {
+                      opacity: 0;
+                      transform: translateY(20px) scale(0.95);
+                    }
+                    100% {
+                      opacity: 1;
+                      transform: translateY(0) scale(1);
+                    }
+                  }
+                  @keyframes cardAppear {
+                    0% {
+                      opacity: 0;
+                      transform: scale(0.7) translateY(30px);
+                    }
+                    70% {
+                      transform: scale(1.05) translateY(-5px);
+                    }
+                    100% {
+                      opacity: 1;
+                      transform: scale(1) translateY(0);
+                    }
+                  }
+              
+                  .card-appear {
+                    animation: cardAppear 0.5s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+                  }
+              
+                  .card-appear-cascade {
+                    opacity: 0;
                   }
                 `}
               </style>
