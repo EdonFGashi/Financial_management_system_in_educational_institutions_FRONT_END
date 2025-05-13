@@ -73,7 +73,7 @@ function KomunaDashboard() {
               </div>
             </Link>
 
-            <Link to="/komuna/kontraktoret">
+            <Link to="/komuna/kompanite">
               <div className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-md transition">
                 <h3 className="text-lg font-semibold text-gray-800 mb-1">Kontraktorët</h3>
                 <p className="text-sm text-gray-500">

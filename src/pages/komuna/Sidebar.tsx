@@ -178,8 +178,7 @@ function Sidebar() {
                     financatHovered ? "rotate-180" : "rotate-0"
                   }`}
                 />
-              </div>
-              <div
+              </div>              <div
                 className={`overflow-hidden transition-all duration-300 ${
                   financatHovered ? "max-h-40 opacity-100" : "max-h-0 opacity-0"
                 } ml-4 mt-1 space-y-1`}
@@ -240,25 +239,15 @@ function Sidebar() {
                 >
                   <DocumentDuplicateIcon className="w-4 h-4" /> Shto Kontraktor
                 </Link>
-              </div>
-            </div>
-
-            <Authorized
-              allowedRoles={["admin"]}
-              authorized={
-                <>
-                  <Link
-                    to="/komuna/financat"
-                    className={`flex items-center gap-3 px-4 py-2 rounded-lg transition ${isActive(
-                      "/komuna/financat"
-                    )}`}
-                  >
-                    <BanknotesIcon className="w-5 h-5" />
-                    <span className="text-sm">Financat</span>
-                  </Link>
-                </>
-              }
-            />
+              </div>            </div>            <Link
+              to="/komuna/financat"
+              className={`flex items-center gap-3 px-4 py-2 rounded-lg transition ${isActive(
+                "/komuna/financat"
+              )}`}
+            >
+              <DocumentDuplicateIcon className="w-5 h-5" />
+              <span className="text-sm">Ndalesat e Punëtorëve</span>
+            </Link>
           </nav>
         </div>
 

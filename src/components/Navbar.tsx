@@ -47,7 +47,7 @@ function Navbar() {
 
   const authorizedLinks = [
     {to: "/register", label: "Regjistro", roles:["SuperAdmin","admin","kompani"]},
-    { to: "/komuna/dashboard", label: "Komuna" , roles: ["SuperAdmin","admin", "komun"]},
+    { to: "/komuna/dashboard", label: "Komuna" , roles: ["SuperAdmin","admin", "komun", "KomunÃ«"]},
     { to: "/shkolla/dashboard", label: "Shkolla" , roles: ["SuperAdmin","admin", "shkoll"]},
     { to: "/kompania/dashboard", label: "Kompanite" , roles: ["SuperAdmin","admin", "kompani"]},
     { to: "/perdoruesit", label: "Perdoruesit" ,  roles: ["SuperAdmin","admin"]}

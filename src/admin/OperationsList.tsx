@@ -136,36 +136,42 @@ console.log("u editua: ", data);
   };
 
   return (
-    <div className="flex flex-col md:flex-row min-h-screen bg-gray-50">
+    <div className="flex flex-col md:flex-row min-h-screen bg-gray-100">
       <AdminSidebar />
 
-      <main className="flex-1 p-4 sm:p-6 md:p-10">
-        <div className="max-w-5xl mx-auto">
-          <h2 className="text-2xl sm:text-3xl font-bold flex items-center gap-2 mb-8">
-            <BuildingLibraryIcon className="w-7 h-7 text-indigo-600" />
-            Operations List
-          </h2>
+      <main className="flex-1 p-4 sm:p-6 md:p-8">
+        <div className="max-w-7xl mx-auto">
+          {/* Header Section */}
+          <div className="mb-8 bg-white rounded-lg shadow-sm p-6">
+            <h2 className="text-2xl sm:text-3xl font-bold flex items-center gap-3 text-gray-800">
+              <BuildingLibraryIcon className="w-8 h-8 text-indigo-600" />
+              Operations Management
+            </h2>
+            <p className="mt-2 text-gray-600">Configure and manage API operations and endpoints</p>
+          </div>
 
           {/* Filter Form */}
-          <div className="bg-white rounded-xl shadow-lg p-6 mb-10">
+          <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+            <h3 className="text-lg font-semibold mb-4 text-gray-700">Filter Operations</h3>
             <Formik initialValues={filterValues} onSubmit={handleFilter}>
-              <Form className="flex flex-wrap gap-4 items-end">
+              <Form className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
                 <div>
-                  <label className="block text-sm font-medium mb-1">Name</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Name</label>
                   <Field
                     name="name"
                     type="text"
-                    className="p-2 border rounded-md"
+                    className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    placeholder="Search by name..."
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">Verb</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">HTTP Method</label>
                   <Field
                     as="select"
                     name="verb"
-                    className="p-2 border rounded-md"
+                    className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                   >
-                    <option value="">All</option>
+                    <option value="">All Methods</option>
                     {methodOptions.map((method) => (
                       <option key={method} value={method}>
                         {method}
@@ -174,29 +180,31 @@ console.log("u editua: ", data);
                   </Field>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">
-                    Resource
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Resource</label>
                   <Field
                     name="resource"
                     type="text"
-                    className="p-2 border rounded-md"
+                    className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    placeholder="Search by resource..."
                   />
                 </div>
                 <div>
                   <button
                     type="submit"
-                    className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700"
+                    className="w-full bg-indigo-600 text-white px-4 py-2.5 rounded-lg hover:bg-indigo-700 transition duration-200 font-medium"
                   >
-                    Filter
+                    Apply Filters
                   </button>
                 </div>
               </Form>
             </Formik>
           </div>
 
-          {/* Add New Operation Form */}
-          <div className="bg-white rounded-xl shadow-lg p-6 mb-10">
+          {/* Add/Edit Form Section */}
+          <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+            <h3 className="text-lg font-semibold mb-4 text-gray-700">
+              {selectedOperation ? "Edit Operation" : "Add New Operation"}
+            </h3>
             <Formik
               enableReinitialize
               initialValues={
@@ -218,36 +226,43 @@ console.log("u editua: ", data);
                 resetForm();
               }}
             >
-              <Form className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium">Name</label>
-                  <Field name="name" className="w-full p-2 border rounded-md" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium">Verb</label>
-                  <Field
-                    as="select"
-                    name="verb"
-                    className="w-full p-2 border rounded-md"
-                  >
-                    {methodOptions.map((method) => (
-                      <option key={method} value={method}>
-                        {method}
-                      </option>
-                    ))}
-                  </Field>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium">Resource</label>
-                  <Field
-                    name="resource"
-                    className="w-full p-2 border rounded-md"
-                  />
+              <Form className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Operation Name</label>
+                    <Field 
+                      name="name" 
+                      className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                      placeholder="Enter operation name..."
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">HTTP Method</label>
+                    <Field
+                      as="select"
+                      name="verb"
+                      className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    >
+                      {methodOptions.map((method) => (
+                        <option key={method} value={method}>
+                          {method}
+                        </option>
+                      ))}
+                    </Field>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Resource Path</label>
+                    <Field
+                      name="resource"
+                      className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                      placeholder="Enter resource path..."
+                    />
+                  </div>
                 </div>
                 <div className="flex gap-4">
                   <button
                     type="submit"
-                    className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700"
+                    className="px-6 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition duration-200 font-medium"
                   >
                     {selectedOperation ? "Update Operation" : "Add Operation"}
                   </button>
@@ -255,7 +270,7 @@ console.log("u editua: ", data);
                     <button
                       type="button"
                       onClick={() => setSelectedOperation(null)}
-                      className="bg-gray-400 text-white px-4 py-2 rounded-md hover:bg-gray-500"
+                      className="px-6 py-2.5 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition duration-200 font-medium"
                     >
                       Cancel
                     </button>
@@ -265,48 +280,52 @@ console.log("u editua: ", data);
             </Formik>
           </div>
 
-          {/* Table */}
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <table className="min-w-full table-auto">
-              <thead>
-                <tr key={1}>
-                  <th className="px-4 py-2 border">Name</th>
-                  <th className="px-4 py-2 border">Verb</th>
-                  <th className="px-4 py-2 border">Resource</th>
-                  <th className="px-4 py-2 border">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {(filteredOperations.length > 0
-                  ? filteredOperations
-                  : operations
-                ).map((op) => {
-                  console.log("Operation item:", op.operationId);
-                  return (
-                    <tr key={`${op.operationId}-${op.name}`}>
-                      <td className="px-4 py-2 border">{op.name}</td>
-                      <td className="px-4 py-2 border">{op.verb}</td>
-                      <td className="px-4 py-2 border">{op.resource}</td>
-                      <td className="px-4 py-2 border text-center">
+          {/* Table Section */}
+          <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Method</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Resource</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {(filteredOperations.length > 0 ? filteredOperations : operations).map((op) => (
+                    <tr key={`${op.operationId}-${op.name}`} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{op.name}</td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full
+                          ${op.verb === 'GET' ? 'bg-blue-100 text-blue-800' : 
+                            op.verb === 'POST' ? 'bg-green-100 text-green-800' :
+                            op.verb === 'PUT' ? 'bg-yellow-100 text-yellow-800' :
+                            op.verb === 'DELETE' ? 'bg-red-100 text-red-800' :
+                            'bg-gray-100 text-gray-800'}`}>
+                          {op.verb}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{op.resource}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <button
                           onClick={() => handleEdit(op)}
-                          className="bg-yellow-500 text-white px-4 py-1 rounded-md mr-2"
+                          className="text-indigo-600 hover:text-indigo-900 mr-4"
                         >
                           Edit
                         </button>
-
                         <button
                           onClick={() => handleDelete(op.operationId)}
-                          className="bg-red-500 text-white px-4 py-1 rounded-md"
+                          className="text-red-600 hover:text-red-900"
                         >
                           Delete
                         </button>
                       </td>
                     </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </main>
