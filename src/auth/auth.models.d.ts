@@ -1,4 +1,3 @@
-import internal from "stream";
 
 export interface claim {
   name: string;
@@ -8,6 +7,12 @@ export interface claim {
 export interface userCredentials {
   email: string;
   password: string;
+}
+
+export interface userRegisterCredentialsAdmin {
+  email: string;
+  password: string;
+  role: "Admin";
 }
 
 export interface userRegisterCredentialsKomuna {
@@ -44,7 +49,8 @@ export interface userRegisterCredentialsKompania{
 
 export type userRegisterCredentials =
   | userRegisterCredentialsKomuna
-  | userRegisterCredentialsShkolla;
+  | userRegisterCredentialsShkolla
+  | userRegisterCredentialsAdmin;
 
 export interface authenticationResponse {
   token: string;

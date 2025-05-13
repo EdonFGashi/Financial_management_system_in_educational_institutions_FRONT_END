@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { Formik, Form, Field, ErrorMessage, FormikHelpers } from "formik";
 import * as Yup from "yup";
@@ -40,6 +41,7 @@ type FormValues = {
 
 
 function RegisterKompani(props: authFormProps) {
+  const navigate = useNavigate();
   const [drejtorFetched, setDrejtorFetched] = useState(false);
   const [loadingDrejtor, setLoadingDrejtor] = useState(false);
   const komunaOptions = useKomunaOptions();
@@ -47,8 +49,6 @@ function RegisterKompani(props: authFormProps) {
   const [animatedText, setAnimatedText] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
   const fullText = "Krijoni një llogari për të menaxhuar Kompani.";
-
-  const roles = ["Admin", "Komunë", "Shkollë"];
 
   useEffect(() => {
     let i = 0;
@@ -156,12 +156,16 @@ function RegisterKompani(props: authFormProps) {
   validationSchema={validationSchema}
   onSubmit={(values, actions) => {
     const { confirmPassword, ...cleaned } = values;
-  
-    props.onSubmit(
+  try {
+      props.onSubmit(
       cleaned as userRegisterCredentialsKompania,
       actions as FormikHelpers<userRegisterCredentialsKompania>
     );
-    
+    navigate("/signin");
+
+  } catch (error) {
+    console.error("Registration failed:", error);
+  }
   }}
 >
 

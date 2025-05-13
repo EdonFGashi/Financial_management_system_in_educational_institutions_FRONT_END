@@ -78,7 +78,7 @@ function AuthForm(props: authFormProps) {
           </p>
 
           <Formik
-            initialValues={{ email: "", password: "" }}
+            initialValues={{ email: "", password: ""}}
             validationSchema={validationSchema}
             onSubmit={props.onSubmit}
           >
