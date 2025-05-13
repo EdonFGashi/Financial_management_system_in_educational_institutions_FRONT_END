@@ -183,7 +183,7 @@ const routes = [
   {
     path: "/perdoruesit",
     component: UsersManagement,
-    allowedRoles: ["SuperAdmin","admin", "komune", "shkolle", "kompani"],
+    allowedRoles: ["SuperAdmin","admin", "komune", "shkolle", "kompani", ],
   },
   {
     path: "/operations",

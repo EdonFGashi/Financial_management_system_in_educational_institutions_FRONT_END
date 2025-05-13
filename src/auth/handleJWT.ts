@@ -6,6 +6,21 @@ const expirationKey = "token-expiration";
 const role = "roleOfUser";
 const email = "emailOfUser";
 
+function base64UrlDecode(base64UrlString: string): string {
+  let base64 = base64UrlString.replace(/-/g, "+").replace(/_/g, "/");
+
+  // Add padding if needed
+  while (base64.length % 4 !== 0) {
+    base64 += "=";
+  }
+  try {
+    return atob(base64);
+  } catch (e) {
+    console.error("Invalid Base64 string:", base64UrlString);
+    throw e;
+  }
+}
+
 export function saveToken(authData: authenticationResponse) {
   localStorage.setItem(tokenKey, authData.token);
   localStorage.setItem(expirationKey, authData.expiration.toString());
@@ -26,14 +41,15 @@ export function getClaims(): claim[] {
     return []; //the token has expired
   }
 
-  // const dataToken = JSON.parse(atob(token.split('.')[1]));
-  // const response: claim[] = [];
-  // for (const property in dataToken){
-  //     response.push({name: property, value: dataToken[property]});
-  // }
+  const parts = token.split(".");
+  if (parts.length !== 3) {
+    console.error("Invalid JWT format");
+    return [];
+  }
 
-  const payload = token.split(".")[1];
-  const decodedPayload = JSON.parse(atob(payload));
+  const payload = parts[1];
+  const decodedPayload = JSON.parse(base64UrlDecode(payload));
+
   const response: claim[] = [];
 
   for (const key in decodedPayload) {

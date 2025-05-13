@@ -1,145 +1,265 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { 
+import {
   BanknotesIcon,
   BuildingLibraryIcon,
   CalendarIcon,
-  ChartBarIcon
+  ChartBarIcon,
 } from "@heroicons/react/24/outline";
 import Sidebar from "../Sidebar";
 import Toast from "../../../components/Toast";
 import Swal from "sweetalert2";
+import axios from "axios";
+import { urlListShkolla } from "../../../endpoints";
+import { StringLiteral } from "@babel/types";
+
+interface SchoolObject {
+  shkollaId: number;
+  emriShkolles: string;
+  nrNxenesve: number;
+  buxhetiAktual: number;
+  buxhetiShfrytezuar: number; // Add this
+  autoNdarja: boolean; // Add this
+  drejtori: string;
+  adresaId: number;
+}
+
+interface Ndarja {
+  shkollaId: number;
+  shuma: number;
+  data: string;
+  shenime: string;
+}
 
 interface School {
-  id: number;
-  emri: string;
+  shkollaId: number;
+  emriShkolles: string;
   nrNxenesve: number;
-  shfrytezimiAktual: number;
-  buxhetiTotal: number;
-  buxhetiAktual: number; // Add this
+  shfrytezimiAktualPerqindje: number;
+  buxhetiAktual: number;
+  buxhetiShfrytezuar: number; // Add this
+  autoNdarja: boolean; // Add this
+  shenime?: string; // Optional field for notes
+  drejtori: string;
+  adresaId: number;
 }
 
 function NdarjaBuxhetit() {
-  const [schools, setSchools] = useState<School[]>([]);
+  const [ndarje, setNdarje] = useState<Ndarja[]>([]);
+  const [schoolRecord, setSchoolRecord] = useState<School[]>([]);
+  const [schools, setSchools] = useState<SchoolObject[]>([]);
   const [totalBudget, setTotalBudget] = useState(10230);
   const [remainingBudget, setRemainingBudget] = useState(542);
   const [selectedMonth, setSelectedMonth] = useState("Qershor 2025");
-  const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
+  const [toast, setToast] = useState<{
+    message: string;
+    type: "success" | "error";
+  } | null>(null);
   const [autoAllocate, setAutoAllocate] = useState(false);
   const [daysInterval, setDaysInterval] = useState("5");
 
   // Add state for allocation input
-  const [allocations, setAllocations] = useState<{ [key: number]: { amount: string; isPercentage: boolean } }>({});
+  const [allocations, setAllocations] = useState<{
+    [key: number]: { amount: string; isPercentage: boolean };
+  }>({});
 
   // Mock data
   useEffect(() => {
-    setSchools([
+    setSchoolRecord([
       {
-        id: 1,
-        emri: "Sami Frasheri",
+        shkollaId: 1,
+        emriShkolles: "Sami Frasheri",
         nrNxenesve: 850,
-        shfrytezimiAktual: 32,
-        buxhetiTotal: 500,
-        buxhetiAktual: 160  // 32% of 500
+        buxhetiShfrytezuar: 500, // 32% of 500
+        shfrytezimiAktualPerqindje: 50,
+        buxhetiAktual: 1000,
+        autoNdarja: false,
+        drejtori: "Drejtori 1",
+        adresaId: 1,
       },
       {
-        id: 2,
-        emri: "Xhevdet Doda",
+        shkollaId: 3,
+        emriShkolles: "Xhevdet Doda",
         nrNxenesve: 720,
-        shfrytezimiAktual: 63,
-        buxhetiTotal: 400,
-        buxhetiAktual: 252  // 63% of 400
-      }
+        buxhetiShfrytezuar: 400, // 32% of 500
+        shfrytezimiAktualPerqindje: 80,
+        buxhetiAktual: 500,
+        autoNdarja: true,
+        drejtori: "Drejtori 1",
+        adresaId: 1,
+      },
     ]);
+    // setNdarje([
+    //   {
+    //     shkollaId: 1,
+    //     shuma: 850,
+    //     data: "25/05/2025",  // 32% of 500
+    //   },
+    //   {
+    //     shkollaId: 3,
+    //     shuma: 1000,
+    //     data: "25/05/2025",  // 32% of 500
+    //   }
+    // ]);
+    loadSchools();
   }, []);
+
+  const loadSchools = async () => {
+    try {
+      const response = await axios.get(`${urlListShkolla}`);
+
+      // Extract the data array from the response
+      const schoolsData = response.data.data;
+
+      // Ensure that schoolsData is an array before calling map
+      if (!Array.isArray(schoolsData)) {
+        console.error("Expected an array, but got:", schoolsData);
+        return;
+      }
+
+      // Mapping the API data to match the School interface
+      const mappedSchools: School[] = schoolsData.map((school) => {
+        const shfrytezimiAktualPerqindje = school.buxhetiAktual
+          ? ((school.buxhetiShfrytezuar / school.buxhetiAktual) * 100).toFixed(
+              2
+            ) // Keeps 2 decimal places
+          : "0.00"; // Default to "0.00" if no data
+
+        return {
+          shkollaId: school.shkollaId,
+          emriShkolles: school.emriShkolles,
+          nrNxenesve: school.nrNxenesve,
+          buxhetiAktual: school.buxhetiAktual,
+          buxhetiShfrytezuar: school.buxhetiShfrytezuar,
+          shfrytezimiAktualPerqindje: parseFloat(shfrytezimiAktualPerqindje),
+          autoNdarja: school.autoNdarja, // Assuming this field exists in your API response
+          drejtori: school.drejtori,
+          adresaId: school.adresaId
+        };
+      });
+
+      // Now we are setting the state with the mapped data
+      setSchoolRecord(mappedSchools);
+
+      console.log("Mapped Schools:", mappedSchools); // To verify the result
+    } catch (error) {
+      console.error("Failed to load schools:", error);
+    }
+  };
+
+  const handleAutoNdarjaChange = (id: number, checked: boolean) => {
+    setSchoolRecord((prev: any[]) =>
+      prev.map((record) =>
+        record.id === id ? { ...record, autoNdarja: checked } : record
+      )
+    );
+  };
 
   // Add handler for allocation type toggle
   const handleAllocationTypeToggle = (schoolId: number) => {
-    setAllocations(prev => ({
+    setAllocations((prev) => ({
       ...prev,
       [schoolId]: {
-        amount: prev[schoolId]?.amount || '',
-        isPercentage: !prev[schoolId]?.isPercentage
-      }
+        amount: prev[schoolId]?.amount || "",
+        isPercentage: !prev[schoolId]?.isPercentage,
+      },
     }));
   };
 
   // Add handler for allocation input change
   const handleAllocationChange = (schoolId: number, value: string) => {
-    setAllocations(prev => ({
+    setAllocations((prev) => ({
       ...prev,
       [schoolId]: {
         ...prev[schoolId],
-        amount: value
-      }
+        amount: value,
+      },
     }));
   };
 
   const handleAllocation = async (schoolId: number) => {
-    const school = schools.find(s => s.id === schoolId);
+    const school = schoolRecord.find((s) => s.shkollaId === schoolId);
     const allocation = allocations[schoolId];
-    
+
     if (!school || !allocation?.amount) {
       setToast({
         message: "Ju lutem vendosni shumën për ndarje",
-        type: "error"
+        type: "error",
       });
       return;
     }
 
     let allocationAmount: number;
     if (allocation.isPercentage) {
-      allocationAmount = (parseFloat(allocation.amount) / 100) * school.buxhetiTotal;
+      allocationAmount =
+        (parseFloat(allocation.amount) / 100) * school.buxhetiAktual;
     } else {
       allocationAmount = parseFloat(allocation.amount);
     }
 
-    if (isNaN(allocationAmount) || allocationAmount <= 0) {
+    if (isNaN(allocationAmount)) {
       setToast({
-        message: "Shuma e ndarjes duhet të jetë pozitive",
-        type: "error"
+        message: "Shuma e ndarjes nuk është e vlefshme",
+        type: "error",
       });
       return;
     }
 
     const result = await Swal.fire({
-      title: 'Konfirmo ndarjen e buxhetit',
-      text: `A jeni të sigurt që dëshironi të ndani ${allocationAmount}€ për shkollën "${school.emri}"?`,
-      icon: 'question',
+      title: "Konfirmo ndarjen e buxhetit",
+      text: `A jeni të sigurt që dëshironi të ${
+        allocationAmount >= 0 ? "ndani" : "zvogëloni"
+      } ${Math.abs(allocationAmount)}€ për shkollën "${school.emriShkolles}"?`,
+      icon: "question",
       showCancelButton: true,
-      confirmButtonColor: '#16a34a',
-      cancelButtonColor: '#dc2626',
-      confirmButtonText: 'Po, ndaj',
-      cancelButtonText: 'Anulo'
+      confirmButtonColor: "#16a34a",
+      cancelButtonColor: "#dc2626",
+      confirmButtonText: "Po, vazhdo",
+      cancelButtonText: "Anulo",
     });
 
     if (result.isConfirmed) {
       try {
-        // Update the school's budget utilization
-        const updatedSchools = schools.map(s => {
-          if (s.id === schoolId) {
-            const newBuxhetiAktual = s.buxhetiAktual + allocationAmount;
-            const newShfrytezimiAktual = (newBuxhetiAktual / s.buxhetiTotal) * 100;
-            return {
-              ...s,
-              buxhetiAktual: newBuxhetiAktual,
-              shfrytezimiAktual: Math.min(Math.round(newShfrytezimiAktual), 100)
-            };
-          }
-          return s;
+        await axios.post("http://localhost:5102/api/NdarjetBuxhetit", {
+          shkollaId: schoolId,
+          shuma: allocationAmount,
+          data: new Date().toISOString(),
+          shenime: school.shenime, // Or pass textarea note if needed
         });
 
-        setSchools(updatedSchools);
-        setAllocations(prev => ({ ...prev, [schoolId]: { amount: '', isPercentage: false } }));
-        
-        setToast({
-          message: "Buxheti u nda me sukses!",
-          type: "success"
+        await axios.put((`${urlListShkolla}/${schoolId}`), {
+          drejtori: school.drejtori,
+          adresaId: school.adresaId,
+          nrNxenesve: school.nrNxenesve,
+          buxhetiAktual: allocationAmount,
+          buxhetiShfrytezuar: school.buxhetiShfrytezuar,
+          autoNdarja: school.autoNdarja
         });
+
+        setToast({
+          message: "Ndarja u realizua me sukses!",
+          type: "success",
+        });
+
+
+        // Clear input
+        setAllocations((prev) => ({
+          ...prev,
+          [schoolId]: { amount: "", isPercentage: false }, // Reset allocation input
+        }));
+        setSchoolRecord((prev) =>
+        prev.map((s) =>
+          s.shkollaId === schoolId ? { ...s, shenime: "" } : s
+        )
+      );
+
+        // Reload schools
+        await loadSchools();
       } catch (error) {
+        console.error(error);
         setToast({
           message: "Ndodhi një gabim gjatë ndarjes së buxhetit",
-          type: "error"
+          type: "error",
         });
       }
     }
@@ -152,7 +272,11 @@ function NdarjaBuxhetit() {
       <main className="flex-1 p-4 sm:p-6 md:p-10">
         {toast && (
           <div className="fixed top-5 right-5 z-50">
-            <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />
+            <Toast
+              message={toast.message}
+              type={toast.type}
+              onClose={() => setToast(null)}
+            />
           </div>
         )}
 
@@ -173,12 +297,18 @@ function NdarjaBuxhetit() {
         {/* Budget Overview Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
           <div className="bg-green-50 p-6 rounded-xl border border-green-200">
-            <h3 className="text-green-700 font-semibold mb-2">Buxheti në dispozicion:</h3>
+            <h3 className="text-green-700 font-semibold mb-2">
+              Buxheti në dispozicion:
+            </h3>
             <p className="text-3xl font-bold text-green-600">{totalBudget} €</p>
           </div>
           <div className="bg-red-50 p-6 rounded-xl border border-red-200">
-            <h3 className="text-red-700 font-semibold mb-2">Buxheti i ndarë:</h3>
-            <p className="text-3xl font-bold text-red-600">{remainingBudget} €</p>
+            <h3 className="text-red-700 font-semibold mb-2">
+              Buxheti i ndarë:
+            </h3>
+            <p className="text-3xl font-bold text-red-600">
+              {remainingBudget} €
+            </p>
           </div>
         </div>
 
@@ -224,7 +354,6 @@ function NdarjaBuxhetit() {
                 onChange={(e) => setDaysInterval(e.target.value)}
                 className="w-full p-2 border border-gray-300 rounded-md text-sm"
                 // disabled={!autoAllocate}
-                
               >
                 <option value="1">1 ditë</option>
                 <option value="2">2 ditë</option>
@@ -246,7 +375,7 @@ function NdarjaBuxhetit() {
                   // Add your filter logic here
                   setToast({
                     message: "Filtrat u aplikuan me sukses",
-                    type: "success"
+                    type: "success",
                   });
                 }}
                 className="w-full p-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition text-sm"
@@ -263,37 +392,60 @@ function NdarjaBuxhetit() {
             <table className="w-full">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold text-gray-900">Shkolla</th>
-                  <th className="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold text-gray-900">Shfrytëzimi i buxhetit</th>
-                  <th className="px-4 sm:px-6 py-3 sm:py-4 text-center text-xs sm:text-sm font-semibold text-gray-900">Shuma e ndarjes</th>
-                  <th className="hidden sm:table-cell px-4 sm:px-6 py-3 sm:py-4 text-center text-xs sm:text-sm font-semibold text-gray-900">Ndarja automatike</th>
-                  <th className="hidden md:table-cell px-4 sm:px-6 py-3 sm:py-4 text-center text-xs sm:text-sm font-semibold text-gray-900">Ndarja e fundit</th>
-                  <th className="px-4 sm:px-6 py-3 sm:py-4 text-center text-xs sm:text-sm font-semibold text-gray-900">Veprime</th>
+                  <th className="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold text-gray-900">
+                    Shkolla
+                  </th>
+                  <th className="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold text-gray-900">
+                    Shfrytëzimi i buxhetit
+                  </th>
+                  <th className="px-4 sm:px-6 py-3 sm:py-4 text-center text-xs sm:text-sm font-semibold text-gray-900">
+                    Shuma e ndarjes
+                  </th>
+                  <th className="hidden sm:table-cell px-2 sm:px-2 py-2 sm:py-2 w-10 text-center text-center text-xs sm:text-sm font-semibold text-gray-900">
+                    Ndarja automatike
+                  </th>
+                  <td className="hidden md:table-cell px-4 sm:px-6 py-3 sm:py-4 w-48 sm:w-64 text-center text-xs sm:text-sm font-semibold text-gray-900">
+                    Shenime
+                  </td>
+
+                  <th className="px-4 sm:px-4 py-3 sm:py-4 text-center text-xs sm:text-sm font-semibold text-gray-900">
+                    Veprime
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {schools.map((school) => (
-                  <tr key={school.id} className="hover:bg-gray-50">
+                {schoolRecord.map((school) => (
+                  <tr key={school.shkollaId} className="hover:bg-gray-50">
                     <td className="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <BuildingLibraryIcon className="h-4 sm:h-5 w-4 sm:w-5 text-gray-400 mr-2 flex-shrink-0" />
-                        <span className="text-sm font-medium">{school.emri}</span>
+                        <span className="text-sm font-medium">
+                          {school.emriShkolles}
+                        </span>
                       </div>
                     </td>
-                    
+
                     <td className="px-4 sm:px-6 py-3 sm:py-4">
                       <div className="space-y-1">
                         <div className="w-full bg-gray-200 rounded-full h-2">
                           <div
                             className={`h-2 rounded-full ${
-                              school.shfrytezimiAktual > 50 ? 'bg-red-600' : 'bg-green-600'
+                              school.shfrytezimiAktualPerqindje <= 40
+                                ? "bg-green-600" // Green for 0% - 40%
+                                : school.shfrytezimiAktualPerqindje <= 60
+                                ? "bg-yellow-500" // Yellow for 41% - 60%
+                                : school.shfrytezimiAktualPerqindje <= 80
+                                ? "bg-orange-500" // Orange for 61% - 80%
+                                : "bg-red-600" // Red for 81% - 100%
                             }`}
-                            style={{ width: `${school.shfrytezimiAktual}%` }}
+                            style={{width: `${Math.min(school.shfrytezimiAktualPerqindje, 100)}%`,
+                            }}
                           ></div>
                         </div>
                         <div className="flex justify-between text-xs sm:text-sm text-gray-500">
-                          <span>{school.buxhetiAktual}€</span>
-                          <span>{school.shfrytezimiAktual}%</span>
+                          <span>Total: {school.buxhetiAktual}€</span>
+                          <span>Shfrytezuar: {school.buxhetiShfrytezuar}€</span>
+                          <span>{school.shfrytezimiAktualPerqindje}%</span>
                         </div>
                       </div>
                     </td>
@@ -302,37 +454,67 @@ function NdarjaBuxhetit() {
                       <div className="flex items-center justify-center gap-1 sm:gap-2">
                         <input
                           type="number"
-                          value={allocations[school.id]?.amount || ''}
-                          onChange={(e) => handleAllocationChange(school.id, e.target.value)}
+                          value={allocations[school.shkollaId]?.amount || ""}
+                          onChange={(e) =>
+                            handleAllocationChange(
+                              school.shkollaId,
+                              e.target.value
+                            )
+                          }
                           className="w-16 sm:w-24 p-1 sm:p-2 border border-gray-300 rounded-md text-xs sm:text-sm text-center"
                           placeholder="Shuma"
                         />
                         <button
-                          onClick={() => handleAllocationTypeToggle(school.id)}
+                          onClick={() =>
+                            handleAllocationTypeToggle(school.shkollaId)
+                          }
                           className="px-1.5 sm:px-2 py-1 text-xs sm:text-sm text-gray-500 hover:text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50"
                         >
-                          {allocations[school.id]?.isPercentage ? '%' : '€'}
+                          {allocations[school.shkollaId]?.isPercentage
+                            ? "%"
+                            : "€"}
                         </button>
                       </div>
                     </td>
 
                     <td className="hidden sm:table-cell px-4 sm:px-6 py-3 sm:py-4">
                       <div className="flex justify-center">
-                        <input 
-                          type="checkbox" 
+                        <input
+                          type="checkbox"
+                          checked={school.autoNdarja}
+                          onChange={(e) =>
+                            handleAutoNdarjaChange(
+                              school.shkollaId,
+                              e.target.checked
+                            )
+                          }
                           className="h-4 w-4 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500"
                         />
                       </div>
                     </td>
 
-                    <td className="hidden md:table-cell px-4 sm:px-6 py-3 sm:py-4 text-center whitespace-nowrap text-xs sm:text-sm text-gray-500">
-                      25/05/2025
+                    <td className="hidden md:table-cell px-2 sm:px-2 py-2 sm:py-2 w-48 sm:w-64 text-center text-xs sm:text-sm">
+                      <textarea
+                        value={school.shenime} // Bind the textarea value to the school note
+                        onChange={(e) => {
+                          const newNote = e.target.value;
+                          setSchoolRecord((prev) =>
+                            prev.map((s) =>
+                              s.shkollaId === school.shkollaId
+                                ? { ...s, shenime: newNote } // Update the note in state
+                                : s
+                            )
+                          );
+                        }}
+                        className="w-full h-16 p-2 border border-gray-300 rounded-md text-sm resize-none"
+                        placeholder="Vërejtje..."
+                      />
                     </td>
 
-                    <td className="px-4 sm:px-6 py-3 sm:py-4">
+                    <td className="px-4 sm:px-2 py-3 sm:py-4">
                       <div className="flex justify-center">
                         <button
-                          onClick={() => handleAllocation(school.id)}
+                          onClick={() => handleAllocation(school.shkollaId)}
                           className="bg-indigo-600 text-white px-2 sm:px-4 py-1 sm:py-2 rounded-md text-xs sm:text-sm hover:bg-indigo-700 transition"
                         >
                           Ndaj
