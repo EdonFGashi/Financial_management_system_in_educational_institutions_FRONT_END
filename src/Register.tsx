@@ -1,5 +1,5 @@
 import axiosInstance from "./api/axiosInstance"; 
-import { urlListShkolla, urlListKomuna } from "./endpoints";
+import { urlListShkolla, urlListKomuna, urlAccounts } from "./endpoints";
 import {
   authenticationResponse,
   userRegisterCredentials,
@@ -37,7 +37,7 @@ export default function Register() {
         response = await axiosInstance.post(`${urlListKomuna}/register-komuna`, dto);
       } else if (values.role === "Shkollë") {
         const dto = {
-          Email: values.email,
+          email: values.email,
           Password: values.password,
           EmriShkolles: values.EmriShkolles,
           NrNxenesve: null,
@@ -47,8 +47,14 @@ export default function Register() {
           ShkollaRruga: values.ShkollaRruga
         };
         response = await axiosInstance.post(`${urlListShkolla}/register-shkolla`, dto);
-      }
-
+      }else if (values.role === "Admin") {
+          const dto= {
+            email: values.email,
+            password: values.password,
+            role: "Admin"
+          };
+          response = await axiosInstance.post(`${urlAccounts}`, dto);
+}
       if (response) {
         saveToken(response.data);
         update(getClaims());
@@ -67,19 +73,19 @@ export default function Register() {
     <>
       <AuthRegister
   model={{
-    email: "",
-    password: "",
-    confirmPassword: "",
-    role: "Komunë",
-    qyteti: "",
-    nrPopullsis: null,
-    buxhetiAktual: null,
-    ditaNdarjesAuto: false,
-    shkollaName: "",
-    komunaId: "",
-    shkollaStreet: "",
-    personalNumber: "",
-  } as userRegisterCredentials}
+  email: "",
+  password: "",
+  confirmPassword: "",
+  role: "Admin",
+  qyteti: "",
+  nrPopullsis: null,
+  buxhetiAktual: null,
+  ditaNdarjesAuto: false,
+  shkollaName: "",
+  komunaId: "",
+  shkollaStreet: "",
+  personalNumber: "",
+} as userRegisterCredentials}
   onSubmit={register}
 />
     </>

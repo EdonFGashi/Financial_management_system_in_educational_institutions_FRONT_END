@@ -1,3 +1,4 @@
+
 export interface claim {
   name: string;
   value: string;
@@ -6,6 +7,12 @@ export interface claim {
 export interface userCredentials {
   email: string;
   password: string;
+}
+
+export interface userRegisterCredentialsAdmin {
+  email: string;
+  password: string;
+  role: "Admin";
 }
 
 export interface userRegisterCredentialsKomuna {
@@ -28,9 +35,22 @@ export interface userRegisterCredentialsShkolla {
   personalNumber: string;
 }
 
+export interface userRegisterCredentialsKompania{
+  email: string;
+  password: string;
+  role: "Kompani";
+  EmriKompanis: string;
+  Sherbimi:string;
+  NrXhirollogaris: number;
+  Qyteti: string;
+  KompaniaRruga: string;
+  personalNumber: string;
+}
+
 export type userRegisterCredentials =
   | userRegisterCredentialsKomuna
-  | userRegisterCredentialsShkolla;
+  | userRegisterCredentialsShkolla
+  | userRegisterCredentialsAdmin;
 
 export interface authenticationResponse {
   token: string;
