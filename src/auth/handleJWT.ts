@@ -13,13 +13,19 @@ function base64UrlDecode(base64UrlString: string): string {
   while (base64.length % 4 !== 0) {
     base64 += "=";
   }
+
   try {
-    return atob(base64);
+    // Convert Base64 -> binary string -> UTF-8 string
+    const binaryString = atob(base64);
+    const utf8Decoder = new TextDecoder("utf-8");
+    const bytes = Uint8Array.from(binaryString, c => c.charCodeAt(0));
+    return utf8Decoder.decode(bytes);
   } catch (e) {
     console.error("Invalid Base64 string:", base64UrlString);
     throw e;
   }
 }
+
 
 export function saveToken(authData: authenticationResponse) {
   localStorage.setItem(tokenKey, authData.token);
