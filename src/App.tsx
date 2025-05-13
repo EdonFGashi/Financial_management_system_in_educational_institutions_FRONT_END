@@ -12,6 +12,7 @@ import OretShtese from "./pages/Shkolla/stafi/OretShtese";
 import Ndalesat from "./pages/Shkolla/stafi/Ndalesat";
 import InventariAktual from "./pages/Shkolla/InventariAktual";
 import KompaniaDashboard from "./pages/Kompania/KompaniaDashboard";
+import Financat from "./pages/komuna/financat/Financat";
 import routes from "./route-config";
 import { useEffect, useState } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
@@ -46,6 +47,7 @@ function App() {
         <div className="container">
           <AnimatedRoutes>
             <Routes>
+              <Route path="/komuna/financat" element={<Financat />} />
               {routes.map((route) => (
                 <Route
                   key={route.path}
@@ -64,35 +66,6 @@ function App() {
         </div>
       </AuthenticationContext.Provider>
     </BrowserRouter>
-    // =======
-    //     <Router>
-    //       <AnimatedRoutes>
-    //         <Routes>
-    //           <Route path="/" element={<Home />} />
-    //           <Route path="/signin" element={<SignIn />} />
-    //           <Route path="/signup" element={<SignUp />} />
-    //           // Komuna
-    //           <Route path="/komuna/dashboard" element={<KomunaDashboard />} />
-    //           <Route path="/komuna/porosite/lista" element={<ListaPorosive />} />
-    //           <Route path="/komuna/porosite/raporte" element={<RaportetPorosi />} />
-    //           // Shkolla
-    //           <Route path="/shkolla/dashboard" element={<ShkollaDashboard />} />
-    //           <Route path="/shkolla/porosite/market" element={<Market />} />
-    //           <Route path="/shkolla/porosite/shporta" element={<Shporta />} />
-    //           <Route path="/shkolla/porosite/historiku" element={<Historiku/>} />
-    //           <Route path="/shkolla/stafi/menaxhimi" element={<StafiShkolles />} />
-    //           <Route path="/shkolla/porosite/inventari" element={<InventariAktual />} />
-
-    //           {/*<Route path="/shkolla/stafi/ndalesat" element={<NdalesatPage />} />*/}
-    //           {/*<Route path="/shkolla/stafi/oret-shtese" element={<OretShtesePage />} />*/}
-    //           // Kompania
-    //           <Route path="/kompania/dashboard" element={<KompaniaDashboard />} />
-    //           <Route path="/kompania/regjistri" element={<RegjistriProdukteve />} />
-    //           {/* <Route path="/kompania/porosite/market" element={<Market />} />
-    //           <Route path="/kompania/porosite/shporta" element={<Shporta />} /> */}
-    //         </Routes>
-    //       </AnimatedRoutes>
-    //     </Router>
   );
 }
 
