@@ -1,3 +1,5 @@
+import internal from "stream";
+
 export interface claim {
   name: string;
   value: string;
@@ -25,6 +27,18 @@ export interface userRegisterCredentialsShkolla {
   EmriShkolles: string;
   komunaId: string;
   ShkollaRruga: string;
+  personalNumber: string;
+}
+
+export interface userRegisterCredentialsKompania{
+  email: string;
+  password: string;
+  role: "Kompani";
+  EmriKompanis: string;
+  Sherbimi:string;
+  NrXhirollogaris: number;
+  Qyteti: string;
+  KompaniaRruga: string;
   personalNumber: string;
 }
 

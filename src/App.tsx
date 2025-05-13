@@ -46,19 +46,23 @@ function App() {
       <AuthenticationContext.Provider value={{ claims, update: setClaims }}>
         <div className="container">
           <Routes>
-            {routes.map((route) => (
-              <Route
-                key={route.path}
-                path={route.path}
-                element={
-                  route.allowedRoles && !isAuthorized(route.allowedRoles) ? (
-                    <>You are not allowed to see this page!</>
-                  ) : (
-                    <route.component />
-                  )
-                }
-              />
-            ))}
+            {routes.map((route) => {
+    const isPublic = route.path === "/register" || route.path === "/signin"; // 👈 allow guest access
+
+    return (
+      <Route
+        key={route.path}
+        path={route.path}
+        element={
+          route.allowedRoles && !isPublic && !isAuthorized(route.allowedRoles) ? (
+            <>You are not allowed to see this page!</>
+          ) : (
+            <route.component />
+          )
+        }
+      />
+    );
+  })}
           </Routes>
         </div>
       </AuthenticationContext.Provider>

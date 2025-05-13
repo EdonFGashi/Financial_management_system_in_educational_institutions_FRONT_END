@@ -37,7 +37,7 @@ export default function Register() {
         response = await axiosInstance.post(`${urlListKomuna}/register-komuna`, dto);
       } else if (values.role === "Shkollë") {
         const dto = {
-          Email: values.email,
+          email: values.email,
           Password: values.password,
           EmriShkolles: values.EmriShkolles,
           NrNxenesve: null,
