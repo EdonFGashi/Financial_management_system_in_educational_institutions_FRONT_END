@@ -48,19 +48,23 @@ function App() {
           <AnimatedRoutes>
             <Routes>
               <Route path="/komuna/financat" element={<Financat />} />
-              {routes.map((route) => (
-                <Route
-                  key={route.path}
-                  path={route.path}
-                  element={
-                    route.allowedRoles && !isAuthorized(route.allowedRoles) ? (
-                      <>You are not allowed to see this page!</>
-                    ) : (
-                      <route.component />
-                    )
-                  }
-                />
-              ))}
+                      {routes.map((route) => {
+    const isPublic = route.path === "/register" || route.path === "/signin"; 
+
+    return (
+      <Route
+        key={route.path}
+        path={route.path}
+        element={
+          route.allowedRoles && !isPublic && !isAuthorized(route.allowedRoles) ? (
+            <>You are not allowed to see this page!</>
+          ) : (
+            <route.component />
+          )
+        }
+      />
+    );
+  })}
             </Routes>
           </AnimatedRoutes>
         </div>
