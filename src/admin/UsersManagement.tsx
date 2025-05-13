@@ -72,75 +72,84 @@ export default function UsersManagement() {
   }
     
   }
-
   return (
-    <div className="flex flex-col md:flex-row min-h-screen bg-gray-50 text-gray-800">
-      
+    <div className="flex flex-col md:flex-row min-h-screen bg-gray-100">
       <AdminSidebar />
 
-      <main className="flex-1 p-4 sm:p-6 md:p-10">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
-          <h2 className="text-2xl sm:text-3xl font-bold flex items-center gap-2">
-            <ClipboardDocumentCheckIcon className="w-6 sm:w-7 h-6 sm:h-7 text-indigo-600" />
-            Lista e Përdoruesve
-          </h2>
-          <Link
-            to="/komuna/dashboard"
-            className="bg-indigo-600 text-white px-4 py-2 rounded-md shadow hover:bg-indigo-700 transition text-sm"
-          >
-            ← Kthehu te Dashboard
-          </Link>
-        </div>
+      <main className="flex-1 p-4 sm:p-6 md:p-8">
+        <div className="max-w-7xl mx-auto">
+          {/* Header Section */}
+          <div className="mb-8 bg-white rounded-lg shadow-sm p-6">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+              <div>
+                <h2 className="text-2xl sm:text-3xl font-bold flex items-center gap-3 text-gray-800">
+                  <ClipboardDocumentCheckIcon className="w-8 h-8 text-indigo-600" />
+                  User Management
+                </h2>
+                <p className="mt-2 text-gray-600">Manage user accounts and roles</p>
+              </div>
+              <Link
+                to="/komuna/dashboard"
+                className="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200"
+              >
+                ← Back to Dashboard
+              </Link>
+            </div>
+          </div>
 
-        {/* Table */}
-        <div className="bg-white rounded-xl shadow overflow-x-auto">
-          <table className="w-full text-sm text-left">
-            <thead className="bg-gray-100 text-gray-700 font-semibold">
-              <tr>
-                <th className="px-4 py-3 border-b">Email</th>
-                <th className="px-4 py-3 border-b">Roli</th>
-                <th className="px-4 py-3 border-b">Veprim</th>
-              </tr>
-            </thead>
-            <tbody>
-              {users.map((user: any) => (
-                <tr key={user.email} className="hover:bg-gray-50">
-                  <td className="px-4 py-3">{user.email}</td>
-                  <td className="px-4 py-3">
-                    <select
-                      value={rolesMap[user.email]}
-                      onChange={(e) => handleRoleChange(user.email, e.target.value)}
-                      className="border border-gray-300 rounded px-2 py-1"
-                    >
-                      {roles.map((role) => (
-                        <option key={role} value={role}>
-                          {role}
-                        </option>
-                      ))}
-                    </select>
-                  </td>
-                  <td className="px-4 py-3">
-                    <button
-                      onClick={() => updateRole(user.email)}
-                      className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
-                    >
-                      Update role
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+          {/* Table Section */}
+          <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {users.map((user: any) => (
+                    <tr key={user.email} className="hover:bg-gray-50 transition-colors duration-200">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {user.email}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <select
+                          value={rolesMap[user.email]}
+                          onChange={(e) => handleRoleChange(user.email, e.target.value)}
+                          className="w-full sm:w-auto p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                        >
+                          {roles.map((role) => (
+                            <option key={role} value={role} className="capitalize">
+                              {role}
+                            </option>
+                          ))}
+                        </select>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <button
+                          onClick={() => updateRole(user.email)}
+                          className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200"
+                        >
+                          Update Role
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
 
-        {/* Pagination */}
-        <div className="mt-6">
-          <Pagination
-            currentPage={currentPage}
-            totalAmountOfPages={totalPages}
-            onChange={(page) => setCurrentPage(page)}
-          />
+          {/* Pagination */}
+          <div className="mt-6 flex justify-center">
+            <Pagination
+              currentPage={currentPage}
+              totalAmountOfPages={totalPages}
+              onChange={(page) => setCurrentPage(page)}
+            />
+          </div>
         </div>
       </main>
     </div>
