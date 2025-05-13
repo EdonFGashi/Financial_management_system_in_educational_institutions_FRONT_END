@@ -40,26 +40,27 @@ function App() {
   function isAuthorized(allowedRoles: string[]) {
     return allowedRoles.some((role) => hasRole(role));
   }
-
   return (
     <BrowserRouter>
       <AuthenticationContext.Provider value={{ claims, update: setClaims }}>
         <div className="container">
-          <Routes>
-            {routes.map((route) => (
-              <Route
-                key={route.path}
-                path={route.path}
-                element={
-                  route.allowedRoles && !isAuthorized(route.allowedRoles) ? (
-                    <>You are not allowed to see this page!</>
-                  ) : (
-                    <route.component />
-                  )
-                }
-              />
-            ))}
-          </Routes>
+          <AnimatedRoutes>
+            <Routes>
+              {routes.map((route) => (
+                <Route
+                  key={route.path}
+                  path={route.path}
+                  element={
+                    route.allowedRoles && !isAuthorized(route.allowedRoles) ? (
+                      <>You are not allowed to see this page!</>
+                    ) : (
+                      <route.component />
+                    )
+                  }
+                />
+              ))}
+            </Routes>
+          </AnimatedRoutes>
         </div>
       </AuthenticationContext.Provider>
     </BrowserRouter>
