@@ -36,16 +36,14 @@ function AdminSidebar() {
         ) : (
           <Bars3Icon className="w-6 h-6 text-gray-700" />
         )}
-      </button>
-
-      <aside
-        className={`fixed md:static z-40 top-0 left-0 h-screen bg-white border-r shadow-sm px-6 py-8 flex flex-col justify-between transition-transform duration-300 w-64 ${
+      </button>      <aside
+        className={`fixed md:sticky z-40 top-0 left-0 h-screen overflow-y-auto scrollbar-hide bg-white border-r shadow-sm px-6 py-8 flex flex-col justify-between transition-transform duration-300 w-64 ${
           isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
         }`}
       >
-        <div>
+        <div className="flex flex-col h-full">
           {/* User Info */}
-          <div className="flex items-center gap-3 mb-10">
+          <div className="flex items-center gap-3 mb-10 sticky top-0 bg-white pt-2 pb-4 z-10">
             <UserCircleIcon className="w-10 h-10 text-indigo-500" />
             <div>
               <p className="text-sm text-gray-500">Përdoruesi</p>
