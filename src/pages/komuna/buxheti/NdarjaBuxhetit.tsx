@@ -10,7 +10,7 @@ import Sidebar from "../Sidebar";
 import Toast from "../../../components/Toast";
 import Swal from "sweetalert2";
 import axios from "axios";
-import { urlListShkolla } from "../../../endpoints";
+import { urlListKomuna, urlListShkolla } from "../../../endpoints";
 import { StringLiteral } from "@babel/types";
 
 interface SchoolObject {
@@ -44,11 +44,16 @@ interface School {
   adresaId: number;
 }
 
+interface KomunaResponse {
+  buxhetiAktual: number; // Define the structure of the response
+}
+
+
 function NdarjaBuxhetit() {
   const [ndarje, setNdarje] = useState<Ndarja[]>([]);
   const [schoolRecord, setSchoolRecord] = useState<School[]>([]);
   const [schools, setSchools] = useState<SchoolObject[]>([]);
-  const [totalBudget, setTotalBudget] = useState(10230);
+  const [totalBudget, setTotalBudget] = useState(0);
   const [remainingBudget, setRemainingBudget] = useState(542);
   const [selectedMonth, setSelectedMonth] = useState("Qershor 2025");
   const [toast, setToast] = useState<{
@@ -102,6 +107,7 @@ function NdarjaBuxhetit() {
     //   }
     // ]);
     loadSchools();
+    loadKomunaBudget();
   }, []);
 
   const loadSchools = async () => {
@@ -146,6 +152,38 @@ function NdarjaBuxhetit() {
       console.error("Failed to load schools:", error);
     }
   };
+
+  const loadKomunaBudget = async () => {
+    try {
+      const token = localStorage.getItem("token");
+  
+      if (!token) {
+        throw new Error("Token not found in localStorage");
+      }
+  
+      const userId = token.split(".")[1];
+      const decodedUserId = JSON.parse(atob(userId));
+  
+      console.log("ID E KOMUNES", decodedUserId.id);
+  
+      const response = await axios.get<KomunaResponse>(`${urlListKomuna}/${decodedUserId.id}`);
+      const buxhetiAktual = response.data.buxhetiAktual;
+  
+      // if (komuna && typeof komuna.buxhetiAktual === "number") {
+        setTotalBudget(buxhetiAktual);
+      // } else {
+      //   console.warn("BuxhetiAktual nuk u gjet në përgjigje:", komuna);
+      // }
+    } catch (error) {
+      console.error("Gabim gjatë marrjes së buxhetit të komunës:", error);
+      setToast({
+        message: "Gabim gjatë marrjes së buxhetit të komunës",
+        type: "error",
+      });
+    }
+  };
+  
+  
 
   const handleAutoNdarjaChange = (id: number, checked: boolean) => {
     setSchoolRecord((prev: any[]) =>
@@ -205,6 +243,17 @@ function NdarjaBuxhetit() {
       return;
     }
 
+    if(allocationAmount < 0 && school.buxhetiAktual + allocationAmount < 0) {
+      await Swal.fire({
+        title: "Njoftim",
+        text: `Ju nuk mund të të zvogëloni buxhetin më shumë se sa është aktualisht!`,
+        icon: "info", // You can use 'success', 'warning', 'error', etc. depending on the context
+        confirmButtonColor: "#16a34a",
+        confirmButtonText: "OK"
+      });
+      return;
+    }
+
     const result = await Swal.fire({
       title: "Konfirmo ndarjen e buxhetit",
       text: `A jeni të sigurt që dëshironi të ${
@@ -220,12 +269,59 @@ function NdarjaBuxhetit() {
 
     if (result.isConfirmed) {
       try {
-        await axios.post("http://localhost:5102/api/NdarjetBuxhetit", {
-          shkollaId: schoolId,
-          shuma: allocationAmount,
-          data: new Date().toISOString(),
-          shenime: school.shenime, // Or pass textarea note if needed
-        });
+        const token = localStorage.getItem("token");
+  
+      if (!token) {
+        throw new Error("Token not found in localStorage");
+      }
+  
+      const userId = token.split(".")[1];
+      const decodedUserId = JSON.parse(atob(userId));
+  
+      console.log("ID E KOMUNES", decodedUserId.id);
+        const response = await axios.put((`${urlListKomuna}/${decodedUserId.id}`), {
+          komunaId: 0,
+          qyteti: "",
+          DitaNdarjesAuto: false,
+          BuxhetiAktual: allocationAmount,
+          UserId: "",
+          nrPopullsis: 0
+});
+
+if(response.status == 200) {
+          await Swal.fire({
+            title: "Njoftim",
+            text: "Ndarja e buxhetit u realizua me sukses!",
+            icon: "info", // You can use 'success', 'warning', 'error', etc. depending on the context
+            confirmButtonColor: "#16a34a",
+            confirmButtonText: "OK"
+          });
+        }
+        if(response.status == 400) {
+          await Swal.fire({
+            title: "Njoftim",
+            text: `${response.statusText}`,
+            icon: "info", // You can use 'success', 'warning', 'error', etc. depending on the context
+            confirmButtonColor: "#16a34a",
+            confirmButtonText: "OK"
+          });
+          return;
+        }
+
+        // try {
+        //   const response = await axios.put(...);
+        // } catch (error) {
+        //   if (axios.isAxiosError(error)) {
+        //     if (error.response?.data === "Ju nuk keni buxhet të mjaftueshëm !") {
+        //       setToast({
+        //         message: error.response.data,
+        //         type: "error",
+        //       });
+        //       return;
+        //     }
+        //   }
+        // }
+        
 
         await axios.put((`${urlListShkolla}/${schoolId}`), {
           drejtori: school.drejtori,
@@ -235,6 +331,13 @@ function NdarjaBuxhetit() {
           buxhetiShfrytezuar: school.buxhetiShfrytezuar,
           autoNdarja: school.autoNdarja
         });
+
+        await axios.post("http://localhost:5102/api/NdarjetBuxhetit", {
+          shkollaId: schoolId,
+          shuma: allocationAmount,
+          data: new Date().toISOString(),
+          shenime: school.shenime, // Or pass textarea note if needed
+        });   
 
         setToast({
           message: "Ndarja u realizua me sukses!",
@@ -254,6 +357,7 @@ function NdarjaBuxhetit() {
       );
 
         // Reload schools
+        await loadKomunaBudget();
         await loadSchools();
       } catch (error) {
         console.error(error);
@@ -330,7 +434,7 @@ function NdarjaBuxhetit() {
               </select>
             </div>
 
-            <div>
+            {/* <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Ndarja automatike:
               </label>
@@ -343,7 +447,7 @@ function NdarjaBuxhetit() {
                 />
                 <span className="ml-2 text-sm text-gray-600">Auto</span>
               </div>
-            </div>
+            </div> */}
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -401,9 +505,9 @@ function NdarjaBuxhetit() {
                   <th className="px-4 sm:px-6 py-3 sm:py-4 text-center text-xs sm:text-sm font-semibold text-gray-900">
                     Shuma e ndarjes
                   </th>
-                  <th className="hidden sm:table-cell px-2 sm:px-2 py-2 sm:py-2 w-10 text-center text-center text-xs sm:text-sm font-semibold text-gray-900">
+                  {/* <th className="hidden sm:table-cell px-2 sm:px-2 py-2 sm:py-2 w-10 text-center text-center text-xs sm:text-sm font-semibold text-gray-900">
                     Ndarja automatike
-                  </th>
+                  </th> */}
                   <td className="hidden md:table-cell px-4 sm:px-6 py-3 sm:py-4 w-48 sm:w-64 text-center text-xs sm:text-sm font-semibold text-gray-900">
                     Shenime
                   </td>
@@ -470,14 +574,12 @@ function NdarjaBuxhetit() {
                           }
                           className="px-1.5 sm:px-2 py-1 text-xs sm:text-sm text-gray-500 hover:text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50"
                         >
-                          {allocations[school.shkollaId]?.isPercentage
-                            ? "%"
-                            : "€"}
+                          {"€"}
                         </button>
                       </div>
                     </td>
 
-                    <td className="hidden sm:table-cell px-4 sm:px-6 py-3 sm:py-4">
+                    {/* <td className="hidden sm:table-cell px-4 sm:px-6 py-3 sm:py-4">
                       <div className="flex justify-center">
                         <input
                           type="checkbox"
@@ -491,7 +593,7 @@ function NdarjaBuxhetit() {
                           className="h-4 w-4 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500"
                         />
                       </div>
-                    </td>
+                    </td> */}
 
                     <td className="hidden md:table-cell px-2 sm:px-2 py-2 sm:py-2 w-48 sm:w-64 text-center text-xs sm:text-sm">
                       <textarea

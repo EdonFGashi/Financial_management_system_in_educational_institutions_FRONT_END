@@ -170,9 +170,9 @@ const routes = [
     component: KompaniaDashboard,
     allowedRoles: ["SuperAdmin","admin", "komune", "shkolle", "kompani", "Admin", "Kompani", "Komunë", "Shkollë"],
   },
-  { path: "/kompania/regjistri", component: RegjistriProdukteve, allowedRoles: ["SuperAdmin","admin", "komune", "shkolle", "kompani", "Admin", "Kompani", "Komunë", "Shkollë"], },
-  { path: "/kompania/porosite/lista", component: ListaPorosiveKompani, allowedRoles: ["SuperAdmin","admin", "komune", "shkolle", "kompani", "Admin", "Kompani", "Komunë", "Shkollë"],},
-  { path: "/kompania/porosite/raporte", component: RaportiPorosiveKompani, allowedRoles: ["SuperAdmin","admin", "komune", "shkolle", "kompani", "Admin", "Kompani", "Komunë", "Shkollë"], },
+  { path: "/kompania/regjistri", component: RegjistriProdukteve, allowedRoles: ["SuperAdmin","admin", "komune", "shkolle", "kompani", "Admin", "Kompani", "Komunë", "Shkolle"], },
+  { path: "/kompania/porosite/lista", component: ListaPorosiveKompani, allowedRoles: ["SuperAdmin","admin", "komune", "shkolle", "kompani", "Admin", "Kompani", "Komunë", "Shkolle"],},
+  { path: "/kompania/porosite/raporte", component: RaportiPorosiveKompani, allowedRoles: ["SuperAdmin","admin", "komune", "shkolle", "kompani", "Admin", "Kompani", "Komunë", "Shkolle"], },
     
 
   { path: "*", component: RedirectToLandingPage },
