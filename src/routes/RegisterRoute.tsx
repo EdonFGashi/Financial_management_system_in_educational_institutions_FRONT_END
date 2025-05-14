@@ -9,7 +9,7 @@ const RoleBasedRegister = () => {
   const roleClaim = claims.find((claim) => claim.name === "role");
   const role = roleClaim?.value;
 
-  if (role === "SuperAdmin" || role === "admin") {
+  if (role === "SuperAdmin" || role === "Admin") {
     return <Register />;
   }
 
