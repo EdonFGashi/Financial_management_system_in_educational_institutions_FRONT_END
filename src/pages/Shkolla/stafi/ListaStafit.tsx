@@ -8,7 +8,7 @@ import Toast from "../../../components/Toast";
 import { urlStafi } from "../../../endpoints";
 
 interface Staff {
-    stafId: number;
+    id: number;
     emri: string;
     mbiemri: string;
     numriPersonal: string;
@@ -28,9 +28,8 @@ function ListaStafit() {
         try {
             const response = await axios.get(`${urlStafi}/paginated`, {
                 params: {
-                    page: currentPage,
-                    pageSize: itemsPerPage,
-                    pozita: filterPozita || undefined
+                    page: 1,
+                    pageSize: 1000 // Load all for local filtering
                 }
             });
             setStaffList(response.data.data || []);
@@ -42,7 +41,7 @@ function ListaStafit() {
 
     useEffect(() => {
         fetchStafi();
-    }, [currentPage, filterPozita]);
+    }, []);
 
     const handleDelete = async (id: number) => {
         const result = await Swal.fire({
@@ -70,17 +69,14 @@ function ListaStafit() {
 
     const handleInlineEdit = async (
         id: number,
-        field: keyof Omit<Staff, "stafId" | "numriPersonal" | "emri" | "mbiemri">,
+        field: "pozita" | "paga" | "numriOreve",
         value: string | number
     ) => {
-        const staff = staffList.find((s) => s.stafId === id);
-        if (!staff) return;
-
-        const updatedStaff = { ...staff, [field]: field === "pozita" ? value : Number(value) };
+        const updatedField = { [field]: field === "pozita" ? value : Number(value) };
 
         try {
-            await axios.put(`${urlStafi}/${id}`, updatedStaff);
-            setStaffList((prev) => prev.map((s) => (s.stafId === id ? updatedStaff : s)));
+            await axios.put(`${urlStafi}/${id}`, updatedField);
+            fetchStafi();
             setToast({ message: "Të dhënat u përditësuan me sukses", type: "success" });
         } catch (error) {
             console.error("Gabim gjatë përditësimit:", error);
@@ -90,8 +86,12 @@ function ListaStafit() {
 
     const uniquePozitat = Array.from(new Set(staffList.map((s) => s.pozita)));
 
-    const totalPages = Math.max(Math.ceil(staffList.length / itemsPerPage), 1);
-    const paginatedStaff = staffList.slice(
+    const filteredStaff = filterPozita
+        ? staffList.filter((s) => s.pozita === filterPozita)
+        : staffList;
+
+    const totalPages = Math.max(Math.ceil(filteredStaff.length / itemsPerPage), 1);
+    const paginatedStaff = filteredStaff.slice(
         (currentPage - 1) * itemsPerPage,
         currentPage * itemsPerPage
     );
@@ -124,7 +124,7 @@ function ListaStafit() {
                         }}
                         onSubmit={async (values, { resetForm }) => {
                             try {
-                                const res = await axios.post(urlStafi, values);
+                                await axios.post(urlStafi, values);
                                 setToast({ message: "Stafi u shtua me sukses!", type: "success" });
                                 resetForm();
                                 setCurrentPage(1);
@@ -199,37 +199,40 @@ function ListaStafit() {
                         <tbody>
                             {paginatedStaff.length > 0 ? (
                                 paginatedStaff.map((staff) => (
-                                    <tr key={staff.stafId} className="border-t border-gray-200">
-                                        <td className="py-3 px-4">{staff.stafId}</td>
+                                    <tr key={staff.id} className="border-t border-gray-200">
+                                        <td className="py-3 px-4">{staff.id}</td>
                                         <td className="py-3 px-4">{`${staff.emri} ${staff.mbiemri}`}</td>
                                         <td className="py-3 px-4">{staff.numriPersonal}</td>
                                         <td className="py-3 px-4">
                                             <input
                                                 type="text"
-                                                value={staff.pozita}
-                                                onChange={(e) => handleInlineEdit(staff.stafId, "pozita", e.target.value)}
+                                                defaultValue={staff.pozita}
+                                                onBlur={(e) => handleInlineEdit(staff.id, "pozita", e.target.value)}
+                                                onKeyDown={(e) => e.key === "Enter" && e.currentTarget.blur()}
                                                 className="border rounded px-2 py-1 w-full"
                                             />
                                         </td>
                                         <td className="py-3 px-4">
                                             <input
                                                 type="number"
-                                                value={staff.paga}
-                                                onChange={(e) => handleInlineEdit(staff.stafId, "paga", e.target.value)}
+                                                defaultValue={staff.paga}
+                                                onBlur={(e) => handleInlineEdit(staff.id, "paga", e.target.value)}
+                                                onKeyDown={(e) => e.key === "Enter" && e.currentTarget.blur()}
                                                 className="border rounded px-2 py-1 w-full"
                                             />
                                         </td>
                                         <td className="py-3 px-4">
                                             <input
                                                 type="number"
-                                                value={staff.numriOreve}
-                                                onChange={(e) => handleInlineEdit(staff.stafId, "numriOreve", e.target.value)}
+                                                defaultValue={staff.numriOreve}
+                                                onBlur={(e) => handleInlineEdit(staff.id, "numriOreve", e.target.value)}
+                                                onKeyDown={(e) => e.key === "Enter" && e.currentTarget.blur()}
                                                 className="border rounded px-2 py-1 w-full"
                                             />
                                         </td>
                                         <td className="py-3 px-4">
                                             <button
-                                                onClick={() => handleDelete(staff.stafId)}
+                                                onClick={() => handleDelete(staff.id)}
                                                 className="text-red-600 hover:text-red-800"
                                             >
                                                 <TrashIcon className="w-5 h-5" />

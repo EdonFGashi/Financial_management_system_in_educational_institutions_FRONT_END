@@ -150,17 +150,17 @@ const routes = [
   {
     path: "/shkolla/stafi/menaxhimi",
     component: StafiShkolles,
-    allowedRoles: ["SuperAdmin", "Admin",  "Shkollë"],
+    allowedRoles: ["SuperAdmin", "Admin",  "Shkolla"],
   },
   {
     path: "/shkolla/stafi/oret-shtese",
     component: OretShtese,
-    allowedRoles: ["SuperAdmin", "Admin", "Shkollë"],
+    allowedRoles: ["SuperAdmin", "Admin", "Shkolla"],
   },
   {
     path: "/shkolla/stafi/ndalesat",
     component: Ndalesat,
-    allowedRoles: ["SuperAdmin", "Admin",  "Shkollë"],
+    allowedRoles: ["SuperAdmin", "Admin",  "Shkolla"],
   },
 
   // Kompania
