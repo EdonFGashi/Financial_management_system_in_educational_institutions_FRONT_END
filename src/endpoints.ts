@@ -10,4 +10,5 @@ export const urlListAdresa= `http://localhost:5102/api/Adresa`;
 export const urlPorosite = `http://localhost:5102/api/Porosite`;
 export const urlRaporti = `http://localhost:5102/api/Raporti`;
 export const urlNdarjetBuxhetit = `http://localhost:5102/api/NdarjetBuxhetit`;
+export const urlStafi = "http://localhost:5102/api/StafiShkolles";
 
