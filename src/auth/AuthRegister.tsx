@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Formik, Form, Field, ErrorMessage, FormikHelpers } from "formik";
 import * as Yup from "yup";
 import * as FiIcons from "react-icons/fi";
-import { userRegisterCredentialsShkolla, userRegisterCredentialsKomuna } from "./auth.models";
+import { userRegisterCredentialsShkolla, userRegisterCredentialsKomuna, userRegisterCredentialsAdmin } from "./auth.models";
 import { useKomunaOptions } from "../hooks/useKomunaOptions";
 import { fetchPersonByNrPersonal } from "../hooks/grabPersonDetails";
 
@@ -20,7 +20,7 @@ type FormValues = {
   email: string;
   password: string;
   confirmPassword: string;
-  role: "Komunë" | "Shkollë";
+  role: "Komunë" | "Shkollë"| "Admin";
   qyteti?: string;
   nrPopullsis?: number | null;
   buxhetiAktual?: number | null;
@@ -378,7 +378,7 @@ function AuthRegister(props: authFormProps) {
 }
 
 export default AuthRegister;
-type userRegisterCredentials = userRegisterCredentialsKomuna | userRegisterCredentialsShkolla;
+type userRegisterCredentials = userRegisterCredentialsKomuna | userRegisterCredentialsShkolla| userRegisterCredentialsAdmin;
 
 interface authFormProps {
   model: userRegisterCredentials;
