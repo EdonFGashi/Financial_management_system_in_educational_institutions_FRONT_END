@@ -161,7 +161,7 @@ function RegisterKompani(props: authFormProps) {
       cleaned as userRegisterCredentialsKompania,
       actions as FormikHelpers<userRegisterCredentialsKompania>
     );
-    navigate("/signin");
+    navigate("/");
 
   } catch (error) {
     console.error("Registration failed:", error);
