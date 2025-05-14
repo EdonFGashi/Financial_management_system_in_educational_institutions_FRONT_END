@@ -11,4 +11,4 @@ export const urlPorosite = `http://localhost:5102/api/Porosite`;
 export const urlRaporti = `http://localhost:5102/api/Raporti`;
 export const urlNdarjetBuxhetit = `http://localhost:5102/api/NdarjetBuxhetit`;
 export const urlStafi = "http://localhost:5102/api/StafiShkolles";
-
+export const urlOretShtese = "http://localhost:5102/api/OretShtese";

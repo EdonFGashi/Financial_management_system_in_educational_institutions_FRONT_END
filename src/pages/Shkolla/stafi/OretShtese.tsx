@@ -1,101 +1,143 @@
 ﻿import { useEffect, useState } from "react";
 import { Formik, Form, Field } from "formik";
 import { TrashIcon, ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
+import axios from "axios";
+import Swal from "sweetalert2";
 import Sidebar from "../Sidebar";
+import Toast from "../../../components/Toast";
+import { urlOretShtese, urlStafi } from "../../../endpoints";
 
 interface Staff {
-    stafId: number;
+    id: number;
     emri: string;
     mbiemri: string;
 }
 
 interface OretShtese {
-    oretShteseId: number;
-    stafId: number;
+    id: number;
+    stafiShkollesId: number;
     dataAngazhimit: string;
     nrOreve: number;
     pagesaPerOre: number;
     shenime: string;
+    stafi?: Staff;
 }
-
-let entryIdCounter = 1;
 
 function OretShtese() {
     const [staffList, setStaffList] = useState<Staff[]>([]);
     const [entries, setEntries] = useState<OretShtese[]>([]);
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 5;
+    const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
 
-    useEffect(() => {
-        // Fetch staff from API
-        fetch("/api/stafi")
-            .then(res => res.json())
-            .then(data => setStaffList(data))
-            .catch(() => setStaffList([]));
-    }, []);
+    const fetchData = async () => {
+        try {
+            const oreRes = await axios.get(`${urlOretShtese}/paginated`, {
+                params: { page: currentPage, recordsPerPage: itemsPerPage }
+            });
+            setEntries(oreRes.data?.data || []);
 
-    const handleDelete = (id: number) => {
-        const updated = entries.filter((e) => e.oretShteseId !== id);
-        setEntries(updated);
-        const newTotalPages = Math.max(Math.ceil(updated.length / itemsPerPage), 1);
-        if (currentPage > newTotalPages) {
-            setCurrentPage(newTotalPages);
+            const staffRes = await axios.get(`${urlStafi}/paginated`, {
+                params: { page: 1, pageSize: 1000 }
+            });
+            setStaffList(staffRes.data?.data || []);
+        } catch (error) {
+            console.error("Gabim gjatë ngarkimit", error);
+            setToast({ message: "Gabim gjatë ngarkimit", type: "error" });
         }
     };
 
-    const handleInlineEdit = (
-        id: number,
-        field: keyof OretShtese,
-        value: string | number
-    ) => {
-        setEntries((prev) =>
-            prev.map((e) =>
-                e.oretShteseId === id ? { ...e, [field]: value } : e
-            )
-        );
+    useEffect(() => {
+        fetchData();
+    }, [currentPage]);
+
+    const handleDelete = async (id: number) => {
+        const result = await Swal.fire({
+            title: "A jeni i sigurt?",
+            text: "Dëshironi të fshini këtë orë shtesë?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#dc2626",
+            cancelButtonColor: "#6b7280",
+            confirmButtonText: "Po, Fshij",
+            cancelButtonText: "Anulo",
+        });
+
+        if (result.isConfirmed) {
+            try {
+                await axios.delete(`${urlOretShtese}/${id}`);
+                setToast({ message: "Ora shtesë u fshi me sukses!", type: "success" });
+                fetchData();
+            } catch (error) {
+                console.error("Gabim gjatë fshirjes", error);
+                setToast({ message: "Gabim gjatë fshirjes", type: "error" });
+            }
+        }
     };
 
-    const paginatedEntries = entries.slice(
-        (currentPage - 1) * itemsPerPage,
-        currentPage * itemsPerPage
-    );
-    const totalPages = Math.max(Math.ceil(entries.length / itemsPerPage), 1);
+    const handleInlineEdit = async (
+        id: number,
+        field: "nrOreve" | "pagesaPerOre" | "shenime",
+        value: string | number
+    ) => {
+        const updated = entries.find(e => e.id === id);
+        if (!updated) return;
+
+        const updatedEntry = {
+            ...updated,
+            [field]: field === "shenime" ? value : Number(value)
+        };
+
+        try {
+            await axios.put(`${urlOretShtese}/${id}`, updatedEntry);
+            fetchData();
+            setToast({ message: "Ora u përditësua me sukses", type: "success" });
+        } catch (error) {
+            console.error("Gabim gjatë përditësimit", error);
+            setToast({ message: "Gabim gjatë përditësimit", type: "error" });
+        }
+    };
+
+    const totalPages = Math.max(1, Math.ceil(entries.length / itemsPerPage));
 
     return (
         <div className="flex min-h-screen bg-gray-50 text-gray-800">
+            {toast && (
+                <div className="fixed top-5 right-5 z-50">
+                    <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />
+                </div>
+            )}
+
             <div className="hidden md:block fixed h-full w-64 bg-white border-r shadow-sm">
                 <Sidebar />
             </div>
 
             <main className="flex-1 md:ml-64 pb-16 overflow-y-auto">
-                {/* Header */}
                 <div className="bg-gradient-to-r from-green-700 to-lime-600 text-white px-4 sm:px-6 md:px-12 py-8 md:py-10">
-                    <h1 className="text-2xl sm:text-3xl font-bold mb-1">Orët Shtesë</h1>
-                    <p className="text-base sm:text-lg text-indigo-100">Regjistro dhe menaxho angazhimet shtesë</p>
+                    <h1 className="text-2xl sm:text-3xl font-bold mb-2">Orët Shtesë</h1>
+                    <p className="text-base sm:text-lg text-green-100">Lista dhe menaxhimi i orëve shtesë</p>
                 </div>
 
-                {/* Form */}
                 <div className="px-6 py-6">
                     <Formik
                         initialValues={{
-                            stafId: "",
+                            stafiShkollesId: "",
                             dataAngazhimit: "",
                             nrOreve: 0,
                             pagesaPerOre: 0,
                             shenime: "",
                         }}
-                        onSubmit={(values, { resetForm }) => {
-                            const newEntry: OretShtese = {
-                                oretShteseId: entryIdCounter++,
-                                stafId: Number(values.stafId),
-                                dataAngazhimit: values.dataAngazhimit,
-                                nrOreve: Number(values.nrOreve),
-                                pagesaPerOre: Number(values.pagesaPerOre),
-                                shenime: values.shenime,
-                            };
-                            setEntries([newEntry, ...entries]);
-                            resetForm();
-                            setCurrentPage(1);
+                        onSubmit={async (values, { resetForm }) => {
+                            try {
+                                await axios.post(urlOretShtese, values);
+                                setToast({ message: "Ora shtesë u shtua me sukses!", type: "success" });
+                                resetForm();
+                                setCurrentPage(1);
+                                fetchData();
+                            } catch (error) {
+                                console.error("Gabim gjatë shtimit", error);
+                                setToast({ message: "Gabim gjatë shtimit", type: "error" });
+                            }
                         }}
                     >
                         {() => (
@@ -105,16 +147,17 @@ function OretShtese() {
                                         <label className="block mb-1 font-medium">Stafi</label>
                                         <Field
                                             as="select"
-                                            name="stafId"
+                                            name="stafiShkollesId"
                                             className="w-full border border-gray-300 p-2 rounded"
                                             required
                                         >
                                             <option value="">Zgjidh stafin</option>
-                                            {staffList.map((s) => (
-                                                <option key={s.stafId} value={s.stafId}>
-                                                    {s.emri} {s.mbiemri}
-                                                </option>
-                                            ))}
+                                            {Array.isArray(staffList) &&
+                                                staffList.map((s) => (
+                                                    <option key={s.id} value={s.id}>
+                                                        {s.emri} {s.mbiemri}
+                                                    </option>
+                                                ))}
                                         </Field>
                                     </div>
                                     <div>
@@ -155,10 +198,7 @@ function OretShtese() {
                                     </div>
                                 </div>
                                 <div className="flex justify-end pt-4">
-                                    <button
-                                        type="submit"
-                                        className="bg-green-600 text-white px-5 py-2 rounded hover:bg-green-700 transition"
-                                    >
+                                    <button type="submit" className="bg-green-600 text-white px-5 py-2 rounded hover:bg-green-700 transition">
                                         Shto
                                     </button>
                                 </div>
@@ -167,7 +207,6 @@ function OretShtese() {
                     </Formik>
                 </div>
 
-                {/* Table */}
                 <div className="px-6 pb-10 overflow-x-auto">
                     <table className="w-full bg-white rounded-lg shadow text-sm">
                         <thead className="bg-gray-100 text-gray-700 font-semibold">
@@ -182,66 +221,61 @@ function OretShtese() {
                             </tr>
                         </thead>
                         <tbody>
-                            {paginatedEntries.length > 0 ? (
-                                paginatedEntries.map((entry) => {
-                                    const staff = staffList.find((s) => s.stafId === entry.stafId);
-                                    return (
-                                        <tr key={entry.oretShteseId} className="border-t border-gray-200">
-                                            <td className="py-3 px-4">{entry.oretShteseId}</td>
-                                            <td className="py-3 px-4">{staff ? `${staff.emri} ${staff.mbiemri}` : "—"}</td>
-                                            <td className="py-3 px-4">{entry.dataAngazhimit}</td>
-                                            <td className="py-3 px-4">
-                                                <input
-                                                    type="number"
-                                                    value={entry.nrOreve}
-                                                    onChange={(e) =>
-                                                        handleInlineEdit(entry.oretShteseId, "nrOreve", e.target.value)
-                                                    }
-                                                    className="border rounded px-2 py-1 w-20"
-                                                />
-                                            </td>
-                                            <td className="py-3 px-4">
-                                                <input
-                                                    type="number"
-                                                    value={entry.pagesaPerOre}
-                                                    onChange={(e) =>
-                                                        handleInlineEdit(entry.oretShteseId, "pagesaPerOre", e.target.value)
-                                                    }
-                                                    className="border rounded px-2 py-1 w-24"
-                                                />
-                                            </td>
-                                            <td className="py-3 px-4">
-                                                <input
-                                                    type="text"
-                                                    value={entry.shenime}
-                                                    onChange={(e) =>
-                                                        handleInlineEdit(entry.oretShteseId, "shenime", e.target.value)
-                                                    }
-                                                    className="border rounded px-2 py-1 w-full"
-                                                />
-                                            </td>
-                                            <td className="py-3 px-4">
-                                                <button
-                                                    onClick={() => handleDelete(entry.oretShteseId)}
-                                                    className="text-red-600 hover:text-red-800"
-                                                >
-                                                    <TrashIcon className="w-5 h-5" />
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    );
-                                })
+                            {entries.length > 0 ? (
+                                entries.map((entry) => (
+                                    <tr key={entry.id} className="border-t border-gray-200">
+                                        <td className="py-3 px-4">{entry.id}</td>
+                                        <td className="py-3 px-4">
+                                            {entry.stafi
+                                                ? `${entry.stafi.emri} ${entry.stafi.mbiemri}`
+                                                : staffList.find(s => s.id === entry.stafiShkollesId)?.emri + " " +
+                                                staffList.find(s => s.id === entry.stafiShkollesId)?.mbiemri}
+                                        </td>
+                                        <td className="py-3 px-4">
+                                            {entry.dataAngazhimit ? entry.dataAngazhimit.split("T")[0] : ""}
+                                        </td>
+                                        <td className="py-3 px-4">
+                                            <input
+                                                type="number"
+                                                defaultValue={entry.nrOreve}
+                                                onBlur={(e) => handleInlineEdit(entry.id, "nrOreve", e.target.value)}
+                                                onKeyDown={(e) => e.key === "Enter" && e.currentTarget.blur()}
+                                                className="border rounded px-2 py-1 w-20"
+                                            />
+                                        </td>
+                                        <td className="py-3 px-4">
+                                            <input
+                                                type="number"
+                                                defaultValue={entry.pagesaPerOre}
+                                                onBlur={(e) => handleInlineEdit(entry.id, "pagesaPerOre", e.target.value)}
+                                                onKeyDown={(e) => e.key === "Enter" && e.currentTarget.blur()}
+                                                className="border rounded px-2 py-1 w-24"
+                                            />
+                                        </td>
+                                        <td className="py-3 px-4">
+                                            <input
+                                                type="text"
+                                                defaultValue={entry.shenime}
+                                                onBlur={(e) => handleInlineEdit(entry.id, "shenime", e.target.value)}
+                                                onKeyDown={(e) => e.key === "Enter" && e.currentTarget.blur()}
+                                                className="border rounded px-2 py-1 w-full"
+                                            />
+                                        </td>
+                                        <td className="py-3 px-4">
+                                            <button onClick={() => handleDelete(entry.id)} className="text-red-600 hover:text-red-800">
+                                                <TrashIcon className="w-5 h-5" />
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))
                             ) : (
                                 <tr>
-                                    <td colSpan={7} className="py-6 text-center text-gray-500">
-                                        Nuk ka të dhëna.
-                                    </td>
+                                    <td colSpan={7} className="py-6 text-center text-gray-500">Nuk ka të dhëna.</td>
                                 </tr>
                             )}
                         </tbody>
                     </table>
 
-                    {/* Pagination */}
                     <div className="flex justify-center mt-6 space-x-2">
                         <button
                             onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
