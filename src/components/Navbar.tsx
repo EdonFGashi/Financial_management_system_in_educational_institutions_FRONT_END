@@ -51,6 +51,7 @@ function Navbar() {
     { to: "/shkolla/dashboard", label: "Shkolla" , roles: ["SuperAdmin","admin", "Shkolla","Admin",]},
     { to: "/kompania/dashboard", label: "Kompanite" , roles: ["SuperAdmin", "Admin", "Kompania"]},
     { to: "/perdoruesit", label: "Perdoruesit" ,  roles: ["SuperAdmin", "Admin" ]}
+
   ];
 
 

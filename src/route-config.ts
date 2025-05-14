@@ -170,9 +170,11 @@ const routes = [
     component: KompaniaDashboard,
     allowedRoles: ["SuperAdmin","Admin", "Kompania"]
   },
+  
   { path: "/kompania/regjistri", component: RegjistriProdukteve, allowedRoles: ["SuperAdmin", "Admin", "Kompania"], },
   { path: "/kompania/porosite/lista", component: ListaPorosiveKompani, allowedRoles: ["SuperAdmin", "Admin", "Kompania"],},
   { path: "/kompania/porosite/raporte", component: RaportiPorosiveKompani, allowedRoles: ["SuperAdmin","Admin", "Kompania"], },
+
     
 
   { path: "*", component: RedirectToLandingPage },
