@@ -1,10 +1,14 @@
-﻿import { useState } from "react";
+﻿import { useEffect, useState } from "react";
 import Sidebar from "./Sidebar";
 import { Formik, Form, Field } from "formik";
 import { ChevronLeftIcon, ChevronRightIcon, TrashIcon } from "@heroicons/react/24/outline";
+import axios from "axios";
+import Swal from "sweetalert2";
+import Toast from "../../components/Toast";
+import { urlInventari } from "../../endpoints";
 
 interface Inventar {
-    inventariId: number;
+    id: number;
     emri: string;
     pershkrimi: string;
     sasia: number;
@@ -12,42 +16,76 @@ interface Inventar {
     createdAt: string;
 }
 
-let inventariIdCounter = 1;
-
 function InventariAktual() {
     const [inventariList, setInventariList] = useState<Inventar[]>([]);
     const [filterEmri, setFilterEmri] = useState("");
+    const [filterShifra, setFilterShifra] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 5;
+    const itemsPerPage = 10;
+    const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
 
-    const handleDelete = (id: number) => {
-        const updatedList = inventariList.filter((i) => i.inventariId !== id);
-        setInventariList(updatedList);
-        const newTotalPages = Math.ceil(updatedList.length / itemsPerPage);
-        if (currentPage > newTotalPages) {
-            setCurrentPage(newTotalPages > 0 ? newTotalPages : 1);
+    const fetchInventari = async () => {
+        try {
+            const response = await axios.get(`${urlInventari}/paginated`, {
+                params: { page: 1, pageSize: 1000 }
+            });
+            setInventariList(response.data.data || []);
+        } catch (error) {
+            console.error("Gabim gjatë ngarkimit:", error);
+            setToast({ message: "Gabim gjatë ngarkimit të inventarit", type: "error" });
         }
     };
 
-    const handleInlineEdit = (
-        id: number,
-        field: "emri" | "pershkrimi" | "sasia" | "shifra",
-        value: string | number
-    ) => {
-        setInventariList((prev) =>
-            prev.map((i) =>
-                i.inventariId === id
-                    ? { ...i, [field]: field === "sasia" ? Number(value) : value }
-                    : i
-            )
-        );
+    useEffect(() => {
+        fetchInventari();
+    }, []);
+
+    const handleDelete = async (id: number) => {
+        const result = await Swal.fire({
+            title: "A jeni i sigurt?",
+            text: "Dëshironi të fshini këtë inventar?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#dc2626",
+            cancelButtonColor: "#6b7280",
+            confirmButtonText: "Po, Fshij",
+            cancelButtonText: "Anulo",
+        });
+
+        if (result.isConfirmed) {
+            try {
+                await axios.delete(`${urlInventari}/${id}`);
+                setToast({ message: "Inventari u fshi me sukses!", type: "success" });
+                fetchInventari();
+            } catch (error) {
+                console.error("Gabim gjatë fshirjes:", error);
+                setToast({ message: "Gabim gjatë fshirjes së inventarit", type: "error" });
+            }
+        }
     };
 
-    const filteredList = inventariList.filter((i) =>
-        i.emri.toLowerCase().includes(filterEmri.toLowerCase())
+    const handleInlineEdit = async (
+        id: number,
+        field: keyof Pick<Inventar, "emri" | "pershkrimi" | "sasia" | "shifra">,
+        value: string | number
+    ) => {
+        const updatedField = { [field]: field === "sasia" ? Number(value) : value };
+        try {
+            await axios.put(`${urlInventari}/${id}`, updatedField);
+            fetchInventari();
+            setToast({ message: "Të dhënat u përditësuan me sukses", type: "success" });
+        } catch (error) {
+            console.error("Gabim gjatë përditësimit:", error);
+            setToast({ message: "Gabim gjatë përditësimit të të dhënave", type: "error" });
+        }
+    };
+
+    const filteredList = inventariList.filter((item) =>
+        item.emri.toLowerCase().includes(filterEmri.toLowerCase()) &&
+        item.shifra.toLowerCase().includes(filterShifra.toLowerCase())
     );
 
-    const totalPages = Math.ceil(filteredList.length / itemsPerPage);
+    const totalPages = Math.max(Math.ceil(filteredList.length / itemsPerPage), 1);
     const paginatedList = filteredList.slice(
         (currentPage - 1) * itemsPerPage,
         currentPage * itemsPerPage
@@ -60,13 +98,17 @@ function InventariAktual() {
             </div>
 
             <main className="flex-1 md:ml-64 pb-16 overflow-y-auto">
-                {/* Header */}
+                {toast && (
+                    <div className="fixed top-5 right-5 z-50">
+                        <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />
+                    </div>
+                )}
+
                 <div className="bg-gradient-to-r from-green-700 to-lime-600 text-white px-4 sm:px-6 md:px-12 py-8 md:py-10">
-                    <h1 className="text-2xl sm:text-3xl font-bold mb-1">Inventari Aktual</h1>
-                    <p className="text-base sm:text-lg text-green-100">Shto dhe menaxho inventarin</p>
+                    <h1 className="text-2xl sm:text-3xl font-bold mb-2">Inventari Aktual</h1>
+                    <p className="text-base sm:text-lg text-green-100">Lista dhe menaxhimi i inventarit</p>
                 </div>
 
-                {/* Formik Form */}
                 <div className="px-6 py-6">
                     <Formik
                         initialValues={{
@@ -75,18 +117,17 @@ function InventariAktual() {
                             sasia: 0,
                             shifra: "",
                         }}
-                        onSubmit={(values, { resetForm }) => {
-                            const newItem: Inventar = {
-                                inventariId: inventariIdCounter++,
-                                emri: values.emri,
-                                pershkrimi: values.pershkrimi,
-                                sasia: values.sasia,
-                                shifra: values.shifra,
-                                createdAt: new Date().toISOString(),
-                            };
-                            setInventariList([newItem, ...inventariList]);
-                            resetForm();
-                            setCurrentPage(1);
+                        onSubmit={async (values, { resetForm }) => {
+                            try {
+                                await axios.post(urlInventari, values);
+                                setToast({ message: "Inventari u shtua me sukses!", type: "success" });
+                                resetForm();
+                                setCurrentPage(1);
+                                fetchInventari();
+                            } catch (error) {
+                                console.error("Gabim gjatë shtimit:", error);
+                                setToast({ message: "Gabim gjatë shtimit të inventarit", type: "error" });
+                            }
                         }}
                     >
                         {() => (
@@ -94,46 +135,23 @@ function InventariAktual() {
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div>
                                         <label className="block mb-1 font-medium">Emri</label>
-                                        <Field
-                                            name="emri"
-                                            type="text"
-                                            className="w-full border border-gray-300 p-2 rounded"
-                                            required
-                                        />
+                                        <Field name="emri" type="text" className="w-full border border-gray-300 p-2 rounded" required />
                                     </div>
                                     <div>
                                         <label className="block mb-1 font-medium">Shifra</label>
-                                        <Field
-                                            name="shifra"
-                                            type="text"
-                                            className="w-full border border-gray-300 p-2 rounded"
-                                            required
-                                        />
+                                        <Field name="shifra" type="text" className="w-full border border-gray-300 p-2 rounded" required />
                                     </div>
                                     <div>
                                         <label className="block mb-1 font-medium">Sasia</label>
-                                        <Field
-                                            name="sasia"
-                                            type="number"
-                                            className="w-full border border-gray-300 p-2 rounded"
-                                            required
-                                        />
+                                        <Field name="sasia" type="number" className="w-full border border-gray-300 p-2 rounded" required />
                                     </div>
                                     <div className="md:col-span-2">
                                         <label className="block mb-1 font-medium">Përshkrimi</label>
-                                        <Field
-                                            name="pershkrimi"
-                                            as="textarea"
-                                            className="w-full border border-gray-300 p-2 rounded"
-                                            required
-                                        />
+                                        <Field name="pershkrimi" as="textarea" className="w-full border border-gray-300 p-2 rounded" required />
                                     </div>
                                 </div>
                                 <div className="flex justify-end pt-4">
-                                    <button
-                                        type="submit"
-                                        className="bg-green-600 text-white px-5 py-2 rounded hover:bg-green-700 transition"
-                                    >
+                                    <button type="submit" className="bg-green-600 text-white px-5 py-2 rounded hover:bg-green-700 transition">
                                         Shto Inventar
                                     </button>
                                 </div>
@@ -142,8 +160,7 @@ function InventariAktual() {
                     </Formik>
                 </div>
 
-                {/* Filters */}
-                <div className="px-6 pb-4 flex justify-end">
+                <div className="px-6 pb-4 flex flex-col md:flex-row gap-3 justify-end">
                     <input
                         type="text"
                         placeholder="Filtro sipas emrit..."
@@ -154,9 +171,19 @@ function InventariAktual() {
                         }}
                         className="border border-gray-300 px-4 py-2 rounded w-full md:max-w-xs"
                     />
+                    <input
+                        type="text"
+                        placeholder="Filtro sipas shifrës..."
+                        value={filterShifra}
+                        onChange={(e) => {
+                            setFilterShifra(e.target.value);
+                            setCurrentPage(1);
+                        }}
+                        className="border border-gray-300 px-4 py-2 rounded w-full md:max-w-xs"
+                    />
                 </div>
 
-                {/* Table */}
+
                 <div className="px-6 pb-10 overflow-x-auto">
                     <table className="w-full bg-white rounded-lg shadow text-sm">
                         <thead className="bg-gray-100 text-gray-700 font-semibold">
@@ -173,52 +200,45 @@ function InventariAktual() {
                         <tbody>
                             {paginatedList.length > 0 ? (
                                 paginatedList.map((item) => (
-                                    <tr key={item.inventariId} className="border-t border-gray-200">
-                                        <td className="py-3 px-4">{item.inventariId}</td>
+                                    <tr key={item.id} className="border-t border-gray-200">
+                                        <td className="py-3 px-4">{item.id}</td>
                                         <td className="py-3 px-4">
                                             <input
-                                                type="text"
-                                                value={item.emri}
-                                                onChange={(e) =>
-                                                    handleInlineEdit(item.inventariId, "emri", e.target.value)
-                                                }
+                                                defaultValue={item.emri}
+                                                onBlur={(e) => handleInlineEdit(item.id, "emri", e.target.value)}
+                                                onKeyDown={(e) => e.key === "Enter" && e.currentTarget.blur()}
                                                 className="border rounded px-2 py-1 w-full"
                                             />
                                         </td>
                                         <td className="py-3 px-4">
                                             <input
-                                                type="text"
-                                                value={item.pershkrimi}
-                                                onChange={(e) =>
-                                                    handleInlineEdit(item.inventariId, "pershkrimi", e.target.value)
-                                                }
+                                                defaultValue={item.pershkrimi}
+                                                onBlur={(e) => handleInlineEdit(item.id, "pershkrimi", e.target.value)}
+                                                onKeyDown={(e) => e.key === "Enter" && e.currentTarget.blur()}
                                                 className="border rounded px-2 py-1 w-full"
                                             />
                                         </td>
                                         <td className="py-3 px-4">
                                             <input
                                                 type="number"
-                                                value={item.sasia}
-                                                onChange={(e) =>
-                                                    handleInlineEdit(item.inventariId, "sasia", e.target.value)
-                                                }
+                                                defaultValue={item.sasia}
+                                                onBlur={(e) => handleInlineEdit(item.id, "sasia", e.target.value)}
+                                                onKeyDown={(e) => e.key === "Enter" && e.currentTarget.blur()}
                                                 className="border rounded px-2 py-1 w-full"
                                             />
                                         </td>
                                         <td className="py-3 px-4">
                                             <input
-                                                type="text"
-                                                value={item.shifra}
-                                                onChange={(e) =>
-                                                    handleInlineEdit(item.inventariId, "shifra", e.target.value)
-                                                }
+                                                defaultValue={item.shifra}
+                                                onBlur={(e) => handleInlineEdit(item.id, "shifra", e.target.value)}
+                                                onKeyDown={(e) => e.key === "Enter" && e.currentTarget.blur()}
                                                 className="border rounded px-2 py-1 w-full"
                                             />
                                         </td>
                                         <td className="py-3 px-4">{new Date(item.createdAt).toLocaleString()}</td>
                                         <td className="py-3 px-4">
                                             <button
-                                                onClick={() => handleDelete(item.inventariId)}
+                                                onClick={() => handleDelete(item.id)}
                                                 className="text-red-600 hover:text-red-800"
                                             >
                                                 <TrashIcon className="w-5 h-5" />
@@ -236,7 +256,6 @@ function InventariAktual() {
                         </tbody>
                     </table>
 
-                    {/* Pagination */}
                     <div className="flex justify-center mt-6 space-x-2">
                         <button
                             onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
@@ -246,11 +265,11 @@ function InventariAktual() {
                             <ChevronLeftIcon className="w-5 h-5" /> Kthehu
                         </button>
                         <span className="px-4 py-2 font-medium">
-                            Faqja {currentPage} nga {totalPages || 1}
+                            Faqja {currentPage} nga {totalPages}
                         </span>
                         <button
                             onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
-                            disabled={currentPage === totalPages || totalPages === 0}
+                            disabled={currentPage === totalPages}
                             className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50 flex items-center gap-2"
                         >
                             Tjetra <ChevronRightIcon className="w-5 h-5" />
