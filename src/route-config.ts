@@ -62,62 +62,62 @@ const routes = [
   {
     path: "/perdoruesit",
     component: UsersManagement,
-    allowedRoles: ["SuperAdmin","admin", "komune", "shkolle", "kompani", "Admin", "Kompani", "Komunë", "Shkollë"],
+    allowedRoles: ["SuperAdmin", "Admin", "Kompania", "Komunë", "Shkolla"],
   },
   {
     path: "/operations",
     component: OperationsList,
-    allowedRoles: ["SuperAdmin","admin", "komune", "shkolle", "kompani", "Admin", "Kompani", "Komunë", "Shkollë"],
+    allowedRoles: ["SuperAdmin", "Admin", "Kompania", "Komunë", "Shkolla"],
   },
   {
     path: "/rolePermissions",
     component: RolePermissions,
-    allowedRoles: ["SuperAdmin","admin", "komune", "shkolle", "kompani", "Admin", "Kompani", "Komunë", "Shkollë"],
+    allowedRoles: ["SuperAdmin", "Admin", "Kompania", "Komunë", "Shkolla"],
   },
 
   // Komuna
   { 
     path: "/komuna/shkolla/listashkollave",
     component: ListaShkollave,
-    allowedRoles: ["SuperAdmin","admin", "komune", "shkolle", "kompani", "Admin", "Kompani", "Komunë", "Shkollë"]
+    allowedRoles: ["SuperAdmin", "Admin", "Komunë"]
   },
   { 
     path: "/komuna/shto-shkolle",
     component: ShtoShkolle,
-    allowedRoles: ["SuperAdmin","admin", "komune", "shkolle", "kompani", "Admin", "Kompani", "Komunë", "Shkollë"]
+    allowedRoles: ["SuperAdmin", "Admin", "Komuna"]
   },
 
   {
     path: "/komuna/dashboard",
     component: KomunaDashboard,
-    allowedRoles: ["SuperAdmin","admin", "komune", "shkolle", "kompani", "Admin", "Kompani", "Komunë", "Shkollë"],
+    allowedRoles: ["SuperAdmin", "Admin", "Komunë"],
   },
   {
     path: "/komuna/porosite/lista",
     component: ListaPorosive,
-    allowedRoles: ["SuperAdmin","admin", "komune", "shkolle", "kompani", "Admin", "Kompani", "Komunë", "Shkollë"],
+    allowedRoles: ["SuperAdmin","Admin", "Komunë"],
   },
   {
     path: "/komuna/porosite/raporte",
     component: RaportetPorosi,
-    allowedRoles: ["SuperAdmin","admin", "komune", "shkolle", "kompani", "Admin", "Kompani", "Komunë", "Shkollë"],
+    allowedRoles: ["SuperAdmin", "Admin",  "Komunë"],
   },
   {
   path: "/komuna/buxheti/historiku",
   component: BuxhetiHistoriku,
-  allowedRoles: ["SuperAdmin","admin", "komune", "shkolle", "kompani", "Admin", "Kompani", "Komunë", "Shkollë"]
+  allowedRoles: ["SuperAdmin","Admin", "Komunë"]
   },
 
   { 
     path: "/komuna/buxheti",
     component: NdarjaBuxhetit,
-    allowedRoles: ["SuperAdmin","admin", "komune", "shkolle", "kompani", "Admin", "Kompani", "Komunë", "Shkollë"]
+    allowedRoles: ["SuperAdmin","Admin", "Komunë"]
   },
 
   {
   path: "/komuna/kompanite",
   component: KomunaListaKompanive,
-  allowedRoles: ["SuperAdmin","admin", "komune", "shkolle", "kompani", "Admin", "Kompani", "Komunë", "Shkollë"],
+  allowedRoles: ["SuperAdmin", "Admin", "Komunë"],
 },
 
 
@@ -125,42 +125,42 @@ const routes = [
   {
     path: "/shkolla/dashboard",
     component: ShkollaDashboard,
-    allowedRoles: ["SuperAdmin","admin", "komune", "shkolle", "kompani", "Admin", "Kompani", "Komunë", "Shkollë"],
+    allowedRoles: ["SuperAdmin", "Admin", "Shkolla"],
   },
   {
     path: "/shkolla/inventari",
     component: InventariAktual,
-    allowedRoles: ["SuperAdmin","admin", "komune", "shkolle", "kompani", "Admin", "Kompani", "Komunë", "Shkollë"],
+    allowedRoles: ["SuperAdmin","Admin", "Shkolla"],
   },
   {
     path: "/shkolla/porosite/market",
     component: Market,
-    allowedRoles: ["SuperAdmin","admin", "komune", "shkolle", "kompani", "Admin", "Kompani", "Komunë", "Shkollë"],
+    allowedRoles: ["SuperAdmin","Admin", "Shkolla"],
   },
   {
     path: "/shkolla/porosite/shporta",
     component: Shporta,
-    allowedRoles: ["SuperAdmin","admin", "komune", "shkolle", "kompani", "Admin", "Kompani", "Komunë", "Shkollë"],
+    allowedRoles: ["SuperAdmin", "Admin",  "Shkolla"],
   },
   {
     path: "/shkolla/porosite/historiku",
     component: Historiku,
-    allowedRoles: ["SuperAdmin","admin", "komune", "shkolle", "kompani", "Admin", "Kompani", "Komunë", "Shkollë"],
+    allowedRoles: ["SuperAdmin", "Admin", "Shkolla"],
   },
   {
     path: "/shkolla/stafi/menaxhimi",
     component: StafiShkolles,
-    allowedRoles: ["SuperAdmin","admin", "komune", "shkolle", "kompani", "Admin", "Kompani", "Komunë", "Shkollë"],
+    allowedRoles: ["SuperAdmin", "Admin",  "Shkollë"],
   },
   {
     path: "/shkolla/stafi/oret-shtese",
     component: OretShtese,
-    allowedRoles: ["SuperAdmin","admin", "komune", "shkolle", "kompani", "Admin", "Kompani", "Komunë", "Shkollë"],
+    allowedRoles: ["SuperAdmin", "Admin", "Shkollë"],
   },
   {
     path: "/shkolla/stafi/ndalesat",
     component: Ndalesat,
-    allowedRoles: ["SuperAdmin","admin", "komune", "shkolle", "kompani", "Admin", "Kompani", "Komunë", "Shkollë"],
+    allowedRoles: ["SuperAdmin", "Admin",  "Shkollë"],
   },
 
   // Kompania
@@ -168,11 +168,13 @@ const routes = [
   {
     path: "/kompania/dashboard",
     component: KompaniaDashboard,
-    allowedRoles: ["SuperAdmin","admin", "komune", "shkolle", "kompani", "Admin", "Kompani", "Komunë", "Shkollë"],
+    allowedRoles: ["SuperAdmin","Admin", "Kompania"]
   },
-  { path: "/kompania/regjistri", component: RegjistriProdukteve, allowedRoles: ["SuperAdmin","admin", "komune", "shkolle", "kompani", "Admin", "Kompani", "Komunë", "Shkolle"], },
-  { path: "/kompania/porosite/lista", component: ListaPorosiveKompani, allowedRoles: ["SuperAdmin","admin", "komune", "shkolle", "kompani", "Admin", "Kompani", "Komunë", "Shkolle"],},
-  { path: "/kompania/porosite/raporte", component: RaportiPorosiveKompani, allowedRoles: ["SuperAdmin","admin", "komune", "shkolle", "kompani", "Admin", "Kompani", "Komunë", "Shkolle"], },
+  
+  { path: "/kompania/regjistri", component: RegjistriProdukteve, allowedRoles: ["SuperAdmin", "Admin", "Kompania"], },
+  { path: "/kompania/porosite/lista", component: ListaPorosiveKompani, allowedRoles: ["SuperAdmin", "Admin", "Kompania"],},
+  { path: "/kompania/porosite/raporte", component: RaportiPorosiveKompani, allowedRoles: ["SuperAdmin","Admin", "Kompania"], },
+
     
 
   { path: "*", component: RedirectToLandingPage },
