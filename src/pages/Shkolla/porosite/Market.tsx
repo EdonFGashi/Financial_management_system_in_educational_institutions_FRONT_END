@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Sidebar from "../Sidebar";
+import axios from "axios";
+import Swal from "sweetalert2";
+import {urlProdukt} from "../../../endpoints";
 import {
     MagnifyingGlassIcon,
     ShoppingCartIcon,
@@ -10,64 +13,53 @@ import {
 } from "@heroicons/react/24/outline";
 
 // Tipet për produktet
-interface Product {
+interface Produkt {
     id: number;
-    name: string;
-    description: string;
-    price: number;
-    company: string;
-    category: string;
-    subcategory: string;
-    image: string;
-    dateAdded: string;
+    emri: string;
+    pershkrimi: string;
+    cmimi: number;
+    sasiaNeStok: number;
+    origjina?: string;
+    prodhuesi?: string;
+    fotografia?: string;
+    kompania: {
+        id: number;
+        emri: string;
+    };
+    createdAt: string; // DateTime from backend is serialized as string
 }
 
 
-
 function ShkollaMarket() {
-    useEffect(() => {
-        const fetchProducts = async () => {
+    const [produktiList, setProduktiList] = useState<Produkt[]>([]);
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 10;
+    const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
+    
+    const fetchProduktet = async () => {
             try {
-                const token = localStorage.getItem("token");
-                const response = await fetch("http://localhost:3000/api/produkti", {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                });
-    
-                if (!response.ok) {
-                    throw new Error("Nuk u morën produktet");
-                }
-    
-                const data = await response.json();
-                // Shembull strukture: përshtat sipas backend-it
-                const transformed = data.map((p: any) => ({
-                    id: p.id,
-                    name: p.emri,
-                    description: p.pershkrimi,
-                    price: p.cmimi,
-                    company: p.kompania.emri, // nëse është i lidhur përmes relacioneve
-                    category: p.kategoria,
-                    subcategory: p.nenkategoria,
-                    image: p.fotoUrl || "https://via.placeholder.com/150?text=Produkt",
-                    dateAdded: p.dataKrijimit,
-                }));
-    
-                setAllProducts(transformed);
+               const response = await axios.get(`${urlProdukt}/paginated`, {
+                params: { page: 1, pageSize: 1000 }
+            });
+            setProduktiList(response.data.data || []);
+            setAllProducts(response.data.data || []);
+            console.log(response.data.data)
             } catch (err) {
-                console.error("Gabim gjatë marrjes së produkteve:", err);
+                console.error("Failed to load products", err);
+                setToast({ message: "Gabim gjatë ngarkimit të produkteve", type: "error" });
             }
         };
-    
-        fetchProducts();
+
+    useEffect(() => {
+          fetchProduktet();
     }, []);
+
+             
     // Lista e produkteve
-    const [allProducts, setAllProducts] = useState<Product[]>([]);
+    const [allProducts, setAllProducts] = useState<Produkt[]>([]);
 
     // State për filtrimin dhe kërkimin
     const [searchTerm, setSearchTerm] = useState("");
-    const [selectedCategory, setSelectedCategory] = useState("të gjitha");
-    const [selectedSubcategory, setSelectedSubcategory] = useState("të gjitha");
     const [selectedCompany, setSelectedCompany] = useState("të gjitha");
     const [minPrice, setMinPrice] = useState("");
     const [maxPrice, setMaxPrice] = useState("");
@@ -75,17 +67,8 @@ function ShkollaMarket() {
     const [showFilters, setShowFilters] = useState(false);
     const [quantities, setQuantities] = useState<{ [key: number]: number }>({});
 
-    // Kategoritë e disponueshme
-    const categories = ["të gjitha", "mobilie", "aksesore", "teknologji", "libra"];
-    const subcategories = {
-        "të gjitha": ["të gjitha"],
-        "mobilie": ["të gjitha", "banka", "tavolina"],
-        "aksesore": ["të gjitha", "pastrim", "shkrim"],
-        "teknologji": ["të gjitha", "kompjutere", "printera"],
-        "libra": ["të gjitha", "tekste", "atlase"],
-    };
 
-    const companies = ["të gjitha", ...Array.from(new Set(allProducts.map(p => p.company)))];
+    // const companies = ["të gjitha", ...Array.from(new Set(allProducts.map(p => p.kompania.emri)))];
 
     // Funksioni për ndryshimin e sasisë
     const handleQuantityChange = (productId: number, value: number) => {
@@ -96,17 +79,13 @@ function ShkollaMarket() {
     };
 
     // Funksioni për shtimin në shportë
-    const addToCart = (product: Product) => {
-        const quantity = quantities[product.id] || 1;
-        alert(`Shtuar në shportë: ${quantity} x ${product.name}`);
-        // Këtu do të shtohet logjika për shtimin në shportë
+    const addToCart = (product: Produkt) => {
+        // Këtu do të shtohet logjika për shtimin në shportë me vone
     };
 
     // Funksioni për pastrimin e filtrave
     const clearFilters = () => {
         setSearchTerm("");
-        setSelectedCategory("të gjitha");
-        setSelectedSubcategory("të gjitha");
         setSelectedCompany("të gjitha");
         setMinPrice("");
         setMaxPrice("");
@@ -115,30 +94,28 @@ function ShkollaMarket() {
     // Filtrimi dhe sortimi i produkteve
     const filteredProducts = allProducts
         .filter((product) => {
-            const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                product.description.toLowerCase().includes(searchTerm.toLowerCase());
-            const matchesCategory = selectedCategory === "të gjitha" || product.category === selectedCategory;
-            const matchesSubcategory = selectedSubcategory === "të gjitha" || product.subcategory === selectedSubcategory;
-            const matchesCompany = selectedCompany === "të gjitha" || product.company === selectedCompany;
-            const matchesMinPrice = !minPrice || product.price >= Number(minPrice);
-            const matchesMaxPrice = !maxPrice || product.price <= Number(maxPrice);
+            const matchesSearch = product.emri.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                product.pershkrimi.toLowerCase().includes(searchTerm.toLowerCase());
+            // const matchesCompany = selectedCompany === "të gjitha" || product.kompania.emri === selectedCompany;
+            const matchesMinPrice = !minPrice || product.cmimi >= Number(minPrice);
+            const matchesMaxPrice = !maxPrice || product.cmimi <= Number(maxPrice);
 
-            return matchesSearch && matchesCategory && matchesSubcategory && matchesCompany && matchesMinPrice && matchesMaxPrice;
+            return matchesSearch && matchesMinPrice && matchesMaxPrice;
         })
         .sort((a, b) => {
             switch (sortOption) {
                 case "price-asc":
-                    return a.price - b.price;
+                    return a.cmimi - b.cmimi;
                 case "price-desc":
-                    return b.price - a.price;
+                    return b.cmimi - a.cmimi;
                 case "date-asc":
-                    return new Date(a.dateAdded).getTime() - new Date(b.dateAdded).getTime();
+                    return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
                 case "date-desc":
-                    return new Date(b.dateAdded).getTime() - new Date(a.dateAdded).getTime();
-                case "company-asc":
-                    return a.company.localeCompare(b.company);
-                case "company-desc":
-                    return b.company.localeCompare(a.company);
+                    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+                // case "company-asc":
+                //     return a.kompania?.emri.localeCompare(b.kompania?.emri || "") || 0;
+                // case "company-desc":
+                //       return b.kompania?.emri.localeCompare(a.kompania?.emri || "") || 0;
                 default:
                     return 0;
             }
@@ -238,53 +215,20 @@ function ShkollaMarket() {
                             </div>
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Kategoria</label>
-                                    <select
-                                        className="block w-full px-3 py-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                                        value={selectedCategory}
-                                        onChange={(e) => {
-                                            setSelectedCategory(e.target.value);
-                                            setSelectedSubcategory("të gjitha");
-                                        }}
-                                    >
-                                        {categories.map((category) => (
-                                            <option key={category} value={category}>
-                                                {category.charAt(0).toUpperCase() + category.slice(1)}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Nënkategoria</label>
-                                    <select
-                                        className="block w-full px-3 py-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                                        value={selectedSubcategory}
-                                        onChange={(e) => setSelectedSubcategory(e.target.value)}
-                                    >
-                                        {(subcategories[selectedCategory as keyof typeof subcategories] || ["të gjitha"]).map((subcat) => (
-                                            <option key={subcat} value={subcat}>
-                                                {subcat.charAt(0).toUpperCase() + subcat.slice(1)}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-
-                                <div>
+                                {/* <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Kompania</label>
                                     <select
                                         className="block w-full px-3 py-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
                                         value={selectedCompany}
                                         onChange={(e) => setSelectedCompany(e.target.value)}
                                     >
-                                        {companies.map((company) => (
-                                            <option key={company} value={company}>
-                                                {company.charAt(0).toUpperCase() + company.slice(1)}
+                                        {companies.map((kompania) => (
+                                            <option key={kompania} value={kompania}>
+                                                {kompania.charAt(0).toUpperCase() + kompania.slice(1)}
                                             </option>
                                         ))}
                                     </select>
-                                </div>
+                                </div> */}
 
                                 <div className="grid grid-cols-2 gap-2">
                                     <div>
@@ -331,18 +275,19 @@ function ShkollaMarket() {
                                 <div key={product.id} className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition">
                                     <div className="p-4">
                                         <img
-                                            src={product.image}
-                                            alt={product.name}
+                                            src={product.fotografia}
+                                            alt={product.fotografia}
                                             className="w-full h-48 object-contain mb-4"
                                         />
                                         <div className="flex justify-between items-start mb-1">
-                                            <h3 className="text-lg font-semibold text-gray-800">{product.name}</h3>
-
+                                            <h3 className="text-lg font-semibold text-gray-800">{product.emri}</h3>
                                         </div>
-                                        <p className="text-sm text-gray-600 mb-2">{product.description}</p>
-                                        <p className="text-sm text-gray-500 mb-1">Nga: {product.company}</p>
-                                        <p className="text-xs text-gray-400 mb-3">Shtuar: {new Date(product.dateAdded).toLocaleDateString()}</p>
-                                        <p className="text-xl font-bold text-green-600 mb-4">€{product.price.toFixed(2)}</p>
+                                        <p className="text-sm text-gray-600 mb-2">{product.pershkrimi}</p>
+                                        {/* <p className="text-sm text-gray-500 mb-1">
+                                            Nga: {product.kompania.emri || 'Kompani e panjohur'}
+                                        </p> */}
+                                        <p className="text-xs text-gray-400 mb-3">Shtuar: {new Date(product.createdAt).toLocaleDateString()}</p>
+                                        <p className="text-xl font-bold text-green-600 mb-4">€{product.cmimi.toFixed(2)}</p>
 
                                         <div className="flex items-center justify-between">
                                             <div className="flex items-center">
