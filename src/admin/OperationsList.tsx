@@ -43,8 +43,8 @@ const OperationsList = () => {
         "http://localhost:5102/api/operations/getOperations"
       );
       console.log(response.data);
-      setOperations(response.data);
-      setFilteredOperations(response.data);
+      setOperations(response.data.data);
+      setFilteredOperations(response.data.data);
     } catch (error) {
       console.error("Failed to load operations:", error);
     }
@@ -71,7 +71,7 @@ const OperationsList = () => {
         data
       );
       loadOperations();
-      setOperations((prevOperations) => [...prevOperations, response.data]);
+      setOperations((prevOperations) => [...prevOperations, response.data.data]);
       Swal.fire("Success", "Operation added successfully!", "success");
     } catch (error: any) {
       console.error("Failed to add operation:", error);
@@ -115,6 +115,7 @@ const OperationsList = () => {
         data
       );
 console.log("u editua: ", data);
+await loadOperations();
       const updated = response.data;
       setOperations((prev) =>
         prev.map((op) =>

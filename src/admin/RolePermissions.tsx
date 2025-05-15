@@ -73,7 +73,8 @@ const RolePermissions = () => {
       //   recordsPerPage: -1
       // });
       
-      setUsers(response.data);
+      setUsers(Array.isArray(response.data.data) ? response.data.data : []);
+
       console.log("Userat: ", response.data);
     } catch (error) {
       console.error("Failed to load roles:", error);
@@ -85,7 +86,8 @@ const RolePermissions = () => {
       const response = await axios.get(
         "http://localhost:5102/api/operations/getOperations"
       );
-      setOperations(response.data);
+      setOperations(Array.isArray(response.data.data) ? response.data.data : []);
+
     } catch (error) {
       console.error("Failed to load operations:", error);
     }
@@ -108,8 +110,9 @@ const RolePermissions = () => {
       );
       console.log("Krejt: ", response.data);
 
-      setRolePermissions(response.data);
-      setFilteredRolePermissions(response.data); // Initially no filter applied
+      const data = Array.isArray(response.data.data) ? response.data.data : [];
+    setRolePermissions(data);
+    setFilteredRolePermissions(data);
     } catch (error) {
       console.error("Failed to load role permissions:", error);
     }
@@ -429,7 +432,7 @@ console.log("u editua: ", data);
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {(filteredRolePermissions.length > 0 ? filteredRolePermissions : rolePermissions).map((rp) => (
+                  {(filteredRolePermissions.length > 0 ? filteredRolePermissions : rolePermissions)?.map((rp) => (
                     <tr key={rp.rolePermissionId} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{rp.userName}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{rp.role}</td>
