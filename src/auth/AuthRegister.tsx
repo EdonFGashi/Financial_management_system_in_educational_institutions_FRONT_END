@@ -6,7 +6,7 @@ import * as FiIcons from "react-icons/fi";
 import { userRegisterCredentialsShkolla, userRegisterCredentialsKomuna, userRegisterCredentialsAdmin } from "./auth.models";
 import { useKomunaOptions } from "../hooks/useKomunaOptions";
 import { fetchPersonByNrPersonal } from "../hooks/grabPersonDetails";
-
+import { useNavigate } from "react-router-dom";
 
 
 const FiUser = FiIcons.FiUser as unknown as React.FC<React.SVGProps<SVGSVGElement>>;
@@ -47,6 +47,9 @@ function AuthRegister(props: authFormProps) {
   const [animatedText, setAnimatedText] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
   const fullText = "Krijoni një llogari për të menaxhuar financat lehtësisht.";
+  const navigate = useNavigate();
+  const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
+
 
   const roles = ["Admin", "Komunë", "Shkollë"];
 
@@ -125,7 +128,13 @@ function AuthRegister(props: authFormProps) {
     setStrength(score);
   };
 
-  return (
+    return (
+         <>
+            {toast && (
+                <div className="fixed top-5 right-5 z-50 bg-green-600 text-white px-4 py-2 rounded shadow">
+                    {toast.message}
+                </div>
+            )}
     <div className="min-h-screen flex">
       {/* Left side - Sign Up form */}
       <div className="w-full md:w-1/2 flex flex-col justify-center items-center px-10 py-16 bg-white">
@@ -154,15 +163,22 @@ function AuthRegister(props: authFormProps) {
     }
   }}
   validationSchema={validationSchema}
-  onSubmit={(values, actions) => {
-    const { confirmPassword, ...cleaned } = values;
+                      onSubmit={async (values, actions) => {
+                          const { confirmPassword, ...cleaned } = values;
+
+                          await props.onSubmit(
+                              cleaned as userRegisterCredentials,
+                              actions as FormikHelpers<userRegisterCredentials>
+                          );
+
+                          setToast({ message: "Regjistrimi u krye me sukses!", type: "success" });
+
+                          setTimeout(() => {
+                              navigate("/signin");
+                          }, 1500);
+                      }}
+ 
   
-    props.onSubmit(
-      cleaned as userRegisterCredentials,
-      actions as FormikHelpers<userRegisterCredentials>
-    );
-    
-  }}
 >
 
 
@@ -374,7 +390,8 @@ function AuthRegister(props: authFormProps) {
         </h2>
       </div>
     </div>
-  );
+        </>
+    );
 }
 
 export default AuthRegister;

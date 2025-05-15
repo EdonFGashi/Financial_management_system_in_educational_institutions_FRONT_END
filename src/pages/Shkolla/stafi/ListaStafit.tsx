@@ -1,10 +1,14 @@
-﻿import { useState } from "react";
+﻿import { useEffect, useState } from "react";
 import Sidebar from "../Sidebar";
 import { Formik, Form, Field } from "formik";
 import { ChevronLeftIcon, ChevronRightIcon, TrashIcon } from "@heroicons/react/24/outline";
+import axios from "axios";
+import Swal from "sweetalert2";
+import Toast from "../../../components/Toast";
+import { urlStafi } from "../../../endpoints";
 
 interface Staff {
-    stafId: number;
+    id: number;
     emri: string;
     mbiemri: string;
     numriPersonal: string;
@@ -13,52 +17,84 @@ interface Staff {
     numriOreve: number;
 }
 
-let staffIdCounter = 1;
-
-function StafiShkolles() {
+function ListaStafit() {
     const [staffList, setStaffList] = useState<Staff[]>([]);
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10;
     const [filterPozita, setFilterPozita] = useState("");
+    const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
 
-    const handleDelete = (id: number) => {
-        const updatedList = staffList.filter((s) => s.stafId !== id);
-        setStaffList(updatedList);
-
-        const newTotalPages = Math.max(Math.ceil(updatedList.length / itemsPerPage), 1);
-        if (currentPage > newTotalPages) {
-            setCurrentPage(newTotalPages);
+    const fetchStafi = async () => {
+        try {
+            const response = await axios.get(`${urlStafi}/paginated`, {
+                params: {
+                    page: 1,
+                    pageSize: 1000 // Load all for local filtering
+                }
+            });
+            setStaffList(response.data.data || []);
+        } catch (error) {
+            console.error("Gabim gjatë marrjes së stafit:", error);
+            setToast({ message: "Gabim gjatë ngarkimit të stafit", type: "error" });
         }
     };
 
-    const handleInlineEdit = (
-        id: number,
-        field: keyof Omit<Staff, "stafId" | "numriPersonal" | "emri" | "mbiemri">,
-        value: string | number
-    ) => {
-        setStaffList((prev) =>
-            prev.map((s) =>
-                s.stafId === id
-                    ? {
-                        ...s,
-                        [field]: field === "pozita" ? value : Number(value),
-                    }
-                    : s
-            )
-        );
+    useEffect(() => {
+        fetchStafi();
+    }, []);
+
+    const handleDelete = async (id: number) => {
+        const result = await Swal.fire({
+            title: "A jeni i sigurt?",
+            text: "Dëshironi të fshini këtë staf?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#dc2626",
+            cancelButtonColor: "#6b7280",
+            confirmButtonText: "Po, Fshij",
+            cancelButtonText: "Anulo",
+        });
+
+        if (result.isConfirmed) {
+            try {
+                await axios.delete(`${urlStafi}/${id}`);
+                setToast({ message: "Stafi u fshi me sukses!", type: "success" });
+                fetchStafi();
+            } catch (error) {
+                console.error("Gabim gjatë fshirjes:", error);
+                setToast({ message: "Gabim gjatë fshirjes së stafit", type: "error" });
+            }
+        }
     };
 
-    const filteredList = staffList.filter(
-        (s) => !filterPozita || s.pozita.toLowerCase() === filterPozita.toLowerCase()
-    );
+    const handleInlineEdit = async (
+        id: number,
+        field: "pozita" | "paga" | "numriOreve",
+        value: string | number
+    ) => {
+        const updatedField = { [field]: field === "pozita" ? value : Number(value) };
 
-    const totalPages = Math.max(Math.ceil(filteredList.length / itemsPerPage), 1);
-    const paginatedStaff = filteredList.slice(
+        try {
+            await axios.put(`${urlStafi}/${id}`, updatedField);
+            fetchStafi();
+            setToast({ message: "Të dhënat u përditësuan me sukses", type: "success" });
+        } catch (error) {
+            console.error("Gabim gjatë përditësimit:", error);
+            setToast({ message: "Gabim gjatë përditësimit të të dhënave", type: "error" });
+        }
+    };
+
+    const uniquePozitat = Array.from(new Set(staffList.map((s) => s.pozita)));
+
+    const filteredStaff = filterPozita
+        ? staffList.filter((s) => s.pozita === filterPozita)
+        : staffList;
+
+    const totalPages = Math.max(Math.ceil(filteredStaff.length / itemsPerPage), 1);
+    const paginatedStaff = filteredStaff.slice(
         (currentPage - 1) * itemsPerPage,
         currentPage * itemsPerPage
     );
-
-    const uniquePozitat = Array.from(new Set(staffList.map((s) => s.pozita)));
 
     return (
         <div className="flex min-h-screen bg-gray-50 text-gray-800">
@@ -67,13 +103,17 @@ function StafiShkolles() {
             </div>
 
             <main className="flex-1 md:ml-64 pb-16 overflow-y-auto">
-                {/* Header */}
+                {toast && (
+                    <div className="fixed top-5 right-5 z-50">
+                        <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />
+                    </div>
+                )}
+
                 <div className="bg-gradient-to-r from-green-700 to-lime-600 text-white px-4 sm:px-6 md:px-12 py-8 md:py-10">
                     <h1 className="text-2xl sm:text-3xl font-bold mb-2">Stafi i Shkollës</h1>
                     <p className="text-base sm:text-lg text-green-100">Lista dhe menaxhimi i stafit</p>
                 </div>
 
-                {/* Formik Form */}
                 <div className="px-6 py-6">
                     <Formik
                         initialValues={{
@@ -82,16 +122,17 @@ function StafiShkolles() {
                             paga: 0,
                             numriOreve: 0,
                         }}
-                        onSubmit={(values, { resetForm }) => {
-                            const newStaff: Staff = {
-                                stafId: staffIdCounter++,
-                                emri: "",
-                                mbiemri: "",
-                                ...values,
-                            };
-                            setStaffList([newStaff, ...staffList]);
-                            resetForm();
-                            setCurrentPage(1);
+                        onSubmit={async (values, { resetForm }) => {
+                            try {
+                                await axios.post(urlStafi, values);
+                                setToast({ message: "Stafi u shtua me sukses!", type: "success" });
+                                resetForm();
+                                setCurrentPage(1);
+                                fetchStafi();
+                            } catch (error) {
+                                console.error("Gabim gjatë shtimit:", error);
+                                setToast({ message: "Gabim gjatë shtimit të stafit", type: "error" });
+                            }
                         }}
                     >
                         {() => (
@@ -99,46 +140,23 @@ function StafiShkolles() {
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div>
                                         <label className="block mb-1 font-medium">Numri Personal</label>
-                                        <Field
-                                            name="numriPersonal"
-                                            type="text"
-                                            className="w-full border border-gray-300 p-2 rounded"
-                                            required
-                                        />
+                                        <Field name="numriPersonal" type="text" className="w-full border border-gray-300 p-2 rounded" required />
                                     </div>
                                     <div>
                                         <label className="block mb-1 font-medium">Pozita</label>
-                                        <Field
-                                            name="pozita"
-                                            type="text"
-                                            className="w-full border border-gray-300 p-2 rounded"
-                                            required
-                                        />
+                                        <Field name="pozita" type="text" className="w-full border border-gray-300 p-2 rounded" required />
                                     </div>
                                     <div>
                                         <label className="block mb-1 font-medium">Paga (€)</label>
-                                        <Field
-                                            name="paga"
-                                            type="number"
-                                            className="w-full border border-gray-300 p-2 rounded"
-                                            required
-                                        />
+                                        <Field name="paga" type="number" className="w-full border border-gray-300 p-2 rounded" required />
                                     </div>
                                     <div>
                                         <label className="block mb-1 font-medium">Numri i orëve</label>
-                                        <Field
-                                            name="numriOreve"
-                                            type="number"
-                                            className="w-full border border-gray-300 p-2 rounded"
-                                            required
-                                        />
+                                        <Field name="numriOreve" type="number" className="w-full border border-gray-300 p-2 rounded" required />
                                     </div>
                                 </div>
                                 <div className="flex justify-end pt-4">
-                                    <button
-                                        type="submit"
-                                        className="bg-green-600 text-white px-5 py-2 rounded hover:bg-green-700 transition"
-                                    >
+                                    <button type="submit" className="bg-green-600 text-white px-5 py-2 rounded hover:bg-green-700 transition">
                                         Shto Stafin
                                     </button>
                                 </div>
@@ -147,7 +165,6 @@ function StafiShkolles() {
                     </Formik>
                 </div>
 
-                {/* Filters */}
                 <div className="px-6 pb-4 flex justify-end">
                     <select
                         value={filterPozita}
@@ -166,7 +183,6 @@ function StafiShkolles() {
                     </select>
                 </div>
 
-                {/* Table */}
                 <div className="px-6 pb-10 overflow-x-auto">
                     <table className="w-full bg-white rounded-lg shadow text-sm">
                         <thead className="bg-gray-100 text-gray-700 font-semibold">
@@ -183,43 +199,40 @@ function StafiShkolles() {
                         <tbody>
                             {paginatedStaff.length > 0 ? (
                                 paginatedStaff.map((staff) => (
-                                    <tr key={staff.stafId} className="border-t border-gray-200">
-                                        <td className="py-3 px-4">{staff.stafId}</td>
+                                    <tr key={staff.id} className="border-t border-gray-200">
+                                        <td className="py-3 px-4">{staff.id}</td>
                                         <td className="py-3 px-4">{`${staff.emri} ${staff.mbiemri}`}</td>
                                         <td className="py-3 px-4">{staff.numriPersonal}</td>
                                         <td className="py-3 px-4">
                                             <input
                                                 type="text"
-                                                value={staff.pozita}
-                                                onChange={(e) =>
-                                                    handleInlineEdit(staff.stafId, "pozita", e.target.value)
-                                                }
+                                                defaultValue={staff.pozita}
+                                                onBlur={(e) => handleInlineEdit(staff.id, "pozita", e.target.value)}
+                                                onKeyDown={(e) => e.key === "Enter" && e.currentTarget.blur()}
                                                 className="border rounded px-2 py-1 w-full"
                                             />
                                         </td>
                                         <td className="py-3 px-4">
                                             <input
                                                 type="number"
-                                                value={staff.paga}
-                                                onChange={(e) =>
-                                                    handleInlineEdit(staff.stafId, "paga", e.target.value)
-                                                }
+                                                defaultValue={staff.paga}
+                                                onBlur={(e) => handleInlineEdit(staff.id, "paga", e.target.value)}
+                                                onKeyDown={(e) => e.key === "Enter" && e.currentTarget.blur()}
                                                 className="border rounded px-2 py-1 w-full"
                                             />
                                         </td>
                                         <td className="py-3 px-4">
                                             <input
                                                 type="number"
-                                                value={staff.numriOreve}
-                                                onChange={(e) =>
-                                                    handleInlineEdit(staff.stafId, "numriOreve", e.target.value)
-                                                }
+                                                defaultValue={staff.numriOreve}
+                                                onBlur={(e) => handleInlineEdit(staff.id, "numriOreve", e.target.value)}
+                                                onKeyDown={(e) => e.key === "Enter" && e.currentTarget.blur()}
                                                 className="border rounded px-2 py-1 w-full"
                                             />
                                         </td>
                                         <td className="py-3 px-4">
                                             <button
-                                                onClick={() => handleDelete(staff.stafId)}
+                                                onClick={() => handleDelete(staff.id)}
                                                 className="text-red-600 hover:text-red-800"
                                             >
                                                 <TrashIcon className="w-5 h-5" />
@@ -237,7 +250,6 @@ function StafiShkolles() {
                         </tbody>
                     </table>
 
-                    {/* Pagination */}
                     <div className="flex justify-center mt-6 space-x-2">
                         <button
                             onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
@@ -263,4 +275,4 @@ function StafiShkolles() {
     );
 }
 
-export default StafiShkolles;
+export default ListaStafit;
