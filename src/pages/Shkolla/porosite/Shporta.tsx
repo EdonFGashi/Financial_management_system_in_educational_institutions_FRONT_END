@@ -2,67 +2,129 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Sidebar from "../Sidebar";
 import { TrashIcon, ArrowLeftIcon } from "@heroicons/react/24/outline";
+import axios from "axios";
+import {urlShporta} from "../../../endpoints";
+import Swal from "sweetalert2";
+import {urlListShkolla} from "../../../endpoints";
 
 interface CartItem {
     id: number;
-    name: string;
-    price: number;
-    quantity: number;
-    image: string;
+    produktiId: number;
+    sasia: number;
+    emriProduktit: string;
+    cmimiProduktit: number;
+    fotografia: string;
 }
 
 function Shporta() {
-    // Artikuj statikë në shportë
-    const [cartItems, setCartItems] = useState<CartItem[]>([
-        {
-            id: 1,
-            name: "Banka shkollore",
-            price: 25,
-            quantity: 2,
-            image: "https://via.placeholder.com/150?text=Banka"
-        },
-        {
-            id: 2,
-            name: "Shkumës whiteboard",
-            price: 3.5,
-            quantity: 5,
-            image: "https://via.placeholder.com/150?text=Shkumes"
-        },
-        {
-            id: 3,
-            name: "Laptop edukativ",
-            price: 450,
-            quantity: 1,
-            image: "https://via.placeholder.com/150?text=Laptop"
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 10;
+    const [totalItems, setTotalItems] = useState(0);
+    const [cartItems, setCartItems] = useState<CartItem[]>([]);
+    const [buxhetiAktual, setBuxhetiAktual] = useState<number | null>(null);
+    const [shkollaId, setShkollaId] = useState<number | null>(null);
+
+        const fetchShporta = async () => {
+            try {
+                const response = await axios.get(`${urlShporta}/paginated`, {
+                    params: {
+                        page: currentPage,
+                        recordsPerPage: itemsPerPage
+                    }
+                });
+
+                const items = response.data.data || [];
+                setCartItems(items);
+                setTotalItems(response.data.totalRecords);
+
+                if (items.length > 0 && !shkollaId) {
+                    setShkollaId(items[0].shkollaId);
+                }
+            } catch (error) {
+                console.error("Gabim gjatë marrjes së shportës", error);
+            }
+        };
+
+        useEffect(() => {
+            fetchShporta();
+        }, [currentPage]);
+
+        const updateQuantity = async (id: number, newQuantity: number) => {
+        if (newQuantity < 1) return;
+
+        try {
+            await axios.put(`${urlShporta}/${id}`, {
+                sasia: newQuantity
+            });
+
+            setCartItems(prev =>
+                prev.map(item =>
+                    item.id === id ? { ...item, sasia: newQuantity } : item
+                )
+            );
+        } catch (err) {
+            console.error("Gabim gjatë përditësimit të sasisë", err);
         }
-    ]);
+         };
 
-    const [availableBudget] = useState(75000);
+        const removeItem = async (id: number) => {
+        const result = await Swal.fire({
+            title: "A jeni i sigurt?",
+            text: "Produkti do të largohet nga shporta!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#16a34a", // e gjelbër
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Po, largoje",
+            cancelButtonText: "Anulo"
+        });
 
-    // Ruaj shportën në localStorage
+        if (result.isConfirmed) {
+            try {
+                await axios.delete(`${urlShporta}/${id}`);
+                setCartItems(prev => prev.filter(item => item.id !== id));
+
+                Swal.fire({
+                    icon: "success",
+                    title: "U fshi!",
+                    text: "Produkti u largua nga shporta.",
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+            } catch (err) {
+                console.error("Gabim gjatë fshirjes së produktit", err);
+                Swal.fire({
+                    icon: "error",
+                    title: "Gabim",
+                    text: "Nuk u arrit të largohet produkti.",
+                });
+            }
+        }
+    };
+
     useEffect(() => {
-        localStorage.setItem('shkollaCart', JSON.stringify(cartItems));
-    }, [cartItems]);
+        const fetchShkollaBudget = async () => {
+            if (shkollaId === null) return;
+
+            try {
+                const response = await axios.get(`${urlListShkolla}/${shkollaId}`);
+                setBuxhetiAktual(response.data.buxhetiAktual);
+            } catch (error) {
+                console.error("Gabim gjatë marrjes së buxhetit të shkollës", error);
+            }
+        };
+
+        fetchShkollaBudget();
+    }, [shkollaId]);
 
     // Funksione për menaxhimin e shportës
-    const updateQuantity = (id: number, newQuantity: number) => {
-        if (newQuantity < 1) return;
-        setCartItems(prevItems =>
-            prevItems.map(item =>
-                item.id === id ? { ...item, quantity: newQuantity } : item
-            )
-        );
-    };
-
-    const removeItem = (id: number) => {
-        setCartItems(prevItems => prevItems.filter(item => item.id !== id));
-    };
-
     const calculateTotal = () => {
-        return cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
+        return cartItems.reduce((total, item) => total + (item.cmimiProduktit * item.sasia), 0);
     };
 
-    const remainingBudget = availableBudget - calculateTotal();
+    const remainingBudget = (buxhetiAktual ?? 0) - calculateTotal();
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+
 
     return (
         <div className="flex min-h-screen bg-gray-50 text-gray-800">
@@ -99,7 +161,7 @@ function Shporta() {
                         <div className="bg-white rounded-xl shadow-sm p-6">
                             <h3 className="text-lg font-semibold text-gray-800 mb-2">Buxheti në Dispozicion</h3>
                             <p className={`text-2xl font-bold ${remainingBudget >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                €{remainingBudget.toLocaleString()}
+                                {buxhetiAktual === null ? 'Loading...' : `€${remainingBudget.toLocaleString()}`}
                             </p>
                         </div>
 
@@ -109,7 +171,7 @@ function Shporta() {
                                 €{calculateTotal().toLocaleString()}
                             </p>
                             <p className="text-sm text-gray-500 mt-1">
-                                {cartItems.reduce((total, item) => total + item.quantity, 0)} artikuj
+                                {cartItems.reduce((total, item) => total + item.sasia, 0)} artikuj
                             </p>
                         </div>
                     </div>
@@ -125,25 +187,25 @@ function Shporta() {
                                 {cartItems.map((item) => (
                                     <div key={item.id} className="p-4 sm:p-6">
                                         <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                                            <img src={item.image} alt={item.name} className="w-20 h-20 object-contain rounded-lg" />
+                                            <img src={item.fotografia} alt={item.emriProduktit} className="w-20 h-20 object-contain rounded-lg" />
 
                                             <div className="flex-1">
-                                                <h3 className="text-lg font-medium text-gray-800">{item.name}</h3>
-                                                <p className="text-green-600 font-semibold">€{item.price.toFixed(2)}</p>
-                                                <p className="text-sm text-gray-500">Total: €{(item.price * item.quantity).toFixed(2)}</p>
+                                                <h3 className="text-lg font-medium text-gray-800">{item.emriProduktit}</h3>
+                                                <p className="text-green-600 font-semibold">€{item.cmimiProduktit.toFixed(2)}</p>
+                                                <p className="text-sm text-gray-500">Total: €{(item.cmimiProduktit * item.sasia).toFixed(2)}</p>
                                             </div>
 
                                             <div className="flex items-center gap-4">
                                                 <div className="flex items-center border border-gray-300 rounded-lg">
                                                     <button
-                                                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                                                        onClick={() => updateQuantity(item.id, item.sasia - 1)}
                                                         className="px-3 py-1 text-gray-600 hover:bg-gray-100"
                                                     >
                                                         -
                                                     </button>
-                                                    <span className="px-3 py-1">{item.quantity}</span>
+                                                    <span className="px-3 py-1">{item.sasia}</span>
                                                     <button
-                                                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                                                        onClick={() => updateQuantity(item.id, item.sasia + 1)}
                                                         className="px-3 py-1 text-gray-600 hover:bg-gray-100"
                                                     >
                                                         +
@@ -164,6 +226,30 @@ function Shporta() {
                         )}
                     </div>
 
+                {totalPages > 1 && (
+                    <div className="flex justify-center mt-6 gap-2">
+                        <button
+                            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                            disabled={currentPage === 1}
+                            className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50"
+                        >
+                            Faqja paraprake
+                        </button>
+
+                        <span className="px-4 py-2 text-gray-700 font-medium">
+                            Faqja {currentPage} nga {totalPages}
+                        </span>
+
+                        <button
+                            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                            disabled={currentPage === totalPages}
+                            className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50"
+                        >
+                            Faqja tjetër
+                        </button>
+                    </div>
+                )}
+
                     {/* Butoni i porosisë */}
                     {cartItems.length > 0 && (
                         <div className="flex justify-end">
@@ -176,7 +262,7 @@ function Shporta() {
                                         : 'bg-green-600 hover:bg-green-700 text-white'
                                 }`}
                             >
-                                {remainingBudget < 0 ? 'Buxheti nuk mjafton' : 'Krye Porosinë'}
+                                {remainingBudget < 0 ? 'Buxheti nuk mjafton' : 'Kryej Porosinë'}
                             </button>
                         </div>
                     )}
