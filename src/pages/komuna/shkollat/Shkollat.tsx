@@ -1,80 +1,94 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { BuildingLibraryIcon } from "@heroicons/react/24/outline";
+import { BuildingLibraryIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import Sidebar from "../Sidebar";
 import Toast from "../../../components/Toast";
 import Swal from 'sweetalert2';
+import { urlListShkolla, urlShkolla } from "../../../endpoints"; 
+import axios from "axios";
 
-// Mock data
-const mockSchools = [
-  {
-    id: 1,
-    emri: "Shkolla Fillore 'Hasan Prishtina'",
-    lokacioni: "Prishtinë",
-    nrNxenesve: 850,
-    nrPersonalDrejtorit: "1234567890",
-    email: "hasan.prishtina@shkolla.com",
-    buxheti: 50000
-  },
-  {
-    id: 2,
-    emri: "Shkolla Fillore 'Gjergj Fishta'",
-    lokacioni: "Prishtinë",
-    nrNxenesve: 720,
-    nrPersonalDrejtorit: "0987654321",
-    email: "gjergj.fishta@shkolla.com",
-    buxheti: 45000
-  },
-  {
-    id: 3,
-    emri: "Shkolla Fillore 'Naim Frashëri'",
-    lokacioni: "Fushë Kosovë",
-    nrNxenesve: 650,
-    nrPersonalDrejtorit: "5678901234",
-    email: "naim.frasheri@shkolla.com",
-    buxheti: 40000
-  }
-];
+interface School {
+  id: number;
+  emriShkolles: string;
+  adresaId: number;
+  adresa: {
+    id: number;
+    rruga: string;
+    qyteti: string;
+    shteti: string;
+    kodiPostal: string;
+  } | null;
+  nrNxenesve: number;
+  drejtori: number;
+  person: {
+    emri: string;
+    mbiemri: string;
+    adresa: {
+      rruga: string;
+      qyteti: string;
+      shteti: string;
+    } | null;
+  };
+  buxhetiAktual: number;
+  buxhetiShfrytezuar: number;
+  user: {
+    email: string;
+    id: string;  // Added this field
+  };
+  userId: string; // You might also need this field
+}
 
 function Shkollat() {
-  const [schools, setSchools] = useState(mockSchools);
+  const [schools, setSchools] = useState<School[]>([]);
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingSchool, setEditingSchool] = useState<School | null>(null);
   const [filters, setFilters] = useState({
     emri: "",
-    nrPersonalDrejtorit: "",
     nrNxenesve: "",
     buxheti: "",
   });
 
-  const handleFilter = () => {
-    let filteredSchools = [...mockSchools];
+  useEffect(() => {
+    fetchSchools();
+  }, []);
 
-    if (filters.emri) {
-      filteredSchools = filteredSchools.filter(school => 
-        school.emri.toLowerCase().includes(filters.emri.toLowerCase())
-      );
+  const fetchSchools = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get(`${urlListShkolla}/get-all`);
+      if (response.data.succeeded) {
+        setSchools(response.data.data);
+      } else {
+        setToast({ message: response.data.message || 'Gabim gjatë marrjes së të dhënave', type: 'error' });
+      }
+    } catch (error) {
+      setToast({ message: 'Ndodhi një gabim gjatë komunikimit me serverin', type: 'error' });
+    } finally {
+      setLoading(false);
     }
+  };
 
-    if (filters.nrPersonalDrejtorit) {
-      filteredSchools = filteredSchools.filter(school => 
-        school.nrPersonalDrejtorit.includes(filters.nrPersonalDrejtorit)
-      );
+  const handleFilter = async () => {
+    setLoading(true);
+    try {
+      const queryParams = new URLSearchParams();
+      if (filters.emri) queryParams.append('emri', filters.emri);
+      if (filters.nrNxenesve) queryParams.append('nrNxenesve', filters.nrNxenesve);
+      if (filters.buxheti) queryParams.append('buxheti', filters.buxheti);
+
+      const response = await axios.get(`${urlListShkolla}/get-all?${queryParams}`);
+      if (response.data.succeeded) {
+        setSchools(response.data.data);
+      } else {
+        setToast({ message: response.data.message || 'Gabim gjatë filtrimit', type: 'error' });
+      }
+    } catch (error) {
+      setToast({ message: 'Ndodhi një gabim gjatë komunikimit me serverin', type: 'error' });
+    } finally {
+      setLoading(false);
     }
-
-    if (filters.nrNxenesve) {
-      filteredSchools = filteredSchools.filter(school => 
-        school.nrNxenesve >= parseInt(filters.nrNxenesve)
-      );
-    }
-
-    if (filters.buxheti) {
-      filteredSchools = filteredSchools.filter(school => 
-        school.buxheti >= parseInt(filters.buxheti)
-      );
-    }
-
-    setSchools(filteredSchools);
   };
 
   const handleDelete = async (id: number) => {
@@ -91,20 +105,24 @@ function Shkollat() {
 
     if (result.isConfirmed) {
       try {
-        // Add your API call here
-        // For now, we'll just remove from state
-        setSchools(prevSchools => prevSchools.filter(school => school.id !== id));
+        console.log("IDJ e shkolles: ",id);
+        const response = await axios.delete(`${urlListShkolla}/${id}`);
         
-        Swal.fire({
-          title: 'E fshirë!',
-          text: 'Shkolla u fshi me sukses.',
-          icon: 'success',
-          confirmButtonColor: '#4F46E5'
-        });
+        if (response.data.succeeded) {
+          setSchools(prevSchools => prevSchools.filter(school => school.id !== id));
+          Swal.fire({
+            title: 'E fshirë!',
+            text: response.data.message,
+            icon: 'success',
+            confirmButtonColor: '#4F46E5'
+          });
+        } else {
+          throw new Error(response.data.message);
+        }
       } catch (error) {
         Swal.fire({
           title: 'Gabim!',
-          text: 'Ndodhi një gabim gjatë fshirjes së shkollës',
+          text: error instanceof Error ? error.message : 'Ndodhi një gabim gjatë fshirjes së shkollës',
           icon: 'error',
           confirmButtonColor: '#EF4444'
         });
@@ -112,9 +130,64 @@ function Shkollat() {
     }
   };
 
-  const handleEdit = (id: number) => {
-    // For now just show a toast message
-    setToast({ message: "Funksioni i modifikimit do të implementohet së shpejti!", type: "error" });
+  const handleEdit = (school: School) => {
+    setEditingSchool(school);
+    setIsEditModalOpen(true);
+  };
+
+  const handleUpdate = async () => {
+    if (!editingSchool) return;
+
+    try {
+      const response = await axios.put(`${urlListShkolla}/${editingSchool.id}`, {
+        id: editingSchool.id,
+        emriShkolles: editingSchool.emriShkolles,
+        nrNxenesve: editingSchool.nrNxenesve,
+        drejtori: editingSchool.drejtori,
+        adresaId: editingSchool.adresaId,
+        userId: editingSchool.userId
+      });
+      
+      if (response.data.succeeded) {
+        // Preserve the existing school data and merge with update response
+        setSchools(prevSchools =>
+          prevSchools.map(school =>
+            school.id === editingSchool.id 
+              ? { 
+                  ...school, 
+                  ...response.data.data,
+                  // Preserve nested objects if they're not in the response
+                  person: response.data.data.person || school.person,
+                  adresa: response.data.data.adresa || school.adresa
+                } 
+              : school
+          )
+        );
+        setToast({ message: "Shkolla u përditësua me sukses!", type: "success" });
+        setIsEditModalOpen(false);
+        setEditingSchool(null);
+        // Refresh the schools data to ensure we have the latest state
+        fetchSchools();
+      } else {
+        throw new Error(response.data.message || "Ndodhi një gabim gjatë përditësimit");
+      }
+    } catch (error) {
+      setToast({ 
+        message: error instanceof Error ? error.message : 'Ndodhi një gabim gjatë përditësimit', 
+        type: "error" 
+      });
+    }
+  };
+
+  // Update the location display in the table to handle null values safely
+  const getLocationDisplay = (school: School) => {
+    if (school.person?.adresa?.qyteti) {
+      return school.person.adresa.qyteti;
+    }
+    if (school.adresa?.qyteti) {
+      return school.adresa.qyteti;
+    }
+    return 'N/A';
   };
 
   return (
@@ -142,7 +215,7 @@ function Shkollat() {
         </div>
 
         <div className="bg-white rounded-xl shadow p-6 mb-8">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 items-end">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 items-end">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Emri i shkollës</label>
               <input
@@ -150,17 +223,6 @@ function Shkollat() {
                 value={filters.emri}
                 onChange={(e) => setFilters({ ...filters, emri: e.target.value })}
                 placeholder="Emri i shkollës..."
-                className="w-full p-2 border border-gray-300 rounded-md text-sm"
-              />
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Nr. personal i drejtorit</label>
-              <input
-                type="text"
-                value={filters.nrPersonalDrejtorit}
-                onChange={(e) => setFilters({ ...filters, nrPersonalDrejtorit: e.target.value })}
-                placeholder="Nr. personal i drejtorit..."
                 className="w-full p-2 border border-gray-300 rounded-md text-sm"
               />
             </div>
@@ -177,9 +239,11 @@ function Shkollat() {
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Buxheti ($)</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Buxheti (€)</label>
               <input
                 type="number"
+                step="any"
+                min="-999999999"
                 value={filters.buxheti}
                 onChange={(e) => setFilters({ ...filters, buxheti: e.target.value })}
                 placeholder="Buxheti..."
@@ -219,14 +283,16 @@ function Shkollat() {
                       ${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}
                     `}
                   >
-                    <td className="px-6 py-4">{school.emri}</td>
-                    <td className="px-6 py-4">{school.lokacioni}</td>
+                    <td className="px-6 py-4">{school.emriShkolles}</td>
+                    <td className="px-6 py-4">
+                      {getLocationDisplay(school)}
+                    </td>
                     <td className="px-6 py-4">{school.nrNxenesve}</td>
-                    <td className="px-6 py-4">{school.buxheti} €</td>
+                    <td className="px-6 py-4">{school.buxhetiAktual} €</td>
                     <td className="px-6 py-4">
                       <div className="flex gap-2">
                         <button
-                          onClick={() => handleEdit(school.id)}
+                          onClick={() => handleEdit(school)}
                           className="text-indigo-600 hover:text-indigo-800"
                         >
                           Modifiko
@@ -245,6 +311,128 @@ function Shkollat() {
             </table>
           )}
         </div>
+
+        {/* Edit Modal with animations */}
+        {isEditModalOpen && editingSchool && (
+          <div 
+            className="fixed inset-0 z-50 overflow-y-auto"
+            aria-labelledby="modal-title"
+            role="dialog"
+            aria-modal="true"
+          >
+            <div 
+              className="fixed inset-0 bg-black bg-opacity-60 transition-opacity duration-300 ease-in-out backdrop-blur-sm"
+              aria-hidden="true"
+              onClick={() => setIsEditModalOpen(false)}
+            ></div>
+
+            <div className="flex min-h-screen items-center justify-center p-4">
+              <div 
+                className="bg-white rounded-2xl shadow-2xl transform transition-all duration-300 ease-in-out
+                          scale-95 opacity-0 translate-y-4 animate-modal w-full max-w-2xl mx-auto"
+                style={{
+                  animation: 'modal-pop 0.3s ease-out forwards'
+                }}
+              >
+                <style>
+                  {`
+                    @keyframes modal-pop {
+                      0% {
+                        opacity: 0;
+                        transform: scale(0.95) translateY(20px);
+                      }
+                      100% {
+                        opacity: 1;
+                        transform: scale(1) translateY(0);
+                      }
+                    }
+                  `}
+                </style>
+
+                <div className="p-8 relative">
+                  {/* Header */}
+                  <div className="flex justify-between items-center mb-8 border-b border-gray-100 pb-4">
+                    <h3 className="text-2xl font-bold text-gray-900">
+                      Modifiko Shkollën
+                    </h3>
+                    <button
+                      onClick={() => setIsEditModalOpen(false)}
+                      className="text-gray-400 hover:text-gray-500 transition-colors duration-150 ease-in-out
+                               hover:bg-gray-100 rounded-full p-2"
+                    >
+                      <XMarkIcon className="w-6 h-6" />
+                    </button>
+                  </div>
+
+                  {/* Form Content */}
+                  <div className="grid grid-cols-2 gap-6">
+                    <div className="col-span-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Emri i shkollës</label>
+                      <input
+                        type="text"
+                        value={editingSchool.emriShkolles}
+                        onChange={(e) => setEditingSchool({ ...editingSchool, emriShkolles: e.target.value })}
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 
+                                 focus:border-indigo-500 transition-all duration-150 ease-in-out shadow-sm"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Numri i nxënësve</label>
+                      <input
+                        type="number"
+                        value={editingSchool.nrNxenesve}
+                        onChange={(e) => setEditingSchool({ ...editingSchool, nrNxenesve: parseInt(e.target.value) })}
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 
+                                 focus:border-indigo-500 transition-all duration-150 ease-in-out shadow-sm"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Buxheti (€)</label>
+                      <input
+                        type="number"
+                        value={editingSchool.buxhetiAktual}
+                        disabled
+                        className="w-full p-3 border border-gray-300 rounded-lg bg-gray-50 cursor-not-allowed"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                      <input
+                        type="email"
+                        value={editingSchool.user.email}
+                        onChange={(e) => setEditingSchool({ ...editingSchool, user: { ...editingSchool.user, email: e.target.value } })}
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 
+                                 focus:border-indigo-500 transition-all duration-150 ease-in-out shadow-sm"
+                      />
+                    </div>
+
+                    {/* Footer */}
+                    <div className="col-span-2 flex justify-end gap-3 mt-8 pt-6 border-t border-gray-100">
+                      <button
+                        onClick={() => setIsEditModalOpen(false)}
+                        className="px-6 py-2.5 text-sm font-medium border border-gray-300 rounded-lg hover:bg-gray-50 
+                                 transition-colors duration-150 ease-in-out"
+                      >
+                        Anulo
+                      </button>
+                      <button
+                        onClick={handleUpdate}
+                        className="px-6 py-2.5 text-sm font-medium bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 
+                                 transform active:scale-95 transition-all duration-150 ease-in-out shadow-sm"
+                      >
+                        Ruaj ndryshimet
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
       </main>
     </div>
   );
