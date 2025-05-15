@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Sidebar from "../Sidebar";
 import axios from "axios";
-import Swal from "sweetalert2";
 import {urlProdukt} from "../../../endpoints";
 import {
     MagnifyingGlassIcon,
@@ -12,7 +11,6 @@ import {
     XMarkIcon,
 } from "@heroicons/react/24/outline";
 
-// Tipet për produktet
 interface Produkt {
     id: number;
     emri: string;
@@ -22,37 +20,36 @@ interface Produkt {
     origjina?: string;
     prodhuesi?: string;
     fotografia?: string;
-    kompania: {
-        id: number;
-        emri: string;
-    };
-    createdAt: string; // DateTime from backend is serialized as string
+    kompaniaEmri?: string;
+    createdAt: string; 
 }
 
 
 function ShkollaMarket() {
     const [produktiList, setProduktiList] = useState<Produkt[]>([]);
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 10;
+    const itemsPerPage = 6;
     const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
     
     const fetchProduktet = async () => {
-            try {
-               const response = await axios.get(`${urlProdukt}/paginated`, {
-                params: { page: 1, pageSize: 1000 }
-            });
-            setProduktiList(response.data.data || []);
-            setAllProducts(response.data.data || []);
-            console.log(response.data.data)
-            } catch (err) {
-                console.error("Failed to load products", err);
-                setToast({ message: "Gabim gjatë ngarkimit të produkteve", type: "error" });
-            }
+          try {
+        const response = await axios.get(`${urlProdukt}/paginated`, {
+            params: {
+                page: currentPage,
+                recordsPerPage: itemsPerPage,
+            },
+        });
+        setProduktiList(response.data.data || []);
+        setAllProducts(response.data.data || []);
+    } catch (err) {
+        console.error("Failed to load products", err);
+        setToast({ message: "Gabim gjatë ngarkimit të produkteve", type: "error" });
+    }
         };
 
     useEffect(() => {
           fetchProduktet();
-    }, []);
+    },  [currentPage]);
 
              
     // Lista e produkteve
@@ -68,7 +65,7 @@ function ShkollaMarket() {
     const [quantities, setQuantities] = useState<{ [key: number]: number }>({});
 
 
-    // const companies = ["të gjitha", ...Array.from(new Set(allProducts.map(p => p.kompania.emri)))];
+    const companies = ["të gjitha", ...Array.from(new Set(allProducts.map(p => p.kompaniaEmri || "")))];
 
     // Funksioni për ndryshimin e sasisë
     const handleQuantityChange = (productId: number, value: number) => {
@@ -96,11 +93,11 @@ function ShkollaMarket() {
         .filter((product) => {
             const matchesSearch = product.emri.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 product.pershkrimi.toLowerCase().includes(searchTerm.toLowerCase());
-            // const matchesCompany = selectedCompany === "të gjitha" || product.kompania.emri === selectedCompany;
+            const matchesCompany = selectedCompany === "të gjitha" || product.kompaniaEmri === selectedCompany;
             const matchesMinPrice = !minPrice || product.cmimi >= Number(minPrice);
             const matchesMaxPrice = !maxPrice || product.cmimi <= Number(maxPrice);
 
-            return matchesSearch && matchesMinPrice && matchesMaxPrice;
+            return matchesSearch && matchesCompany && matchesMinPrice && matchesMaxPrice;
         })
         .sort((a, b) => {
             switch (sortOption) {
@@ -112,10 +109,10 @@ function ShkollaMarket() {
                     return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
                 case "date-desc":
                     return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-                // case "company-asc":
-                //     return a.kompania?.emri.localeCompare(b.kompania?.emri || "") || 0;
-                // case "company-desc":
-                //       return b.kompania?.emri.localeCompare(a.kompania?.emri || "") || 0;
+                case "company-asc":
+                    return a.kompaniaEmri?.localeCompare(b.kompaniaEmri|| "") || 0;
+                case "company-desc":
+                      return b.kompaniaEmri?.localeCompare(a.kompaniaEmri || "") || 0;
                 default:
                     return 0;
             }
@@ -215,7 +212,7 @@ function ShkollaMarket() {
                             </div>
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                                {/* <div>
+                                <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Kompania</label>
                                     <select
                                         className="block w-full px-3 py-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
@@ -228,7 +225,7 @@ function ShkollaMarket() {
                                             </option>
                                         ))}
                                     </select>
-                                </div> */}
+                                </div>
 
                                 <div className="grid grid-cols-2 gap-2">
                                     <div>
@@ -283,9 +280,9 @@ function ShkollaMarket() {
                                             <h3 className="text-lg font-semibold text-gray-800">{product.emri}</h3>
                                         </div>
                                         <p className="text-sm text-gray-600 mb-2">{product.pershkrimi}</p>
-                                        {/* <p className="text-sm text-gray-500 mb-1">
-                                            Nga: {product.kompania.emri || 'Kompani e panjohur'}
-                                        </p> */}
+                                        <p className="text-sm text-gray-500 mb-1">
+                                            Kompania: {product.kompaniaEmri || 'Kompani e panjohur'}
+                                        </p>
                                         <p className="text-xs text-gray-400 mb-3">Shtuar: {new Date(product.createdAt).toLocaleDateString()}</p>
                                         <p className="text-xl font-bold text-green-600 mb-4">€{product.cmimi.toFixed(2)}</p>
 
@@ -323,6 +320,22 @@ function ShkollaMarket() {
                             ))}
                         </div>
                     )}
+                </div>
+                <div className="flex justify-center mt-8">
+                    <button
+                        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                        className="px-4 py-2 mx-1 bg-gray-200 rounded hover:bg-gray-300"
+                        disabled={currentPage === 1}
+                    >
+                        Faqja Paraprake
+                    </button>
+                    <span className="px-4 py-2">{currentPage}</span>
+                    <button
+                        onClick={() => setCurrentPage(prev => prev + 1)}
+                        className="px-4 py-2 mx-1 bg-gray-200 rounded hover:bg-gray-300"
+                    >
+                        Faqja Tjetër
+                    </button>
                 </div>
             </main>
         </div>
