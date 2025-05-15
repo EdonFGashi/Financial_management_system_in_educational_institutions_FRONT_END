@@ -21,6 +21,8 @@ function Shporta() {
     const itemsPerPage = 10;
     const [totalItems, setTotalItems] = useState(0);
     const [cartItems, setCartItems] = useState<CartItem[]>([]);
+    const [buxhetiAktual, setBuxhetiAktual] = useState<number | null>(null);
+    const [shkollaId, setShkollaId] = useState<number | null>(null);
 
         const fetchShporta = async () => {
             try {
@@ -31,8 +33,13 @@ function Shporta() {
                     }
                 });
 
-                setCartItems(response.data.data || []);
-                setTotalItems(response.data.totalRecords); // nëse backend e kthen këtë fushë
+                const items = response.data.data || [];
+                setCartItems(items);
+                setTotalItems(response.data.totalRecords);
+
+                if (items.length > 0 && !shkollaId) {
+                    setShkollaId(items[0].shkollaId);
+                }
             } catch (error) {
                 console.error("Gabim gjatë marrjes së shportës", error);
             }
@@ -94,14 +101,28 @@ function Shporta() {
             }
         }
     };
-    const [availableBudget] = useState(100);//FIX
+
+    useEffect(() => {
+        const fetchShkollaBudget = async () => {
+            if (shkollaId === null) return;
+
+            try {
+                const response = await axios.get(`${urlListShkolla}/${shkollaId}`);
+                setBuxhetiAktual(response.data.buxhetiAktual);
+            } catch (error) {
+                console.error("Gabim gjatë marrjes së buxhetit të shkollës", error);
+            }
+        };
+
+        fetchShkollaBudget();
+    }, [shkollaId]);
 
     // Funksione për menaxhimin e shportës
     const calculateTotal = () => {
         return cartItems.reduce((total, item) => total + (item.cmimiProduktit * item.sasia), 0);
     };
 
-    const remainingBudget = availableBudget - calculateTotal();
+    const remainingBudget = (buxhetiAktual ?? 0) - calculateTotal();
     const totalPages = Math.ceil(totalItems / itemsPerPage);
 
 
@@ -140,7 +161,7 @@ function Shporta() {
                         <div className="bg-white rounded-xl shadow-sm p-6">
                             <h3 className="text-lg font-semibold text-gray-800 mb-2">Buxheti në Dispozicion</h3>
                             <p className={`text-2xl font-bold ${remainingBudget >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                €{remainingBudget.toLocaleString()}
+                                {buxhetiAktual === null ? 'Loading...' : `€${remainingBudget.toLocaleString()}`}
                             </p>
                         </div>
 
