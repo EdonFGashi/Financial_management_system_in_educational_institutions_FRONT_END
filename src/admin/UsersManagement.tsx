@@ -24,14 +24,15 @@ export default function UsersManagement() {
         page: 1,
         recordsPerPage: 10
       });
-      console.log(response.data);
-          setUsers(response.data);
+      console.log(response.data.data);
+          setUsers(response.data.data);
     const total = parseInt(response.headers["totalamountofpages"]);
     setTotalPages(total);
     const initialRoles: { [key: string]: string } = {};
-    response.data.forEach((user: any) => {
-      initialRoles[user.email] = user.role; // suppose que tu reçois aussi "role"
+    response.data.data.forEach((user: any) => {
+      initialRoles[user.email] = user.role;
     });
+    
     setRolesMap(initialRoles);
   }
 

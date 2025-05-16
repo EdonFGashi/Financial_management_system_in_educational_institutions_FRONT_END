@@ -46,11 +46,11 @@ function Navbar() {
   ];
 
   const authorizedLinks = [
-    {to: "/register", label: "Regjistro", roles:["SuperAdmin","admin", "Komunë", "Admin"]},
-    { to: "/komuna/dashboard", label: "Komuna" , roles: ["SuperAdmin", "Komunë", "Admin"]},
-    { to: "/shkolla/dashboard", label: "Shkolla" , roles: ["SuperAdmin","admin", "Shkolla","Admin",]},
-    { to: "/kompania/dashboard", label: "Kompanite" , roles: ["SuperAdmin", "Admin", "Kompania"]},
-    { to: "/perdoruesit", label: "Perdoruesit" ,  roles: ["SuperAdmin", "Admin" ]}
+    {to: "/register", label: "Regjistro", roles:["SuperAdmin","admin", "Komunë", "Admin", "komune"]},
+    { to: "/komuna/dashboard", label: "Komuna" , roles: ["SuperAdmin", "Komunë", "Admin", "komune"]},
+    { to: "/shkolla/dashboard", label: "Shkolla" , roles: ["SuperAdmin","admin", "Shkolla","Admin", "komune"]},
+    { to: "/kompania/dashboard", label: "Kompanite" , roles: ["SuperAdmin", "Admin", "Kompania", "komune"]},
+    { to: "/perdoruesit", label: "Perdoruesit" ,  roles: ["SuperAdmin", "Admin" , "komune"]}
 
   ];
 

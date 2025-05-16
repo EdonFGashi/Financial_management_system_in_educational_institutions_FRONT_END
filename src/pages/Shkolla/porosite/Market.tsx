@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import Sidebar from "../Sidebar";
 import axios from "axios";
 import {urlProdukt} from "../../../endpoints";
+import {urlShporta} from "../../../endpoints";
 import {
     MagnifyingGlassIcon,
     ShoppingCartIcon,
@@ -76,8 +77,27 @@ function ShkollaMarket() {
     };
 
     // Funksioni për shtimin në shportë
-    const addToCart = (product: Produkt) => {
-        // Këtu do të shtohet logjika për shtimin në shportë me vone
+   const addToCart = async (product: Produkt) => {
+        const sasia = quantities[product.id] || 1;
+
+        try {
+            const response = await axios.post(urlShporta, {
+                produktiId: product.id,
+                sasia: sasia
+            }, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("token")}`
+                }
+            });
+            if (response.data.succeeded) {
+                setToast({ message: "Produkti u shtua në shportë", type: "success" });
+            } else {
+                setToast({ message: response.data.message || "Diçka shkoi keq", type: "error" });
+            }
+        } catch (error) {
+            console.error("Gabim gjatë shtimit në shportë", error);
+            setToast({ message: "Gabim gjatë shtimit në shportë", type: "error" });
+        }
     };
 
     // Funksioni për pastrimin e filtrave
@@ -127,9 +147,27 @@ function ShkollaMarket() {
         }
     }, []);
 
+    useEffect(() => {
+            if (toast) {
+                const timer = setTimeout(() => {
+                    setToast(null);
+                }, 3000); // zhduket pas 3 sekondash
+
+                return () => clearTimeout(timer);
+            }
+        }, [toast]);
+
     return (
         <div className="flex flex-col md:flex-row min-h-screen bg-gray-50 text-gray-800">
             <Sidebar />
+            
+            
+            {toast && (
+                <div className={`fixed top-10 right-4 z-50 px-10 py-6 rounded-lg shadow-lg text-white transition-all duration-300
+                    ${toast.type === 'success' ? 'bg-blue-600' : 'bg-red-600'}`}>
+                    {toast.message}
+                </div>
+            )}
 
             <main className="flex-1 pb-16 overflow-y-auto">
                 {/* Header */}
