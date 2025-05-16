@@ -24,7 +24,7 @@ interface Porosia {
 function Historiku() {
     const [porosite, setPorosite] = useState<Porosia[]>([]);
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 5;
+    const itemsPerPage = 10;
     const [loading, setLoading] = useState(false);
     const [startDate, setStartDate] = useState("");
     const [endDate, setEndDate] = useState("");
@@ -84,7 +84,7 @@ function Historiku() {
             head: [[
                 "ID", "Produkti", "Sasia", "Data", "Çmimi", "Statusi", "Kompania", "Modifikuar më"
             ]],
-            body: porosite.map(p => [
+            body: paginatedList.map(p => [
                 p.id,
                 p.produktiEmri,
                 p.sasia,
