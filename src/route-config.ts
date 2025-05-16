@@ -84,7 +84,7 @@ const routes = [
   { 
     path: "/komuna/shto-shkolle",
     component: ShtoShkolle,
-    allowedRoles: ["SuperAdmin", "Admin", "Komuna"]
+    allowedRoles: ["SuperAdmin", "Admin", "Komuna", "Komunë"]
   },
 
   {

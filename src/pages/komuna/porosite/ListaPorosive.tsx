@@ -57,14 +57,20 @@ function ListaPorosive() {
       if (filters.kompania) params.append("kompania", filters.kompania);
       if (filters.shkolla) params.append("shkolla", filters.shkolla);
       if (filters.data) params.append("data", filters.data);
-      console.log("Params: ", params.toString());
-      console.log("URL: ", `${urlPorosite}?${params.toString()}`);
+      
       const response = await axios.get(`${urlPorosite}?${params.toString()}`);
-      console.log("U ba kerkesa");
-      console.log("Response: ", response);
-      setPorosite(response.data.data || []);
+      console.log("Response data:", response.data);
+      
+      // Make sure we're accessing the data correctly from the response
+      if (response.data && response.data.data) {
+        setPorosite(response.data.data);
+      } else {
+        console.error("Unexpected data structure:", response.data);
+        setPorosite([]);
+      }
     } catch (error) {
       console.error("Gabim duke marrë porositë:", error);
+      setPorosite([]);
     }
   };
 
@@ -200,7 +206,7 @@ function ListaPorosive() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {porosite.length > 0 ? (
             porosite
-              .filter(p => p.statusi === "Ne Pritje")
+              .filter(p => p.statusi === "Pending") // Changed from "Ne Pritje" to "Pending"
               .map((porosi) => (
                 <div
   key={porosi.id}
