@@ -1,54 +1,126 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Sidebar from "../Sidebar";
 import {ChevronLeftIcon} from "@heroicons/react/24/outline";
 import {ChevronRightIcon} from "@heroicons/react/24/outline";
+import Swal from "sweetalert2";
+import {urlPorosite} from "../../../endpoints";
+import axios from "axios";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+import {
+    MagnifyingGlassIcon,
+    ShoppingCartIcon,
+    FunnelIcon,
+    ArrowsUpDownIcon,
+    XMarkIcon,
+} from "@heroicons/react/24/outline";
 
-interface Porosi {
+interface Porosia {
     id: number;
-    item: string;
+    dataPorosise: string;
     sasia: number;
-    data: string;
-    cmimiTotal: number;
-    aprovuar: boolean;
-    kompania: string;
+    statusi: string;
+    shenime?: string;
+    produktiId: number;
+    produktiCmimi: number;
+    produktiEmri: string;
+    kompaniaEmri: string;
+    updatedAt?: string;
 }
 
-const companyOptions = ["Albi Office", "TechKosova", "EduSupply", "PrintMaster", "OfficeMart"];
-
-const mockData: Porosi[] = Array.from({ length: 35 }, (_, i) => ({
-    id: i + 1,
-    item: ["Lapsa", "Laptop", "Tabela", "Printer", "Projektor", "Karrige", "Dritare", "Router", "Switch", "Smart TV"][i % 10],
-    sasia: (i + 2) % 20 + 1,
-    data: `2025-04-${(i % 28) + 1}`.padStart(10, "0"),
-    cmimiTotal: Math.floor(Math.random() * 500) + 50,
-    aprovuar: i % 2 === 0,
-    kompania: companyOptions[i % companyOptions.length],
-}));
-
 function Historiku() {
+    const [porosite, setPorosite] = useState<Porosia[]>([]);
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 5;
+    const [loading, setLoading] = useState(false);
+
+    const fetchPorosite = async () => {
+        setLoading(true);
+        try {
+            const response = await axios.get(`${urlPorosite}/paginated`, {
+                params: {
+                    page: currentPage,
+                    recordsPerPage: itemsPerPage,
+                },
+            });
+            setPorosite(response.data.data);
+            setAllPorosite(response.data.totalPages);
+        } catch (error) {
+            console.error("Error fetching data:", error);
+            Swal.fire("Gabim", "Nuk u arrit të merret lista e porosive", "error");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchPorosite();
+    }, [currentPage]);   
+
+    // Lista e porosive
+    const [allPorosite, setAllPorosite] = useState<Porosia[]>([]);
+    
+    // Filtrimi
     const [startDate, setStartDate] = useState("");
     const [endDate, setEndDate] = useState("");
-    const [selectedCompany, setSelectedCompany] = useState("");
+    const [selectedCompany, setSelectedCompany] = useState("të gjitha");
     const [minPrice, setMinPrice] = useState("");
     const [maxPrice, setMaxPrice] = useState("");
+    const [showFilters, setShowFilters] = useState(false);
 
-    const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 10;
+    // Kompanite
+    // const companies = ["të gjitha", ...Array.from(new Set(allPorosite.map(p => p.kompaniaEmri || "")))];
 
-    const filteredPorosite = mockData.filter((p) => {
-        const matchStart = !startDate || new Date(p.data) >= new Date(startDate);
-        const matchEnd = !endDate || new Date(p.data) <= new Date(endDate);
-        const matchCompany = !selectedCompany || p.kompania === selectedCompany;
-        const matchMin = !minPrice || p.cmimiTotal >= parseFloat(minPrice);
-        const matchMax = !maxPrice || p.cmimiTotal <= parseFloat(maxPrice);
-        return matchStart && matchEnd && matchCompany && matchMin && matchMax;
-    });
+      // Funksioni për pastrimin e filtrave
+    const clearFilters = () => {
+        setStartDate("");
+        setEndDate("");
+        setSelectedCompany("të gjitha");
+        setMinPrice("");
+        setMaxPrice("");
+    };
 
-    const totalPages = Math.ceil(filteredPorosite.length / itemsPerPage);
-    const paginatedPorosite = filteredPorosite.slice(
-        (currentPage - 1) * itemsPerPage,
-        currentPage * itemsPerPage
-    );
+    // Filtrimi i produkteve
+    // const filteredPorosite = allPorosite
+    //     .filter((porosia) => {
+    //         const orderDate = new Date(porosia.dataPorosise);
+    //         const matchesStartDate = !startDate || orderDate >= new Date(startDate);
+    //         const matchesEndDate = !endDate || orderDate <= new Date(endDate);
+    //         const matchesCompany = selectedCompany === "të gjitha" || porosia.kompaniaEmri === selectedCompany;
+    //         const matchesMinPrice = !minPrice || (porosia.produktiCmimi*porosia.sasia) >= Number(minPrice);
+    //         const matchesMaxPrice = !maxPrice || (porosia.produktiCmimi*porosia.sasia) <= Number(maxPrice);
+    //         return matchesCompany && matchesMinPrice && matchesMaxPrice;
+    //     });
+
+    const generatePDF = () => {
+    const doc = new jsPDF();
+        
+        doc.setFontSize(16); // Optional: set font size
+        doc.text("Raporti i Porosive", 14, 20); // (text, x, y)
+
+        autoTable(doc, {
+            startY: 30, 
+            head: [[
+                "ID", "Produkti", "Sasia", "Data", "Çmimi", "Statusi", "Kompania", "Modifikuar më"
+            ]],
+            body: porosite.map(p => [
+                p.id,
+                p.produktiEmri,
+                p.sasia,
+                new Date(p.dataPorosise).toLocaleDateString(),
+                `€${(p.produktiCmimi * p.sasia).toFixed(2)}`,
+                p.statusi,
+                p.kompaniaEmri,
+                p.updatedAt
+                    ? new Date(p.updatedAt).toLocaleDateString("sq-AL", {
+                        day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit"
+                    })
+                    : "—",
+            ]),
+        });
+
+        doc.save("historiku_porosive.pdf");
+    };
 
     return (
         <div className="flex min-h-screen bg-gray-50 text-gray-800">
@@ -85,10 +157,10 @@ function Historiku() {
                         onChange={(e) => setSelectedCompany(e.target.value)}
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                     >
-                        <option value="">Zgjidh kompaninë</option>
-                        {companyOptions.map((c, idx) => (
+                        {/* <option value="">Zgjidh kompaninë</option>
+                        {companies.map((c, idx) => (
                             <option key={idx} value={c}>{c}</option>
-                        ))}
+                        ))} */}
                     </select>
 
                     {/* Min/Max price */}
@@ -112,38 +184,62 @@ function Historiku() {
 
                 {/* Table */}
                 <div className="px-4 sm:px-6 md:px-12 pb-10 overflow-x-auto">
-                    <table className="w-full bg-white rounded-xl shadow-md text-sm">
+                    <div className="px-4 sm:px-6 md:px-12 pb-10 overflow-x-auto">
+                    <table className="w-full bg-white rounded-xl shadow-md text-sm table-auto">
                         <thead className="bg-gray-100 text-gray-700 font-semibold">
-                        <tr>
-                            <th className="py-3 px-4 text-left">#</th>
-                            <th className="py-3 px-4 text-left">Item</th>
-                            <th className="py-3 px-4 text-left">Sasia</th>
-                            <th className="py-3 px-4 text-left">Data</th>
-                            <th className="py-3 px-4 text-left">Çmimi Total</th>
-                            <th className="py-3 px-4 text-left">Aprovuar</th>
-                            <th className="py-3 px-4 text-left">Kompania</th>
-                        </tr>
+                            <tr>
+                                <th className="py-3 px-4 text-left">ID e Porosisë</th>
+                                <th className="py-3 px-4 text-left">Produkti</th>
+                                <th className="py-3 px-4 text-right">Sasia</th>
+                                <th className="py-3 px-4 text-left">Data e Porosisë</th>
+                                <th className="py-3 px-4 text-right">Çmimi Total</th>
+                                <th className="py-3 px-4 text-center">Statusi</th>
+                                <th className="py-3 px-4 text-left">Kompania</th>
+                                <th className="py-3 px-4 text-left min-w-[140px]">Modifikuar më</th>
+                            </tr>
                         </thead>
                         <tbody>
-                        {paginatedPorosite.length > 0 ? (
-                            paginatedPorosite.map((p) => (
-                                <tr key={p.id} className="border-t border-gray-200">
-                                    <td className="py-3 px-4">{p.id}</td>
-                                    <td className="py-3 px-4">{p.item}</td>
-                                    <td className="py-3 px-4">{p.sasia}</td>
-                                    <td className="py-3 px-4">{p.data}</td>
-                                    <td className="py-3 px-4">€{p.cmimiTotal.toFixed(2)}</td>
-                                    <td className="py-3 px-4">{p.aprovuar ? "Po" : "Jo"}</td>
-                                    <td className="py-3 px-4">{p.kompania}</td>
+                            {porosite.length > 0 ? (
+                                porosite.map((p) => (
+                                    <tr key={p.id} className="border-t border-gray-200 hover:bg-gray-50">
+                                        <td className="py-3 px-4">{p.id}</td>
+                                        <td className="py-3 px-4">{p.produktiEmri}</td>
+                                        <td className="py-3 px-4 text-right">{p.sasia}</td>
+                                        <td className="py-3 px-4">{new Date(p.dataPorosise).toLocaleDateString()}</td>
+                                        <td className="py-3 px-4 text-right">
+                                            {/* Replace with actual price logic */}
+                                            €{(p["produktiCmimi"] ?? 0 * p.sasia).toFixed(2)}
+                                        </td>
+                                        <td className="py-3 px-4 text-center">
+                                            <span className={`inline-block px-2 py-1 rounded text-xs font-medium 
+                                                ${p.statusi === "Paguar" ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"}`}>
+                                                {p.statusi === "Paguar" ? "Paguar" : "Ne pritje"}
+                                            </span>
+                                        </td>
+                                        <td className="py-3 px-4">{p.kompaniaEmri}</td>
+                                        <td className="py-3 px-4">
+                                            {p.updatedAt
+                                                ? new Date(p.updatedAt).toLocaleDateString("sq-AL", {
+                                                    day: "2-digit",
+                                                    month: "short",
+                                                    year: "numeric",
+                                                    hour: "2-digit",
+                                                    minute: "2-digit",
+                                                })
+                                                : "—"}
+                                        </td>
+                                    </tr>
+                                ))
+                            ) : (
+                                <tr>
+                                    <td colSpan={8} className="py-6 text-center text-gray-500">
+                                        {loading ? "Duke u ngarkuar..." : "Nuk u gjet asnjë porosi."}
+                                    </td>
                                 </tr>
-                            ))
-                        ) : (
-                            <tr>
-                                <td colSpan={7} className="py-6 text-center text-gray-500">Nuk u gjet asnjë porosi.</td>
-                            </tr>
-                        )}
+                            )}
                         </tbody>
                     </table>
+                </div>
 
                     <div className="flex justify-center mt-6 space-x-2">
                         <button
@@ -153,10 +249,8 @@ function Historiku() {
                         >
                             <ChevronLeftIcon className="w-5 h-5" /> Kthehu
                         </button>
-                        <span className="px-4 py-2 font-medium">Faqja {currentPage} nga {totalPages}</span>
                         <button
-                            onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
-                            disabled={currentPage === totalPages}
+                            onClick={() => setCurrentPage(prev => prev + 1)}
                             className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50 flex items-center gap-2"
                         >
                             Tjetra
@@ -167,7 +261,7 @@ function Historiku() {
                     {/* PDF Download Button - Now at the bottom */}
                     <div className="flex justify-end">
                         <button
-                            onClick={() => alert("Raporti do të shkarkohet (placeholder)")}
+                            onClick={generatePDF}
                             className="px-5 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition -mt-[30px]"
                         >
                             Shkarko në PDF
