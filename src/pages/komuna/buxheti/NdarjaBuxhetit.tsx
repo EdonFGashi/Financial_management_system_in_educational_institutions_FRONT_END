@@ -54,7 +54,6 @@ function NdarjaBuxhetit() {
   const [schoolRecord, setSchoolRecord] = useState<School[]>([]);
   const [schools, setSchools] = useState<SchoolObject[]>([]);
   const [totalBudget, setTotalBudget] = useState(0);
-  const [remainingBudget, setRemainingBudget] = useState(542);
   const [selectedMonth, setSelectedMonth] = useState("Qershor 2025");
   const [toast, setToast] = useState<{
     message: string;
@@ -399,20 +398,12 @@ if(response.status == 200) {
         </div>
 
         {/* Budget Overview Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
+        <div className="grid grid-cols-1 gap-6 mb-8">
           <div className="bg-green-50 p-6 rounded-xl border border-green-200">
             <h3 className="text-green-700 font-semibold mb-2">
               Buxheti në dispozicion:
             </h3>
             <p className="text-3xl font-bold text-green-600">{totalBudget} €</p>
-          </div>
-          <div className="bg-red-50 p-6 rounded-xl border border-red-200">
-            <h3 className="text-red-700 font-semibold mb-2">
-              Buxheti i ndarë:
-            </h3>
-            <p className="text-3xl font-bold text-red-600">
-              {remainingBudget} €
-            </p>
           </div>
         </div>
 

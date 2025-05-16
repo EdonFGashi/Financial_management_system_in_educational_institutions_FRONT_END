@@ -12,6 +12,7 @@ import Toast from "../../../components/Toast";
 import Swal from "sweetalert2";
 import { urlNdarjetBuxhetit } from "../../../endpoints";
 import axios from "axios";
+import { generateHistoryPDF } from "../../../components/PdfGenerator";
 
 interface HistorikuEntry {
   id: number;
@@ -172,30 +173,18 @@ function Historiku() {
       return;
     }
 
-    const result = await Swal.fire({
-      title: "Gjenero PDF",
-      text: `Dëshironi të gjeneroni PDF për ${selectedEntries.length} regjistrime?`,
-      icon: "question",
-      showCancelButton: true,
-      confirmButtonColor: "#4F46E5",
-      cancelButtonColor: "#EF4444",
-      confirmButtonText: "Gjenero",
-      cancelButtonText: "Anulo",
-    });
-
-    if (result.isConfirmed) {
-      try {
-        // Logic here
-        setToast({
-          message: "PDF u gjenerua me sukses!",
-          type: "success",
-        });
-      } catch (error) {
-        setToast({
-          message: "Ndodhi një gabim gjatë gjenerimit të PDF-së",
-          type: "error",
-        });
-      }
+    try {
+      await generateHistoryPDF({
+        entries: selectedEntries,
+        filters,
+        onSuccess: (message) => setToast({ message, type: "success" }),
+        onError: (message) => setToast({ message, type: "error" })
+      });
+    } catch (error) {
+      setToast({
+        message: "Ndodhi një gabim gjatë gjenerimit të PDF-së",
+        type: "error",
+      });
     }
   };
 
@@ -307,6 +296,14 @@ function Historiku() {
             <table className="w-full">
               <thead className="bg-gray-50">
                 <tr>
+                  <th className="px-4 sm:px-6 py-3 sm:py-4 text-center text-xs sm:text-sm font-semibold text-gray-900">
+                    <input
+                      type="checkbox"
+                      checked={selectAll}
+                      onChange={toggleSelectAll}
+                      className="w-4 h-4 text-indigo-600 rounded border-gray-300"
+                    />
+                  </th>
                   <th className="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold text-gray-900">
                     Drejtori
                   </th>
@@ -334,6 +331,14 @@ function Historiku() {
               <tbody className="divide-y divide-gray-200">
                 {entries.map((entry) => (
                   <tr key={entry.id} className="hover:bg-gray-50">
+                    <td className="px-4 sm:px-6 py-3 sm:py-4 text-center">
+                      <input
+                        type="checkbox"
+                        checked={entry.selected || false}
+                        onChange={() => toggleSingleEntry(entry.id)}
+                        className="w-4 h-4 text-indigo-600 rounded border-gray-300"
+                      />
+                    </td>
                     <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-gray-700">
                       {entry.emriDrejtorit} {entry.mbiemriDrejtorit}
                     </td>
