@@ -34,6 +34,7 @@ function Sidebar() {
   const {update, claims} = useContext(AuthenticationContext);
   const navigate = useNavigate();
 
+  const email = claims.find(claim => claim.name === "email")?.value;
 
   const isActive = (path: string) =>
     location.pathname === path
@@ -61,15 +62,24 @@ function Sidebar() {
       >
         <div>
           {/* User Info */}
-          <div className="flex items-center gap-3 mb-10">
-            <UserCircleIcon className="w-10 h-10 text-indigo-500" />
-            <div>
-              <p className="text-sm text-gray-500">Përdoruesi</p>
-              <h2 className="text-lg font-bold text-gray-800">
-                Admin i Komunës
-              </h2>
+          <Link
+            to="/komuna/profile"
+            className="flex items-center gap-3 mb-10 cursor-pointer hover:bg-gray-50 p-3 rounded-lg transition-all duration-200"
+          >
+            <div className="relative">
+              <UserCircleIcon className="w-12 h-12 text-indigo-500" />
+              <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-400 rounded-full border-2 border-white"></div>
             </div>
-          </div>
+            <div className="flex-1">
+              <p className="text-xs font-medium text-gray-500 mb-0.5">Përdoruesi</p>
+              <div className="flex items-center gap-2">
+                <h2 className="text-sm font-semibold text-gray-800 truncate max-w-[140px]">
+                  {email}
+                </h2>
+                <ChevronDownIcon className="w-4 h-4 text-gray-400" />
+              </div>
+            </div>
+          </Link>
 
           {/* Navigation */}
           <nav className="space-y-2">

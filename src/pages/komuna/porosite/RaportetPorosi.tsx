@@ -34,7 +34,7 @@ function RaportetPorosi() {
     shkolla: "",
     ngaData: "",
     deriData: "",
-    statuset: ["Ne Pritje"],
+    statuset: ["Ne Pritje", "Paguar", "Fshire"], // All statuses selected by default
   });
 
   useEffect(() => {
@@ -50,10 +50,9 @@ function RaportetPorosi() {
       if (filters.ngaData) params.append("ngaData", filters.ngaData);
       if (filters.deriData) params.append("deriData", filters.deriData);
       filters.statuset.forEach((status) => params.append("statuset", status));
-      console.log("Request: ", params.toString());
 
       const response = await axios.get(`${urlRaporti}?${params.toString()}`);
-      console.log("Response: ", response.data);
+      // Access the data array directly from response.data.data
       setRecords((response.data.data || []).map((r: any) => ({ ...r, selected: false })));
     } catch (error) {
       console.error("Gabim gjatë marrjes së raporteve:", error);
