@@ -26,6 +26,7 @@ import ShtoShkolle from "./pages/komuna/shkollat/ShtoShkolle";
 import NdarjaBuxhetit from "./pages/komuna/buxheti/NdarjaBuxhetit";
 import BuxhetiHistoriku from "./pages/komuna/buxheti/Historiku";
 import KomunaListaKompanive from "./pages/komuna/kontraktoret/ListaKompanive";
+import UserProfile from "./pages/komuna/UserProfile";
 
 /*
 * Shkolla routes
@@ -175,7 +176,11 @@ const routes = [
   { path: "/kompania/porosite/lista", component: ListaPorosiveKompani, allowedRoles: ["SuperAdmin", "Admin", "Kompania"],},
   { path: "/kompania/porosite/raporte", component: RaportiPorosiveKompani, allowedRoles: ["SuperAdmin","Admin", "Kompania"], },
 
-    
+  { 
+    path: "/komuna/profile", 
+    component: UserProfile,
+    allowedRoles: ["SuperAdmin", "Admin", "Komunë", "Shkolla", "Kompania"]
+  },
 
   { path: "*", component: RedirectToLandingPage },
 ];
