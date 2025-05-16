@@ -65,7 +65,7 @@ function ShkollaMarket() {
     const [showFilters, setShowFilters] = useState(false);
     const [quantities, setQuantities] = useState<{ [key: number]: number }>({});
 
-
+    //
     const companies = ["të gjitha", ...Array.from(new Set(allProducts.map(p => p.kompaniaEmri || "")))];
 
     // Funksioni për ndryshimin e sasisë
