@@ -40,6 +40,7 @@ import StafiShkolles from "./pages/Shkolla/stafi/ListaStafit";
 import OretShtese from "./pages/Shkolla/stafi/OretShtese";
 import Ndalesat from "./pages/Shkolla/stafi/Ndalesat";
 import UsersManagement from "./admin/UsersManagement";
+import ShkollaUserProfile from "./pages/Shkolla/UserProfile";
 
 /*
 * Kompania routes
@@ -51,6 +52,7 @@ import RaportiPorosiveKompani from "./pages/Kompania/porosite/raportiPorosive";
 import OperationsList from "./admin/OperationsList";
 import RolePermissions from "./admin/RolePermissions";
 import RoleBasedRegister from "./routes/RegisterRoute";
+import KompaniaUserProfile from "./pages/Kompania/UserProfile";
 
 
 // const routes = [
@@ -295,6 +297,11 @@ const routes = [
     allowedRoles: ["SuperAdmin", "Admin",  "Shkolla", "komuKomunëne", "komune"],
 
   },
+  {
+    path: "/shkolla/profile",
+    component: ShkollaUserProfile,
+    allowedRoles: ["SuperAdmin", "Admin", "Shkolla", "Komunë", "komune"],
+  },
 
   // Kompania
 
@@ -307,6 +314,7 @@ const routes = [
   { path: "/kompania/regjistri", component: RegjistriProdukteve, allowedRoles: ["SuperAdmin", "Admin", "Kompania", "Komunë", "komune"], },
   { path: "/kompania/porosite/lista", component: ListaPorosiveKompani, allowedRoles: ["SuperAdmin", "Admin", "Kompania", "Komunë", "komune"],},
   { path: "/kompania/porosite/raporte", component: RaportiPorosiveKompani, allowedRoles: ["SuperAdmin","Admin", "Kompania", "Komunë", "komune"], },
+  { path: "/kompania/profile", component: KompaniaUserProfile, allowedRoles: ["SuperAdmin", "Admin", "Kompania", "Komunë", "komune"], },
 
   { 
     path: "/komuna/profile", 

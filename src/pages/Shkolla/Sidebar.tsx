@@ -1,4 +1,4 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
     HomeIcon,
     ShoppingCartIcon,
@@ -10,19 +10,43 @@ import {
     UserCircleIcon,
     ArchiveBoxIcon
 } from "@heroicons/react/24/outline";
-import { useState } from "react";
+import { useState, useEffect, useContext } from "react";
+import { logout } from "../../auth/handleJWT";
+import AuthenticationContext from "../../auth/AuthenticationContext";
+import { urlAccounts } from "../../endpoints";
+import axiosInstance from "../../api/axiosInstance";
+import { urlListShkolla } from "../../endpoints";
+import { UserInfoDto, ApiResponse } from '../../interfaces/auth.models';
 
 function ShkollaSidebar() {
     const location = useLocation();
+    const navigate = useNavigate();
     const [isOpen, setIsOpen] = useState(true);
     const [hoveredPorosite, setHoveredPorosite] = useState(false);
     const [hoveredStafi, setHoveredStafi] = useState(false);
     const [hoveredInventari, setHoveredInventari] = useState(false);
+    const [userEmail, setUserEmail] = useState('');
+    const {update} = useContext(AuthenticationContext);
+
+    useEffect(() => {
+        const fetchUserInfo = async () => {
+            try {
+                const response = await axiosInstance.get<ApiResponse<UserInfoDto>>(`${urlAccounts}/me`);
+                if (response.data.succeeded) {
+                    setUserEmail(response.data.data.email);
+                }
+            } catch (error: any) {
+                console.error('Failed to fetch user info:', error.response?.data?.message || error);
+            }
+        };
+
+        fetchUserInfo();
+    }, []);
 
     const isActive = (path: string) =>
         location.pathname === path
-            ? "font-semibold text-indigo-700"
-            : "text-gray-700 hover:text-indigo-600";
+            ? "font-semibold text-green-700"
+            : "text-gray-700 hover:text-green-600";
 
     return (
         <>
@@ -35,21 +59,35 @@ function ShkollaSidebar() {
             </button>
 
             <aside
-                className={`fixed md:static z-40 top-0 left-0 h-screen bg-white border-r shadow-sm px-6 py-8 flex flex-col justify-between transition-transform duration-300 w-64 ${isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
-                    }`}
+                className={`fixed md:sticky top-0 left-0 h-screen overflow-y-auto overflow-x-hidden bg-white border-r shadow-sm px-6 py-8 flex flex-col justify-between transition-transform duration-300 w-64 ${
+                    isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
+                }`}
             >
-                <div>
+                <div className="flex-1 flex flex-col min-h-0">
                     {/* User Info */}
-                    <div className="flex items-center gap-3 mb-10">
-                        <UserCircleIcon className="w-10 h-10 text-indigo-500" />
-                        <div>
-                            <p className="text-sm text-gray-500">Përdoruesi</p>
-                            <h2 className="text-lg font-bold text-gray-800">Admin i Shkollës</h2>
-                        </div>
+                    <div className="flex-shrink-0">
+                        <Link
+                            to="/shkolla/profile"
+                            className="flex items-center gap-3 mb-10 cursor-pointer hover:bg-gray-50 p-3 rounded-lg transition-all duration-200"
+                        >
+                            <div className="relative">
+                                <UserCircleIcon className="w-12 h-12 text-green-500" />
+                                <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-400 rounded-full border-2 border-white"></div>
+                            </div>
+                            <div className="flex-1">
+                                <p className="text-xs font-medium text-gray-500 mb-0.5">Përdoruesi</p>
+                                <div className="flex items-center gap-2">
+                                    <h2 className="text-sm font-semibold text-gray-800 truncate max-w-[140px]">
+                                        {userEmail}
+                                    </h2>
+                                    <ChevronDownIcon className="w-4 h-4 text-gray-400" />
+                                </div>
+                            </div>
+                        </Link>
                     </div>
 
-                    {/* Navigation */}
-                    <nav className="space-y-2">
+                    {/* Navigation with Scroll */}
+                    <nav className="flex-1 space-y-2 overflow-y-auto overflow-x-hidden">
                         <Link
                             to="/shkolla/dashboard"
                             className={`flex items-center gap-3 px-4 py-2 rounded-lg transition ${isActive("/shkolla/dashboard")}`}
@@ -64,7 +102,7 @@ function ShkollaSidebar() {
                             onMouseLeave={() => setHoveredPorosite(false)}
                             className="relative"
                         >
-                            <div className="flex items-center justify-between px-4 py-2 rounded-lg hover:bg-gray-100 cursor-pointer">
+                            <div className="flex items-center justify-between px-4 py-2 rounded-lg hover:bg-green-50 cursor-pointer">
                                 <span className="flex items-center gap-3 text-sm text-gray-700">
                                     <ShoppingCartIcon className="w-5 h-5" /> Porositë
                                 </span>
@@ -104,7 +142,7 @@ function ShkollaSidebar() {
                             onMouseLeave={() => setHoveredStafi(false)}
                             className="relative"
                         >
-                            <div className="flex items-center justify-between px-4 py-2 rounded-lg hover:bg-gray-100 cursor-pointer">
+                            <div className="flex items-center justify-between px-4 py-2 rounded-lg hover:bg-green-50 cursor-pointer">
                                 <span className="flex items-center gap-3 text-sm text-gray-700">
                                     <UsersIcon className="w-5 h-5" /> Stafi
                                 </span>
@@ -144,7 +182,7 @@ function ShkollaSidebar() {
                             onMouseLeave={() => setHoveredInventari(false)}
                             className="relative"
                         >
-                            <div className="flex items-center justify-between px-4 py-2 rounded-lg hover:bg-gray-100 cursor-pointer">
+                            <div className="flex items-center justify-between px-4 py-2 rounded-lg hover:bg-green-50 cursor-pointer">
                                 <span className="flex items-center gap-3 text-sm text-gray-700">
                                     <ArchiveBoxIcon className="w-5 h-5" /> Inventari
                                 </span>
@@ -169,14 +207,18 @@ function ShkollaSidebar() {
                 </div>
 
                 {/* Sign Out */}
-                <div className="pt-6 border-t mt-8">
-                    <Link
-                        to="/signin"
-                        className="flex items-center gap-3 px-4 py-2 text-sm text-gray-600 hover:text-red-500 transition"
+                <div className="flex-shrink-0 pt-6 border-t mt-8">
+                    <button
+                        onClick={() => {
+                            logout(update);
+                            update([]);
+                            navigate("/");
+                        }}
+                        className="w-full flex items-center gap-3 px-4 py-2 rounded-lg text-sm text-red-600 hover:bg-red-50 transition-colors duration-200"
                     >
                         <ArrowLeftOnRectangleIcon className="w-5 h-5" />
-                        Dilni nga llogaria
-                    </Link>
+                        <span>Dilni nga llogaria</span>
+                    </button>
                 </div>
             </aside>
         </>
