@@ -4,6 +4,7 @@ import Sidebar from "../Sidebar";
 import axios from "axios";
 import {urlProdukt} from "../../../endpoints";
 import {urlShporta} from "../../../endpoints";
+import Swal from "sweetalert2";
 import {
     MagnifyingGlassIcon,
     ShoppingCartIcon,
@@ -78,27 +79,60 @@ function ShkollaMarket() {
 
     // Funksioni për shtimin në shportë
    const addToCart = async (product: Produkt) => {
-        const sasia = quantities[product.id] || 1;
+    const sasia = quantities[product.id] || 1;
 
-        try {
-            const response = await axios.post(urlShporta, {
-                produktiId: product.id,
-                sasia: sasia
-            }, {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem("token")}`
-                }
-            });
-            if (response.data.succeeded) {
-                setToast({ message: "Produkti u shtua në shportë", type: "success" });
-            } else {
-                setToast({ message: response.data.message || "Diçka shkoi keq", type: "error" });
+            if (product.sasiaNeStok === 0) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Jashtë stokut',
+                    text: 'Ky produkt është jashtë stokut.',
+                });
+                return;
             }
-        } catch (error) {
-            console.error("Gabim gjatë shtimit në shportë", error);
-            setToast({ message: "Gabim gjatë shtimit në shportë", type: "error" });
-        }
-    };
+
+            if (sasia > product.sasiaNeStok) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Sasi e tepërt',
+                    text: `Sasia që keni kërkuar (${sasia}) tejkalon stokun (${product.sasiaNeStok}).`,
+                });
+                return;
+            }
+
+            try {
+                const response = await axios.post(urlShporta, {
+                    produktiId: product.id,
+                    sasia: sasia
+                }, {
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem("token")}`
+                    }
+                });
+
+                if (response.data.succeeded) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Sukses!',
+                        text: 'Produkti u shtua në shportë.',
+                        timer: 2000,
+                        showConfirmButton: false,
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gabim!',
+                        text: response.data.message || 'Diçka shkoi keq.',
+                    });
+                }
+            } catch (error) {
+                console.error("Gabim gjatë shtimit në shportë", error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gabim në rrjet',
+                    text: 'Gabim gjatë shtimit në shportë.',
+                });
+            }
+        };
 
     // Funksioni për pastrimin e filtrave
     const clearFilters = () => {
@@ -323,7 +357,9 @@ function ShkollaMarket() {
                                         </p>
                                         <p className="text-xs text-gray-400 mb-3">Shtuar: {new Date(product.createdAt).toLocaleDateString()}</p>
                                         <p className="text-xl font-bold text-green-600 mb-4">€{product.cmimi.toFixed(2)}</p>
-
+                                        {product.sasiaNeStok === 0 && (
+                                                <div className="text-red-600 font-semibold mb-2">Produkti jashtë stokut</div>
+                                            )}
                                         <div className="flex items-center justify-between">
                                             <div className="flex items-center">
                                                 <button
@@ -348,9 +384,14 @@ function ShkollaMarket() {
                                             </div>
                                             <button
                                                 onClick={() => addToCart(product)}
-                                                className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition"
+                                                disabled={product.sasiaNeStok === 0}
+                                                className={`px-4 py-2 rounded-lg transition ${
+                                                    product.sasiaNeStok === 0
+                                                        ? 'bg-gray-400 cursor-not-allowed'
+                                                        : 'bg-green-600 text-white hover:bg-green-700'
+                                                }`}
                                             >
-                                                Shto në Shportë
+                                                {product.sasiaNeStok === 0 ? "Jashtë stokut" : "Shto në Shportë"}
                                             </button>
                                         </div>
                                     </div>
