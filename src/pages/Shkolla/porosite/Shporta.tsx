@@ -6,6 +6,7 @@ import axios from "axios";
 import {urlShporta} from "../../../endpoints";
 import Swal from "sweetalert2";
 import {urlListShkolla} from "../../../endpoints";
+import { urlPorosite } from "../../../endpoints";
 
 interface CartItem {
     id: number;
@@ -126,6 +127,56 @@ function Shporta() {
     const totalPages = Math.ceil(totalItems / itemsPerPage);
 
 
+    const handleKryejPorosine = async () => {
+            const { value: shenime } = await Swal.fire({
+                title: "Kryej Porosinë",
+                input: "textarea",
+                inputLabel: "Shënime për porosinë (opsionale)",
+                inputPlaceholder: "Shkruani ndonjë koment për këtë porosi...",
+                inputAttributes: {
+                    "aria-label": "Shkruani shënimet tuaja këtu"
+                },
+                showCancelButton: true,
+                confirmButtonText: "Po, kryej porosinë",
+                cancelButtonText: "Anulo",
+                confirmButtonColor: "#16a34a"
+            });
+
+            if (shenime === undefined) return; // user clicked cancel
+
+            try {
+                for (const item of cartItems) {
+                    const porosiaPayload = {
+                        sasia: item.sasia,
+                        produktiId: item.produktiId,
+                        shenime: shenime || null
+                    };
+
+                    await axios.post(`${urlPorosite}`, porosiaPayload);
+                    await axios.delete(`${urlShporta}/${item.id}`);
+                }
+
+                Swal.fire({
+                    icon: "success",
+                    title: "Porosia u krye me sukses!",
+                    text: "Të gjitha produktet u transferuan në Porositë.",
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+
+                fetchShporta(); // refresh cart
+            } catch (error) {
+                console.error("Gabim gjatë kryerjes së porosisë:", error);
+                Swal.fire({
+                    icon: "error",
+                    title: "Gabim",
+                    text: "Dështoi kryerja e porosisë. Ju lutem provoni përsëri.",
+                });
+            }
+        };
+
+
+
     return (
         <div className="flex min-h-screen bg-gray-50 text-gray-800">
             {/* Sidebar Statik - i njëjtë si në Market */}
@@ -161,7 +212,7 @@ function Shporta() {
                         <div className="bg-white rounded-xl shadow-sm p-6">
                             <h3 className="text-lg font-semibold text-gray-800 mb-2">Buxheti në Dispozicion</h3>
                             <p className={`text-2xl font-bold ${remainingBudget >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                {buxhetiAktual === null ? 'Loading...' : `€${remainingBudget.toLocaleString()}`}
+                              {buxhetiAktual === null ? 'Loading...' : `€${remainingBudget.toLocaleString()}`}
                             </p>
                         </div>
 
@@ -254,7 +305,7 @@ function Shporta() {
                     {cartItems.length > 0 && (
                         <div className="flex justify-end">
                             <button
-                                onClick={() => alert(`Porosia u krye me sukses! Totali: €${calculateTotal().toFixed(2)}`)}
+                                onClick={handleKryejPorosine}
                                 disabled={remainingBudget < 0}
                                 className={`px-6 py-3 rounded-lg font-medium ${
                                     remainingBudget < 0
