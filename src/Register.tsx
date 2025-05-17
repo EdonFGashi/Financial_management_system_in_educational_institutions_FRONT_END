@@ -42,7 +42,7 @@ export default function Register() {
           EmriShkolles: values.EmriShkolles,
           NrNxenesve: null,
           Qyteti: parseInt(values.komunaId), // converting to int as backend expects int
-          DrejtoriNumriPersonal: values.personalNumber,
+          DrejtoriNumriPersonal: values.DrejtoriNumriPersonal,
           KodiPostal: "", // optional, default to empty
           ShkollaRruga: values.ShkollaRruga
         };
@@ -84,7 +84,7 @@ export default function Register() {
   shkollaName: "",
   komunaId: "",
   shkollaStreet: "",
-  personalNumber: "",
+  DrejtoriNumriPersonal: "",
 } as userRegisterCredentials}
   onSubmit={register}
 />
