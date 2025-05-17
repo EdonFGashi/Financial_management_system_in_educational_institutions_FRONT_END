@@ -2,6 +2,7 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { useProdukte } from "../../../hooks/fetchProdukt";
 import { Produkti } from "../../../models/produkte.model";
+import { motion } from "framer-motion";
 import Sidebar from "../Sidebar";
 import axiosInstance from "../../../api/axiosInstance";
 import { urlProdukte } from "../../../endpoints";
@@ -9,8 +10,23 @@ import Swal from "sweetalert2";
 import { useState } from "react";
 
 export default function RegjistriProdukteve() {
+  const [selectedProdukt, setSelectedProdukt] = useState<Produkti | null>(null);
   const [produkte, , refetchProdukte] = useProdukte();
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleProduktUpdate = async (updatedProdukt: Produkti) => {
+    try {
+      setIsSubmitting(true);
+      await axiosInstance.put(`${urlProdukte}/${updatedProdukt.id}`, updatedProdukt);
+      refetchProdukte();
+      setSelectedProdukt(null);
+      Swal.fire("U përditësua!", "Produkti u përditësua me sukses.", "success");
+    } catch (error) {
+      Swal.fire("Gabim", "Nuk u përditësua produkti.", "error");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className="flex">
@@ -128,12 +144,18 @@ export default function RegjistriProdukteve() {
             <h2 className="text-xl font-semibold mb-4">Lista e Produkteve</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {produkte.map((p) => (
-                <div key={p.id} className="border p-4 rounded shadow bg-white">
+                <div
+                      key={p.id}
+                      onClick={() => setSelectedProdukt(p)} 
+                      className={`border p-4 rounded shadow cursor-pointer transition duration-200 hover:ring-2 hover:ring-rose-500 ${
+                        p.sasiaNeStok < 5 ? "bg-red-100 border-red-400" : "bg-white"
+                      }`}
+                    >
                   {p.fotografia && (
                     <img
                       src={p.fotografia}
                       alt={p.emri}
-                      className="h-40 w-full object-cover mb-2 rounded"
+                      className="h-40 w-full object-cover mb-2 rounded "
                     />
                   )}
                   <h3 className="text-lg font-bold">{p.emri}</h3>
@@ -141,13 +163,65 @@ export default function RegjistriProdukteve() {
                   <p className="text-sm text-gray-500">Origjina: {p.origjina}</p>
                   <p className="text-sm text-gray-500">Prodhuesi: {p.prodhuesi}</p>
                   <p className="text-sm text-gray-500">Sasia në stok: {p.sasiaNeStok}</p>
+                  {/* ✅ INSERT HERE */}
+                    {p.sasiaNeStok < 5 && (
+                      <div className="flex items-center text-red-600 mb-2 animate-pulse">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M12 2a10 10 0 100 20 10 10 0 000-20z" />
+                        </svg>
+                        <span>Sasia e ulët</span>
+                      </div>
+                    )}
                   <p className="text-rose-600 font-bold mt-2">€{p.cmimi}</p>
                 </div>
               ))}
+              {selectedProdukt && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 ">
+    <motion.div
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.9 }}
+      transition={{ duration: 0.3 }}
+      className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md"
+    >
+      <h2 className="text-xl font-bold mb-4">Përditëso Produktin</h2>
+      <Formik
+        initialValues={selectedProdukt}
+        enableReinitialize
+        onSubmit={(values) => handleProduktUpdate(values)}
+      >
+            {({ values, handleChange }) => (
+              <Form className="space-y-3">
+                {["emri", "pershkrimi", "cmimi", "sasiaNeStok", "origjina", "prodhuesi", "fotografia"].map((field) => (
+                  <Field
+                    key={field}
+                    type={["cmimi", "sasiaNeStok"].includes(field) ? "number" : "text"}
+                    name={field}
+                    value={values[field as keyof Produkti]}
+                    onChange={handleChange}
+                    placeholder={field}
+                    className="border p-2 w-full rounded"
+                  />
+                ))}
+                          <div className="flex justify-end gap-2 pt-3">
+                            <button type="button" onClick={() => setSelectedProdukt(null)} className="text-gray-600">Anulo</button>
+                            <button type="submit" className="bg-rose-600 text-white px-4 py-2 rounded hover:bg-rose-700">
+                              {isSubmitting ? "Duke përditësuar..." : "Ruaj"}
+                            </button>
+                          </div>
+                        </Form>
+                      )}
+                    </Formik>
+                  </motion.div>
+                </div>
+              )}
             </div>
+            
           </div>
         </div>
       </main>
     </div>
   );
+
+  
 }
