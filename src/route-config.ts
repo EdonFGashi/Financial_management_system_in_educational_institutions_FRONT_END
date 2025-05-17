@@ -280,19 +280,19 @@ const routes = [
   {
     path: "/shkolla/stafi/menaxhimi",
     component: StafiShkolles,
-    allowedRoles: ["SuperAdmin", "Admin",  "Shkollë", "Komunë", "komune"],
+    allowedRoles: ["SuperAdmin", "Admin",  "Shkolla", "Komunë", "komune"],
 
   },
   {
     path: "/shkolla/stafi/oret-shtese",
     component: OretShtese,
-    allowedRoles: ["SuperAdmin", "Admin", "Shkollë", "Komunë", "komune"],
+    allowedRoles: ["SuperAdmin", "Admin", "Shkolla", "Komunë", "komune"],
 
   },
   {
     path: "/shkolla/stafi/ndalesat",
     component: Ndalesat,
-    allowedRoles: ["SuperAdmin", "Admin",  "Shkollë", "komuKomunëne", "komune"],
+    allowedRoles: ["SuperAdmin", "Admin",  "Shkolla", "komuKomunëne", "komune"],
 
   },
 
