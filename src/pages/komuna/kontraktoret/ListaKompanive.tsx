@@ -16,10 +16,11 @@ import Toast from "../../../components/Toast";
 import Swal from "sweetalert2";
 import axiosInstance from "../../../api/axiosInstance";
 import { urlKompania } from "../../../endpoints";
+import { StringLiteral } from "typescript";
 
 interface Kompania {
   id: number;
-  emri: string;
+  emriKompanis: string;
   pronariId: number;
   sherbimi: string;
   nrXhirologaris: number;
@@ -27,14 +28,28 @@ interface Kompania {
   userId: string;
   createdAt: string;
   lokacioni?: string;
+  person: {
+    emri: string,
+    mbiemri: string,
+    adresa: {
+      rruga: string,
+      qyteti: string,
+      shteti: string,
+      kodiPostal: number,
+    },
+  }
+ 
 }
 
 interface KompaniaForm {
-  emri: string;
+  emriKompanis: string;
   pronariId: number;
   sherbimi: string;
   nrXhirologaris: number;
   adresaId: number;
+  rruga?: string;
+  emri: string,
+  mbiemri: string,
 }
 
 function ListaKompanive() {
@@ -50,11 +65,14 @@ function ListaKompanive() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedKompania, setSelectedKompania] = useState<Kompania | null>(null);
   const [formData, setFormData] = useState<KompaniaForm>({
-    emri: "",
+    emriKompanis: "",
     pronariId: 0,
     sherbimi: "",
     nrXhirologaris: 0,
-    adresaId: 0
+    adresaId: 0, 
+    rruga: "",
+    emri: "",
+    mbiemri: ""
   });
 
   useEffect(() => {
@@ -70,8 +88,12 @@ function ListaKompanive() {
       if (filters.sherbimi) params.append("sherbimi", filters.sherbimi);
       if (filters.data) params.append("data", filters.data);
 
-      const response = await axiosInstance.get(`${urlKompania}?${params.toString()}`);
-      
+      const response = await axiosInstance.get(`${urlKompania}?${params.toString()}`, {
+        // headers: {
+        //   'Accept-Charset': 'utf-8'
+        // }
+      });
+      console.log("Response from API:", response.data);
       // Update to handle the new Response<List<KompaniaDto>> structure
       if (response.data && response.data.data) {
         setKompanite(response.data.data);
@@ -152,11 +174,14 @@ function ListaKompanive() {
   const handleModifiko = (kompania: Kompania) => {
     setSelectedKompania(kompania);
     setFormData({
-      emri: kompania.emri,
+      emriKompanis: kompania.emriKompanis,
       pronariId: kompania.pronariId,
       sherbimi: kompania.sherbimi,
       nrXhirologaris: kompania.nrXhirologaris,
-      adresaId: kompania.adresaId
+      adresaId: kompania.adresaId,
+      rruga: kompania.person.adresa.rruga,
+      emri: kompania.person.emri,
+      mbiemri: kompania.person.mbiemri,
     });
     setIsModalOpen(true);
   };
@@ -170,7 +195,7 @@ function ListaKompanive() {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: ['pronariId', 'nrXhirologaris', 'adresaId'].includes(name)
+      [name]: ['pronariId', 'nrXhirologaris', 'rruga'].includes(name)
         ? value === '' ? 0 : Number(value)
         : value
     }));
@@ -312,7 +337,7 @@ function ListaKompanive() {
                   <div className="space-y-4">
                     {/* Header with title and status */}
                     <div className="flex justify-between items-start">
-                      <h3 className="text-xl font-bold text-gray-800">{kompania.emri}</h3>
+                      <h3 className="text-xl font-bold text-gray-800">{kompania.emriKompanis}</h3>
                       <span className="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-xs font-semibold">
                         {new Date(kompania.createdAt).toLocaleDateString('sq-AL')}
                       </span>
@@ -353,7 +378,7 @@ function ListaKompanive() {
                         className="flex-1 bg-indigo-500 hover:bg-indigo-600 text-white py-2 rounded-lg text-sm font-semibold transition flex items-center justify-center gap-2"
                       >
                         <PencilSquareIcon className="h-4 w-4" />
-                        Modifiko
+                        Detajet
                       </button>
                       <button
                         onClick={() => handleFshij(kompania.id)}
@@ -459,12 +484,13 @@ function ListaKompanive() {
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Emri
+                    Kompania
                   </label>
                   <input
                     type="text"
-                    name="emri"
-                    value={formData.emri}
+                    
+                    name="emriKompanis"
+                    value={formData.emriKompanis}
                     onChange={handleFormChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
                     required
@@ -480,6 +506,20 @@ function ListaKompanive() {
                     name="pronariId"
                     value={formData.pronariId}
                     onChange={handleFormChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Emri
+                  </label>
+                  <input
+                    type="text"
+                    name="emri"
+                    disabled
+                    value={`${formData.emri} ${formData.mbiemri}`}
+                    // onChange={handleFormChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
                     required
                   />
@@ -517,12 +557,12 @@ function ListaKompanive() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Adresa ID
+                    Adresa
                   </label>
                   <input
-                    type="number"
-                    name="adresaId"
-                    value={formData.adresaId}
+                    type="text"
+                    name="rruga"
+                    value={formData.rruga || ""}
                     onChange={handleFormChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
                     required
@@ -535,14 +575,9 @@ function ListaKompanive() {
                     onClick={handleModalClose}
                     className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
                   >
-                    Anulo
+                    Mbyll
                   </button>
-                  <button
-                    type="submit"
-                    className="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700 transform hover:scale-105 transition-all"
-                  >
-                    Ruaj Ndryshimet
-                  </button>
+                  
                 </div>
               </form>
             </div>
