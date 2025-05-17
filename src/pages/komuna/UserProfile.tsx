@@ -1,16 +1,20 @@
-import { useContext, useState } from 'react';
+import { useContext, useState, useEffect } from 'react';
 import AuthenticationContext from '../../auth/AuthenticationContext';
 import Sidebar from './Sidebar';
 import { UserCircleIcon, KeyIcon } from '@heroicons/react/24/outline';
+import { urlAccounts } from '../../endpoints';
+import axios from 'axios';
+import { UserInfoDto, ChangePasswordDto, ApiResponse } from '../../interfaces/auth.models';
+import Toast from '../../components/Toast';
+import Swal from 'sweetalert2';
 
 export default function UserProfile() {
     const { claims } = useContext(AuthenticationContext);
-    const email = claims.find(claim => claim.name === "email")?.value;
     const [loading, setLoading] = useState(false);
 
     const [userInfo, setUserInfo] = useState({
-        email: email || '',
-        fullName: claims.find(claim => claim.name === "fullName")?.value || '',
+        email: '',
+        fullName: '',
     });
 
     const [passwords, setPasswords] = useState({
@@ -19,22 +23,125 @@ export default function UserProfile() {
         confirmPassword: '',
     });
 
+    // Add error states
+    const [error, setError] = useState('');
+    const [toastInfo, setToastInfo] = useState<{message: string; type: "success" | "error"} | null>(null);
+
+    // Show toast function
+    const showToast = (message: string, type: "success" | "error") => {
+        setToastInfo({ message, type });
+    };
+
+    // Fetch user info on component mount
+    useEffect(() => {
+        const fetchUserInfo = async () => {
+            try {
+                const response = await axios.get<ApiResponse<UserInfoDto>>(`${urlAccounts}/me`);
+                if (response.data.succeeded) {
+                    setUserInfo({
+                        email: response.data.data.email,
+                        fullName: response.data.data.fullName
+                    });
+                }
+            } catch (error) {
+                console.error('Failed to fetch user info:', error);
+                showToast('Gabim gjatë marrjes së të dhënave', 'error');
+            }
+        };
+
+        fetchUserInfo();
+    }, []);
+
     const handleUserInfoSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        
+        const result = await Swal.fire({
+            title: 'Konfirmoni ndryshimet',
+            text: 'A jeni të sigurt që dëshironi të përditësoni të dhënat personale?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Po, përditëso',
+            cancelButtonText: 'Anulo',
+            reverseButtons: true
+        });
+
+        if (!result.isConfirmed) return;
+
         setLoading(true);
-        // Add your API call here to update user info
-        setLoading(false);
+        setError('');
+
+        try {
+            const response = await axios.post<ApiResponse<string>>(
+                `${urlAccounts}/update-profile`,
+                userInfo
+            );
+
+            if (response.data.succeeded) {
+                showToast('Të dhënat u përditësuan me sukses', 'success');
+                // Update the claims context if needed
+            }
+        } catch (error: any) {
+            console.error('Failed to update user info:', error);
+            const errorMessage = error.response?.data?.message || 'Gabim gjatë përditësimit të të dhënave';
+            showToast(errorMessage, 'error');
+        } finally {
+            setLoading(false);
+        }
     };
 
     const handlePasswordSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (passwords.newPassword !== passwords.confirmPassword) {
-            alert("Fjalëkalimet e reja nuk përputhen!");
+            Swal.fire({
+                title: 'Gabim',
+                text: 'Fjalëkalimet e reja nuk përputhen!',
+                icon: 'error',
+                confirmButtonText: 'Në rregull'
+            });
             return;
         }
+
+        const result = await Swal.fire({
+            title: 'Konfirmoni ndryshimin e fjalëkalimit',
+            text: 'A jeni të sigurt që dëshironi të ndryshoni fjalëkalimin?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Po, ndrysho',
+            cancelButtonText: 'Anulo',
+            reverseButtons: true
+        });
+
+        if (!result.isConfirmed) return;
+
         setLoading(true);
-        // Add your API call here to update password
-        setLoading(false);
+        setError('');
+
+        try {
+            const passwordData: ChangePasswordDto = {
+                currentPassword: passwords.currentPassword,
+                newPassword: passwords.newPassword,
+                confirmNewPassword: passwords.confirmPassword
+            };
+
+            const response = await axios.post<ApiResponse<string>>(
+                `${urlAccounts}/change-password`,
+                passwordData
+            );
+
+            if (response.data.succeeded) {
+                showToast('Fjalëkalimi u ndryshua me sukses', 'success');
+                setPasswords({
+                    currentPassword: '',
+                    newPassword: '',
+                    confirmPassword: ''
+                });
+            }
+        } catch (error: any) {
+            console.error('Failed to change password:', error);
+            showToast(error.response?.data?.message || 'Gabim gjatë ndryshimit të fjalëkalimit', 'error');
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -51,7 +158,7 @@ export default function UserProfile() {
                 </div>
 
                 <div className="relative z-10 max-w-4xl mx-auto space-y-8">
-                    {/* Enhanced Header */}
+                    {/* Updated Header */}
                     <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl p-6 border border-white/20 transform hover:scale-[1.01] transition-all duration-300">
                         <div className="flex items-center gap-6">
                             <div className="p-3 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-xl shadow-lg">
@@ -59,7 +166,7 @@ export default function UserProfile() {
                             </div>
                             <div>
                                 <h1 className="text-3xl font-bold text-gray-900 mb-1">Profili i Përdoruesit</h1>
-                                <p className="text-gray-500">{email}</p>
+                                <p className="text-gray-500">{userInfo.email}</p>
                             </div>
                         </div>
                     </div>
@@ -101,6 +208,7 @@ export default function UserProfile() {
                                     />
                                 </div>
                             </div>
+                            {error && <div className="text-red-500 text-sm mt-2">{error}</div>}
                             <div className="flex justify-end">
                                 <button
                                     type="submit"
@@ -159,6 +267,7 @@ export default function UserProfile() {
                                     />
                                 </div>
                             </div>
+                            {error && <div className="text-red-500 text-sm mt-2">{error}</div>}
                             <div className="flex justify-end">
                                 <button
                                     type="submit"
@@ -176,6 +285,17 @@ export default function UserProfile() {
                 <div className="fixed bottom-4 right-4 p-3 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-full shadow-lg animate-bounce opacity-50">
                     <UserCircleIcon className="w-6 h-6 text-white" />
                 </div>
+
+                {/* Toast Notification */}
+                {toastInfo && (
+                    <div className="fixed top-4 right-4 z-50">
+                        <Toast
+                            message={toastInfo.message}
+                            type={toastInfo.type}
+                            onClose={() => setToastInfo(null)}
+                        />
+                    </div>
+                )}
             </div>
         </div>
     );
