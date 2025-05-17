@@ -3,7 +3,7 @@ import AuthenticationContext from '../../auth/AuthenticationContext';
 import Sidebar from './Sidebar';
 import { UserCircleIcon, KeyIcon } from '@heroicons/react/24/outline';
 import { urlAccounts } from '../../endpoints';
-import axios from 'axios';
+import axiosInstance from '../../api/axiosInstance';
 import { UserInfoDto, ChangePasswordDto, ApiResponse } from '../../interfaces/auth.models';
 import Toast from '../../components/Toast';
 import Swal from 'sweetalert2';
@@ -12,7 +12,7 @@ export default function UserProfile() {
     const { claims } = useContext(AuthenticationContext);
     const [loading, setLoading] = useState(false);
 
-    const [userInfo, setUserInfo] = useState({
+    const [userInfo, setUserInfo] = useState<UserInfoDto>({
         email: '',
         fullName: '',
     });
@@ -36,16 +36,16 @@ export default function UserProfile() {
     useEffect(() => {
         const fetchUserInfo = async () => {
             try {
-                const response = await axios.get<ApiResponse<UserInfoDto>>(`${urlAccounts}/me`);
+                const response = await axiosInstance.get<ApiResponse<UserInfoDto>>(`${urlAccounts}/me`);
                 if (response.data.succeeded) {
                     setUserInfo({
                         email: response.data.data.email,
                         fullName: response.data.data.fullName
                     });
                 }
-            } catch (error) {
+            } catch (error: any) {
                 console.error('Failed to fetch user info:', error);
-                showToast('Gabim gjatë marrjes së të dhënave', 'error');
+                showToast(error.response?.data?.message || 'Gabim gjatë marrjes së të dhënave', 'error');
             }
         };
 
@@ -71,19 +71,19 @@ export default function UserProfile() {
         setError('');
 
         try {
-            const response = await axios.post<ApiResponse<string>>(
+            const response = await axiosInstance.post<ApiResponse<string>>(
                 `${urlAccounts}/update-profile`,
                 userInfo
             );
 
             if (response.data.succeeded) {
                 showToast('Të dhënat u përditësuan me sukses', 'success');
-                // Update the claims context if needed
+            } else {
+                throw new Error(response.data.message);
             }
         } catch (error: any) {
             console.error('Failed to update user info:', error);
-            const errorMessage = error.response?.data?.message || 'Gabim gjatë përditësimit të të dhënave';
-            showToast(errorMessage, 'error');
+            showToast(error.response?.data?.message || 'Gabim gjatë përditësimit të të dhënave', 'error');
         } finally {
             setLoading(false);
         }
@@ -123,7 +123,7 @@ export default function UserProfile() {
                 confirmNewPassword: passwords.confirmPassword
             };
 
-            const response = await axios.post<ApiResponse<string>>(
+            const response = await axiosInstance.post<ApiResponse<string>>(
                 `${urlAccounts}/change-password`,
                 passwordData
             );
@@ -135,9 +135,10 @@ export default function UserProfile() {
                     newPassword: '',
                     confirmPassword: ''
                 });
+            } else {
+                throw new Error(response.data.message);
             }
         } catch (error: any) {
-            console.error('Failed to change password:', error);
             showToast(error.response?.data?.message || 'Gabim gjatë ndryshimit të fjalëkalimit', 'error');
         } finally {
             setLoading(false);
@@ -190,7 +191,7 @@ export default function UserProfile() {
                                     <div className="relative">
                                         <input
                                             type="email"
-                                            value={userInfo.email}
+                                            value={userInfo.email || ''}
                                             onChange={(e) => setUserInfo({...userInfo, email: e.target.value})}
                                             className="block w-full rounded-lg border border-gray-300 px-4 py-3 bg-white/50 backdrop-blur-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200"
                                         />
@@ -202,7 +203,7 @@ export default function UserProfile() {
                                     </label>
                                     <input
                                         type="text"
-                                        value={userInfo.fullName}
+                                        value={userInfo.fullName || ''}
                                         onChange={(e) => setUserInfo({...userInfo, fullName: e.target.value})}
                                         className="block w-full rounded-lg border border-gray-300 px-4 py-3 bg-white/50 backdrop-blur-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200"
                                     />

@@ -14,7 +14,7 @@ import {
 } from "@heroicons/react/24/outline";
 import Toast from "../../../components/Toast";
 import Swal from "sweetalert2";
-import axios from "axios";
+import axiosInstance from "../../../api/axiosInstance";
 import { urlKompania } from "../../../endpoints";
 
 interface Kompania {
@@ -70,7 +70,7 @@ function ListaKompanive() {
       if (filters.sherbimi) params.append("sherbimi", filters.sherbimi);
       if (filters.data) params.append("data", filters.data);
 
-      const response = await axios.get(`${urlKompania}?${params.toString()}`);
+      const response = await axiosInstance.get(`${urlKompania}?${params.toString()}`);
       
       // Update to handle the new Response<List<KompaniaDto>> structure
       if (response.data && response.data.data) {
@@ -82,10 +82,10 @@ function ListaKompanive() {
           type: "error"
         });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching kompanite:", error);
       setToast({
-        message: "Ndodhi një gabim gjatë marrjes së të dhënave",
+        message: error.response?.data?.message || "Ndodhi një gabim gjatë marrjes së të dhënave",
         type: "error"
       });
     } finally {
@@ -132,12 +132,19 @@ function ListaKompanive() {
 
     if (result.isConfirmed) {
       try {
-        await axios.delete(`${urlKompania}/${id}`);
-        setToast({ message: "Kompania u fshi me sukses!", type: "success" });
-        fetchKompanite(); // Refresh the list
-      } catch (error) {
+        const response = await axiosInstance.delete(`${urlKompania}/${id}`);
+        if (response.data.succeeded) {
+          setToast({ message: "Kompania u fshi me sukses!", type: "success" });
+          fetchKompanite();
+        } else {
+          throw new Error(response.data.message || "Gabim gjatë fshirjes");
+        }
+      } catch (error: any) {
         console.error("Error deleting kompania:", error);
-        setToast({ message: "Veprimi nuk u krye me sukses!", type: "error" });
+        setToast({ 
+          message: error.response?.data?.message || "Veprimi nuk u krye me sukses!", 
+          type: "error" 
+        });
       }
     }
   };
@@ -191,13 +198,20 @@ function ListaKompanive() {
           nrXhirologaris: Number(formData.nrXhirologaris)
         };
   
-        await axios.put(`${urlKompania}/${selectedKompania.id}`, payload);
-        setToast({ message: "Kompania u modifikua me sukses!", type: "success" });
-        handleModalClose();
-        fetchKompanite();
-      } catch (error) {
+        const response = await axiosInstance.put(`${urlKompania}/${selectedKompania.id}`, payload);
+        if (response.data.succeeded) {
+          setToast({ message: "Kompania u modifikua me sukses!", type: "success" });
+          handleModalClose();
+          fetchKompanite();
+        } else {
+          throw new Error(response.data.message || "Gabim gjatë modifikimit");
+        }
+      } catch (error: any) {
         console.error("Error updating kompania:", error);
-        setToast({ message: "Ndodhi një gabim gjatë modifikimit!", type: "error" });
+        setToast({ 
+          message: error.response?.data?.message || "Ndodhi një gabim gjatë modifikimit!", 
+          type: "error" 
+        });
       }
     }
   };

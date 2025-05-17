@@ -9,7 +9,7 @@ import {
 import Sidebar from "../Sidebar";
 import Toast from "../../../components/Toast";
 import Swal from "sweetalert2";
-import axios from "axios";
+import axiosInstance from "../../../api/axiosInstance";
 import { urlListKomuna, urlListShkolla } from "../../../endpoints";
 import { StringLiteral } from "@babel/types";
 
@@ -111,7 +111,7 @@ function NdarjaBuxhetit() {
 
   const loadSchools = async () => {
     try {
-      const response = await axios.get(`${urlListShkolla}`);
+      const response = await axiosInstance.get(`${urlListShkolla}`);
 
       // Extract the data array from the response
       const schoolsData = response.data.data;
@@ -155,17 +155,13 @@ function NdarjaBuxhetit() {
   const loadKomunaBudget = async () => {
     try {
       const token = localStorage.getItem("token");
-  
       if (!token) {
         throw new Error("Token not found in localStorage");
       }
-  
       const userId = token.split(".")[1];
       const decodedUserId = JSON.parse(atob(userId));
   
-      console.log("ID E KOMUNES", decodedUserId.id);
-  
-      const response = await axios.get<KomunaResponse>(`${urlListKomuna}/${decodedUserId.id}`);
+      const response = await axiosInstance.get<KomunaResponse>(`${urlListKomuna}/${decodedUserId.id}`);
       const buxhetiAktual = response.data.buxhetiAktual;
   
       // if (komuna && typeof komuna.buxhetiAktual === "number") {
@@ -269,25 +265,22 @@ function NdarjaBuxhetit() {
     if (result.isConfirmed) {
       try {
         const token = localStorage.getItem("token");
-  
-      if (!token) {
-        throw new Error("Token not found in localStorage");
-      }
-  
-      const userId = token.split(".")[1];
-      const decodedUserId = JSON.parse(atob(userId));
-  
-      console.log("ID E KOMUNES", decodedUserId.id);
-        const response = await axios.put((`${urlListKomuna}/${decodedUserId.id}`), {
+        if (!token) {
+          throw new Error("Token not found in localStorage");
+        }
+        const userId = token.split(".")[1];
+        const decodedUserId = JSON.parse(atob(userId));
+
+        const response = await axiosInstance.put(`${urlListKomuna}/${decodedUserId.id}`, {
           komunaId: 0,
           qyteti: "",
           DitaNdarjesAuto: false,
           BuxhetiAktual: allocationAmount,
           UserId: "",
           nrPopullsis: 0
-});
+        });
 
-if(response.status == 200) {
+        if(response.status == 200) {
           await Swal.fire({
             title: "Njoftim",
             text: "Ndarja e buxhetit u realizua me sukses!",
@@ -322,7 +315,7 @@ if(response.status == 200) {
         // }
         
 
-        await axios.put((`${urlListShkolla}/${schoolId}`), {
+        await axiosInstance.put(`${urlListShkolla}/${schoolId}`, {
           drejtori: school.drejtori,
           adresaId: school.adresaId,
           nrNxenesve: school.nrNxenesve,
@@ -331,7 +324,7 @@ if(response.status == 200) {
           autoNdarja: school.autoNdarja
         });
 
-        await axios.post("http://localhost:5102/api/NdarjetBuxhetit", {
+        await axiosInstance.post("http://localhost:5102/api/NdarjetBuxhetit", {
           shkollaId: schoolId,
           shuma: allocationAmount,
           data: new Date().toISOString(),

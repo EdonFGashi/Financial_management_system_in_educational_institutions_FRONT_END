@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
 import { Link } from "react-router-dom";
 import Sidebar from "../Sidebar";
 import { urlPorosite } from "../../../endpoints";
@@ -17,6 +16,7 @@ import {
   Squares2X2Icon,
   PencilIcon,
 } from "@heroicons/react/24/outline";
+import axiosInstance from "../../../api/axiosInstance";
 
 
 function ListaPorosive() {
@@ -58,18 +58,19 @@ function ListaPorosive() {
       if (filters.shkolla) params.append("shkolla", filters.shkolla);
       if (filters.data) params.append("data", filters.data);
       
-      const response = await axios.get(`${urlPorosite}?${params.toString()}`);
-      console.log("Response data:", response.data);
+      const response = await axiosInstance.get(`${urlPorosite}?${params.toString()}`);
       
-      // Make sure we're accessing the data correctly from the response
-      if (response.data && response.data.data) {
+      if (response.data.succeeded) {
         setPorosite(response.data.data);
       } else {
-        console.error("Unexpected data structure:", response.data);
+        setToast({ message: response.data.message || 'Gabim gjatë marrjes së të dhënave', type: 'error' });
         setPorosite([]);
       }
-    } catch (error) {
-      console.error("Gabim duke marrë porositë:", error);
+    } catch (error: any) {
+      setToast({ 
+        message: error.response?.data?.message || 'Ndodhi një gabim gjatë komunikimit me serverin', 
+        type: 'error' 
+      });
       setPorosite([]);
     }
   };
@@ -100,12 +101,18 @@ function ListaPorosive() {
 
     if (result.isConfirmed) {
       try {
-        const res = await axios.patch(`${urlPorosite}/paguaj/${id}`);
-        setToast({ message: res.data.message || "Porosia u pagua me sukses!", type: "success" });
-        fetchPorosite();
-      } catch (error) {
-        console.error("Gabim gjatë pagesës:", error);
-        setToast({ message: "Veprimi nuk u krye me sukses!", type: "error" });
+        const response = await axiosInstance.patch(`${urlPorosite}/paguaj/${id}`);
+        if (response.data.succeeded) {
+          setToast({ message: response.data.message || "Porosia u pagua me sukses!", type: "success" });
+          fetchPorosite();
+        } else {
+          throw new Error(response.data.message);
+        }
+      } catch (error: any) {
+        setToast({ 
+          message: error.response?.data?.message || "Veprimi nuk u krye me sukses!", 
+          type: "error" 
+        });
       }
     }
   };
@@ -124,12 +131,18 @@ function ListaPorosive() {
 
     if (result.isConfirmed) {
       try {
-        const res = await axios.patch(`${urlPorosite}/fshij/${id}`);
-        setToast({ message: res.data.message || "Porosia u fshi me sukses!", type: "success" });
-        fetchPorosite();
-      } catch (error) {
-        console.error("Gabim gjatë fshirjes:", error);
-        setToast({ message: "Veprimi nuk u krye me sukses!", type: "error" });
+        const response = await axiosInstance.patch(`${urlPorosite}/fshij/${id}`);
+        if (response.data.succeeded) {
+          setToast({ message: response.data.message || "Porosia u fshi me sukses!", type: "success" });
+          fetchPorosite();
+        } else {
+          throw new Error(response.data.message);
+        }
+      } catch (error: any) {
+        setToast({ 
+          message: error.response?.data?.message || "Veprimi nuk u krye me sukses!", 
+          type: "error" 
+        });
       }
     }
   };

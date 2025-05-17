@@ -23,7 +23,7 @@ import { logout } from "../../auth/handleJWT";
 import AuthenticationContext from "../../auth/AuthenticationContext";
 import { useContext } from "react";
 import { urlAccounts } from "../../endpoints";
-import axios from 'axios';
+import axiosInstance from "../../api/axiosInstance";
 import { UserInfoDto, ApiResponse } from '../../interfaces/auth.models';
 
 function Sidebar() {
@@ -41,12 +41,14 @@ function Sidebar() {
   useEffect(() => {
     const fetchUserInfo = async () => {
       try {
-        const response = await axios.get<ApiResponse<UserInfoDto>>(`${urlAccounts}/me`);
+        const response = await axiosInstance.get<ApiResponse<UserInfoDto>>(`${urlAccounts}/me`);
         if (response.data.succeeded) {
           setUserEmail(response.data.data.email);
+        } else {
+          console.error('Failed to fetch user info:', response.data.message);
         }
-      } catch (error) {
-        console.error('Failed to fetch user info:', error);
+      } catch (error: any) {
+        console.error('Failed to fetch user info:', error.response?.data?.message || error);
       }
     };
 
