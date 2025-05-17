@@ -12,9 +12,10 @@ import Swal from "sweetalert2";
 import axiosInstance from "../../../api/axiosInstance";
 import { urlListKomuna, urlListShkolla } from "../../../endpoints";
 import { StringLiteral } from "@babel/types";
+import axios from "axios";
 
 interface SchoolObject {
-  shkollaId: number;
+  id: number;
   emriShkolles: string;
   nrNxenesve: number;
   buxhetiAktual: number;
@@ -32,7 +33,7 @@ interface Ndarja {
 }
 
 interface School {
-  shkollaId: number;
+  id: number;
   emriShkolles: string;
   nrNxenesve: number;
   shfrytezimiAktualPerqindje: number;
@@ -71,7 +72,7 @@ function NdarjaBuxhetit() {
   useEffect(() => {
     setSchoolRecord([
       {
-        shkollaId: 1,
+        id: 1,
         emriShkolles: "Sami Frasheri",
         nrNxenesve: 850,
         buxhetiShfrytezuar: 500, // 32% of 500
@@ -82,7 +83,7 @@ function NdarjaBuxhetit() {
         adresaId: 1,
       },
       {
-        shkollaId: 3,
+        id: 3,
         emriShkolles: "Xhevdet Doda",
         nrNxenesve: 720,
         buxhetiShfrytezuar: 400, // 32% of 500
@@ -111,7 +112,7 @@ function NdarjaBuxhetit() {
 
   const loadSchools = async () => {
     try {
-      const response = await axiosInstance.get(`${urlListShkolla}`);
+      const response = await axiosInstance.get(`${urlListShkolla}/get-all`);
 
       // Extract the data array from the response
       const schoolsData = response.data.data;
@@ -131,7 +132,7 @@ function NdarjaBuxhetit() {
           : "0.00"; // Default to "0.00" if no data
 
         return {
-          shkollaId: school.shkollaId,
+          id: school.id,
           emriShkolles: school.emriShkolles,
           nrNxenesve: school.nrNxenesve,
           buxhetiAktual: school.buxhetiAktual,
@@ -211,7 +212,7 @@ function NdarjaBuxhetit() {
   };
 
   const handleAllocation = async (schoolId: number) => {
-    const school = schoolRecord.find((s) => s.shkollaId === schoolId);
+    const school = schoolRecord.find((s) => s.id === schoolId);
     const allocation = allocations[schoolId];
 
     if (!school || !allocation?.amount) {
@@ -280,6 +281,7 @@ function NdarjaBuxhetit() {
           nrPopullsis: 0
         });
 
+        console.log("ERRORII: ",response?.data);
         if(response.status == 200) {
           await Swal.fire({
             title: "Njoftim",
@@ -289,7 +291,7 @@ function NdarjaBuxhetit() {
             confirmButtonText: "OK"
           });
         }
-        if(response.status == 400) {
+        if(response.data == "Ju nuk keni buxhet të mjaftueshëm !") {
           await Swal.fire({
             title: "Njoftim",
             text: `${response.statusText}`,
@@ -344,20 +346,38 @@ function NdarjaBuxhetit() {
         }));
         setSchoolRecord((prev) =>
         prev.map((s) =>
-          s.shkollaId === schoolId ? { ...s, shenime: "" } : s
+          s.id === schoolId ? { ...s, shenime: "" } : s
         )
       );
 
         // Reload schools
         await loadKomunaBudget();
         await loadSchools();
-      } catch (error) {
+      } catch (error: any) {
         console.error(error);
+      
+        // Check if it's an Axios error and the specific error message is returned
+        if (
+          axios.isAxiosError(error) &&
+          error.response?.data === "Ju nuk keni buxhet të mjaftueshëm !"
+        ) {
+          await Swal.fire({
+            title: "Gabim",
+            text: "Ju nuk keni buxhet të mjaftueshëm !",
+            icon: "error",
+            confirmButtonColor: "#dc2626",
+            confirmButtonText: "OK"
+          });
+          return; // Stop execution if this specific error occurred
+        }
+      
+        // Fallback for other errors
         setToast({
           message: "Ndodhi një gabim gjatë ndarjes së buxhetit",
           type: "error",
         });
       }
+      
     }
   };
 
@@ -503,7 +523,7 @@ function NdarjaBuxhetit() {
               </thead>
               <tbody className="divide-y divide-gray-200">
                 {schoolRecord.map((school) => (
-                  <tr key={school.shkollaId} className="hover:bg-gray-50">
+                  <tr key={school.id} className="hover:bg-gray-50">
                     <td className="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <BuildingLibraryIcon className="h-4 sm:h-5 w-4 sm:w-5 text-gray-400 mr-2 flex-shrink-0" />
@@ -542,10 +562,10 @@ function NdarjaBuxhetit() {
                       <div className="flex items-center justify-center gap-1 sm:gap-2">
                         <input
                           type="number"
-                          value={allocations[school.shkollaId]?.amount || ""}
+                          value={allocations[school.id]?.amount || ""}
                           onChange={(e) =>
                             handleAllocationChange(
-                              school.shkollaId,
+                              school.id,
                               e.target.value
                             )
                           }
@@ -554,7 +574,7 @@ function NdarjaBuxhetit() {
                         />
                         <button
                           onClick={() =>
-                            handleAllocationTypeToggle(school.shkollaId)
+                            handleAllocationTypeToggle(school.id)
                           }
                           className="px-1.5 sm:px-2 py-1 text-xs sm:text-sm text-gray-500 hover:text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50"
                         >
@@ -586,7 +606,7 @@ function NdarjaBuxhetit() {
                           const newNote = e.target.value;
                           setSchoolRecord((prev) =>
                             prev.map((s) =>
-                              s.shkollaId === school.shkollaId
+                              s.id === school.id
                                 ? { ...s, shenime: newNote } // Update the note in state
                                 : s
                             )
@@ -600,7 +620,7 @@ function NdarjaBuxhetit() {
                     <td className="px-4 sm:px-2 py-3 sm:py-4">
                       <div className="flex justify-center">
                         <button
-                          onClick={() => handleAllocation(school.shkollaId)}
+                          onClick={() => handleAllocation(school.id)}
                           className="bg-indigo-600 text-white px-2 sm:px-4 py-1 sm:py-2 rounded-md text-xs sm:text-sm hover:bg-indigo-700 transition"
                         >
                           Ndaj
