@@ -108,7 +108,7 @@ function Shporta() {
 
             try {
                 const response = await axios.get(`${urlListShkolla}/${shkollaId}`);
-                setBuxhetiAktual(response.data.buxhetiAktual);
+                setBuxhetiAktual(response.data.data.buxhetiAktual);
             } catch (error) {
                 console.error("Gabim gjatë marrjes së buxhetit të shkollës", error);
             }

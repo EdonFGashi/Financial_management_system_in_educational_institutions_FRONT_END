@@ -135,28 +135,25 @@ function RegisterKompani(props: authFormProps) {
 
           <Formik<userRegisterCredentialsKompania>
   initialValues={{
-  email: "", 
+  email: "",
   password: "",
   confirmPassword: "",
   role: "Kompani",
   EmriKompanis: "",
   Sherbimi: "",
-  NrXhirollogaris: 0,
-  qyteti: "", // 
+  NrXhirologaris: 0,
+  Qyteti: 0, // make sure it's a number!
   KompaniaRruga: "",
-  personalNumber: "",
-  pronari: {
-    personalNumber: "",
-    name: "",
-    surname: "",
-    street: ""
-  }
+  PronariNumriPersonal: 0, // must be number, not inside nested object
+  KodiPostal: "10000" // or optional
 }}
+
 
   validationSchema={validationSchema}
   onSubmit={(values, actions) => {
     const { confirmPassword, ...cleaned } = values;
   try {
+    console.log("Submitted raw values:", values);
       props.onSubmit(
       cleaned as userRegisterCredentialsKompania,
       actions as FormikHelpers<userRegisterCredentialsKompania>
@@ -252,13 +249,14 @@ function RegisterKompani(props: authFormProps) {
                 </div>
                 <div className="relative">
                 <FiRoad className="w-5 h-5 text-gray-400 absolute left-3 top-3.5" />
-                <Field name="NrXhirollogaris" placeholder="Numri i Xhirrollagaris" className="w-full p-3 pl-10 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-rose-500"/>
-                <ErrorMessage name="NrXhirollogaris" component="p" className="text-red-500 text-sm mt-1" />
+                <Field name="NrXhirologaris"  placeholder="Numri i Xhirrollagaris" className="w-full p-3 pl-10 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-rose-500"/>
+                <ErrorMessage name="NrXhirologaris" component="p" className="text-red-500 text-sm mt-1" />
                 </div>
                 <div className="relative">
                                       <FiLicense className="w-5 h-5 text-gray-400 absolute left-3 top-3.5" />
                                       <Field
-                                        name="pronari.personalNumber"
+                                        name="PronariNumriPersonal"
+                                        
                                         placeholder="Nr Personal Pronari"
                                         className="w-full p-3 pl-10 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-rose-500"
                                         onBlur={async (e: React.FocusEvent<HTMLInputElement>) => {

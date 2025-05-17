@@ -29,9 +29,9 @@ export default function Register() {
           Qyteti: values.Qyteti,
           EmriKompanis: values.EmriKompanis,
           Sherbimi: values.Sherbimi,
-          NrXhirollogaris: values.NrXhirollogaris,
+          NrXhirologaris: values.NrXhirologaris,
           KompaniaRruga: values.KompaniaRruga,
-          personalNumber: values.personalNumber
+          PronariNumriPersonal: values.PronariNumriPersonal
 
         };
         response = await axiosInstance.post(`${urlKompania}`, dto);
@@ -59,10 +59,10 @@ export default function Register() {
   role: "Kompani",
   EmriKompanis: "",
   Sherbimi: "",
-  NrXhirollogaris: 0,
+  NrXhirologaris: 0,
   Qyteti: "",
   KompaniaRruga: "",
-  personalNumber: ""
+  PronariNumriPersonal: 0
   } as userRegisterCredentialsKompania}
   onSubmit={register}
 />

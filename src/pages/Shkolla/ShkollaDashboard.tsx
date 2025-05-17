@@ -90,11 +90,11 @@ function ShkollaDashboard() {
                             </div>
                         </Link>
 
-                        <Link to="/shkolla/dashboard">
+                        <Link to="/Shkolla/porosite/Shporta">
                             <div className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-md transition">
-                                <h3 className="text-lg font-semibold text-gray-800 mb-1">Buxheti</h3>
+                                <h3 className="text-lg font-semibold text-gray-800 mb-1">Shporta</h3>
                                 <p className="text-sm text-gray-500">
-                                    Kontrolloni gjendjen dhe ndarjen e buxhetit.
+                                    Kontrolloni shportën dhe buxhetin aktual.
                                 </p>
                             </div>
                         </Link>
