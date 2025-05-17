@@ -16,4 +16,3 @@ export const urlNdalesat = "http://localhost:5102/api/Ndalesat";
 export const urlInventari = "http://localhost:5102/api/InventariAktual";
 export const urlProdukt = "http://localhost:5102/api/Produkti";
 export const urlShporta = "http://localhost:5102/api/Shporta";
-
