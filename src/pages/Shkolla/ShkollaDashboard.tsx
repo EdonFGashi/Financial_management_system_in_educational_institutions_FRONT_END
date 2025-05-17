@@ -1,8 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import ToastContainer, { ToastData } from "../../components/ToastContainer";
 import Sidebar from "./Sidebar"; // ShkollaSidebar
+import axios from "axios";
+import { urlListShkolla } from "../../endpoints";
+
+
 
 import {
     ClipboardDocumentCheckIcon,
@@ -11,9 +15,33 @@ import {
 } from "@heroicons/react/24/outline";
 
 function ShkollaDashboard() {
-    const [buxheti] = useState(75000);
-    const [shpenzimet] = useState(31500);
-    const [stafi] = useState(23);
+    const [statistics, setStatistics] = useState({
+        buxhetiAktual: 0,
+        buxhetiShfrytezuar: 0,
+        nrStafit: 0,
+    });
+
+    useEffect(() => {
+        const fetchStatistics = async () => {
+            try {
+                const response = await axios.get(`${urlListShkolla}/statistics`); 
+                if (response.data.succeeded) {
+                    setStatistics({
+                        buxhetiAktual: response.data.data.buxhetiAktual,
+                        buxhetiShfrytezuar: response.data.data.buxhetiShfrytezuar,
+                        nrStafit: response.data.data.nrStafit,
+                    });
+                } else {
+                    showToast("error", response.data.message || "Nuk u ngarkuan statistikat");
+                }
+            } catch (error) {
+                console.error("Gabim gjatë marrjes së statistikave:", error);
+                showToast("error", "Gabim gjatë ngarkimit të statistikave");
+            }
+        };
+
+        fetchStatistics();
+    }, []);
 
     const [toasts, setToasts] = useState<ToastData[]>([]);
 
@@ -53,7 +81,7 @@ function ShkollaDashboard() {
                 {/* Navigation Cards */}
                 <div className="bg-gray-100 rounded-xl shadow-sm mx-4 sm:mx-6 md:mx-12 px-4 sm:px-6 py-8 sm:py-10 mb-12">
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <Link to="/Shkolla/porosite/Historiku">
+                        <Link to="/shkolla/porosite/historiku">
                             <div className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-md transition">
                                 <h3 className="text-lg font-semibold text-gray-800 mb-1">Porositë</h3>
                                 <p className="text-sm text-gray-500">
@@ -71,7 +99,7 @@ function ShkollaDashboard() {
                             </div>
                         </Link>
 
-                        <Link to="/Shkolla/stafi/ListaStafit">
+                        <Link to="/shkolla/stafi/menaxhimi">
                             <div className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-md transition">
                                 <h3 className="text-lg font-semibold text-gray-800 mb-1">Stafi</h3>
                                 <p className="text-sm text-gray-500">
@@ -88,16 +116,16 @@ function ShkollaDashboard() {
                         <div className="bg-gray-50 border border-gray-200 rounded-xl p-6 flex items-center gap-4">
                             <BanknotesIcon className="w-8 h-8 text-green-600" />
                             <div>
-                                <p className="text-sm text-gray-500">Buxheti total</p>
-                                <p className="text-xl font-semibold text-gray-800">€ {buxheti.toLocaleString()}</p>
+                                <p className="text-sm text-gray-500">Buxheti total i muajit</p>
+                                <p className="text-xl font-semibold text-gray-800">€ {statistics.buxhetiAktual.toLocaleString()}</p>
                             </div>
                         </div>
 
                         <div className="bg-gray-50 border border-gray-200 rounded-xl p-6 flex items-center gap-4">
                             <ClipboardDocumentCheckIcon className="w-8 h-8 text-green-600" />
                             <div>
-                                <p className="text-sm text-gray-500">Shpenzimet totale</p>
-                                <p className="text-xl font-semibold text-gray-800">€ {shpenzimet.toLocaleString()}</p>
+                                <p className="text-sm text-gray-500">Shpenzimet totale te muajit</p>
+                                <p className="text-xl font-semibold text-gray-800">€ {statistics.buxhetiShfrytezuar.toLocaleString()}</p>
                             </div>
                         </div>
 
@@ -105,7 +133,7 @@ function ShkollaDashboard() {
                             <UsersIcon className="w-8 h-8 text-green-600" />
                             <div>
                                 <p className="text-sm text-gray-500">Numri i stafit</p>
-                                <p className="text-xl font-semibold text-gray-800">{stafi}</p>
+                                <p className="text-xl font-semibold text-gray-800">{statistics.nrStafit}</p>
                             </div>
                         </div>
                     </div>

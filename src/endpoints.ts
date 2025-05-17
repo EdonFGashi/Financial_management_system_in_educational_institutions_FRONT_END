@@ -8,6 +8,7 @@ export const urlListShkolla = `http://localhost:5102/api/Shkolla`;
 export const urlListPerson= `http://localhost:5102/api/Person`;
 export const urlListAdresa= `http://localhost:5102/api/Adresa`;
 export const urlPorosite = `http://localhost:5102/api/Porosite`;
+export const urlProdukte = `http://localhost:5102/api/Produkti`;
 export const urlRaporti = `http://localhost:5102/api/Raporti`;
 export const urlNdarjetBuxhetit = `http://localhost:5102/api/NdarjetBuxhetit`;
 export const urlStafi = "http://localhost:5102/api/StafiShkolles";

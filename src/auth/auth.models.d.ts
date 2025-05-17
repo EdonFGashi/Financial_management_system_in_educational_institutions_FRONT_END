@@ -32,19 +32,20 @@ export interface userRegisterCredentialsShkolla {
   EmriShkolles: string;
   komunaId: string;
   ShkollaRruga: string;
-  personalNumber: string;
+  DrejtoriNumriPersonal: number;
 }
 
-export interface userRegisterCredentialsKompania{
+export interface userRegisterCredentialsKompania {
   email: string;
   password: string;
   role: "Kompani";
   EmriKompanis: string;
-  Sherbimi:string;
-  NrXhirollogaris: number;
+  Sherbimi: string;
+  NrXhirologaris: number;
   Qyteti: string;
   KompaniaRruga: string;
-  personalNumber: string;
+  PronariNumriPersonal: number; 
+  // KodiPostal?: string; // optional if you want
 }
 
 export type userRegisterCredentials =

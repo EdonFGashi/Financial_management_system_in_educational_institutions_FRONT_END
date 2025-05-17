@@ -1,4 +1,5 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { logout } from "../../auth/handleJWT";
 import {
   FolderOpenIcon,
   AdjustmentsVerticalIcon,
@@ -18,16 +19,20 @@ import {
   WalletIcon,
   DocumentIcon,
 } from "@heroicons/react/24/outline";
-import { useState } from "react";
+import AuthenticationContext from "../../auth/AuthenticationContext";
+import { useState,useContext } from "react";
 
 function Sidebar() {
+  const {update, claims} = useContext(AuthenticationContext);
+  const navigate = useNavigate();
+
   const location = useLocation();
   const [hoveredPorosite, setHoveredPorosite] = useState(false);
   // const [HoveredProdukte, setHoveredProdukte] = useState(false);
   const [isOpen, setIsOpen] = useState(true);
 
   const isActive = (path: string) =>
-    location.pathname === path ? "font-semibold text-indigo-700" : "text-gray-700 hover:text-indigo-600";
+    location.pathname === path ? "font-semibold text-rose-700" : "text-gray-700 hover:text-rose-600";
 
   return (
     <>
@@ -47,7 +52,7 @@ function Sidebar() {
         <div>
           {/* User Info */}
           <div className="flex items-center gap-3 mb-10">
-            <UserCircleIcon className="w-10 h-10 text-indigo-500" />
+            <UserCircleIcon className="w-10 h-10 text-rose-500" />
             <div>
               <p className="text-sm text-gray-500">Përdoruesi</p>
               <h2 className="text-lg font-bold text-gray-800">Admin i Kompanisë</h2>
@@ -106,14 +111,18 @@ function Sidebar() {
 
         {/* Sign Out */}
         <div className="pt-6 border-t mt-8">
-          <Link
-            to="/signin"
-            className="flex items-center gap-3 px-4 py-2 text-sm text-gray-600 hover:text-red-500 transition"
-          >
-            <ArrowLeftOnRectangleIcon className="w-5 h-5" />
-            Dilni nga llogaria
-          </Link>
-        </div>
+                  <button
+                    onClick={() => {
+                      logout(update);
+                      update([]);
+                      navigate("/");
+                    }}
+                    className="w-full flex items-center gap-3 px-4 py-2 rounded-lg text-sm text-red-600 hover:bg-red-50 transition-colors duration-200"
+                  >
+                    <ArrowLeftOnRectangleIcon className="w-5 h-5" />
+                    <span>Dilni nga llogaria</span>
+                  </button>
+                </div>
       </aside>
     </>
   );

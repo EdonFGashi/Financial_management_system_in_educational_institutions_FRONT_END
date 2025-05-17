@@ -31,7 +31,7 @@ type FormValues = {
   komunaId?: string;
   ShkollaRruga?: string;
   drejtori?: {
-    personalNumber?: string;
+    DrejtoriNumriPersonal?: string;
     name?: string;
     surname?: string;
     street?: string;
@@ -156,7 +156,7 @@ function AuthRegister(props: authFormProps) {
     komunaId: "",
     ShkollaRruga: "",
     drejtori: {
-      personalNumber: "",
+      DrejtoriNumriPersonal: "",
       name: "",
       surname: "",
       street: ""
@@ -290,7 +290,7 @@ function AuthRegister(props: authFormProps) {
                     <div className="relative">
                       <FiLicense className="w-5 h-5 text-gray-400 absolute left-3 top-3.5" />
                       <Field
-                        name="drejtori.personalNumber"
+                        name="DrejtoriNumriPersonal"
                         placeholder="Nr Personal Drejtorit"
                         className="w-full p-3 pl-10 rounded-lg border border-gray-300"
                         onBlur={async (e: React.FocusEvent<HTMLInputElement>) => {
@@ -313,7 +313,7 @@ function AuthRegister(props: authFormProps) {
                             setLoadingDrejtor(false);
                         }}
                       />
-                      <ErrorMessage name="drejtori.personalNumber" component="p" className="text-red-500 text-sm mt-1" />
+                      <ErrorMessage name="DrejtoriNumriPersonal" component="p" className="text-red-500 text-sm mt-1" />
                     </div>
                     {loadingDrejtor && (
                       <p className="text-indigo-500 text-sm mt-1">Duke kërkuar drejtorin...</p>
