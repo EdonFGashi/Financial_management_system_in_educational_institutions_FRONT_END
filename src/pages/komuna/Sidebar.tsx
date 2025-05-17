@@ -16,12 +16,15 @@ import {
   ClockIcon,
   BuildingOffice2Icon,
 } from "@heroicons/react/24/outline";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Authorized from "../../auth/Authorized";
 import Button from "../../components/Button";
 import { logout } from "../../auth/handleJWT";
 import AuthenticationContext from "../../auth/AuthenticationContext";
 import { useContext } from "react";
+import { urlAccounts } from "../../endpoints";
+import axiosInstance from "../../api/axiosInstance";
+import { UserInfoDto, ApiResponse } from '../../interfaces/auth.models';
 
 function Sidebar() {
   const location = useLocation();
@@ -30,11 +33,27 @@ function Sidebar() {
   const [isOpen, setIsOpen] = useState(true);
   const [financatHovered, setFinancatHovered] = useState(false);
   const [kontraktoretHovered, setKontraktoretHovered] = useState(false);
+  const [userEmail, setUserEmail] = useState('');
 
   const {update, claims} = useContext(AuthenticationContext);
   const navigate = useNavigate();
 
-  const email = claims.find(claim => claim.name === "email")?.value;
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      try {
+        const response = await axiosInstance.get<ApiResponse<UserInfoDto>>(`${urlAccounts}/me`);
+        if (response.data.succeeded) {
+          setUserEmail(response.data.data.email);
+        } else {
+          console.error('Failed to fetch user info:', response.data.message);
+        }
+      } catch (error: any) {
+        console.error('Failed to fetch user info:', error.response?.data?.message || error);
+      }
+    };
+
+    fetchUserInfo();
+  }, []);
 
   const isActive = (path: string) =>
     location.pathname === path
@@ -56,33 +75,35 @@ function Sidebar() {
       </button>
 
       <aside
-        className={`fixed md:static z-40 top-0 left-0 h-screen bg-white border-r shadow-sm px-6 py-8 flex flex-col justify-between transition-transform duration-300 w-64 ${
+        className={`fixed md:sticky top-0 left-0 h-screen overflow-y-auto overflow-x-hidden bg-white border-r shadow-sm px-6 py-8 flex flex-col justify-between transition-transform duration-300 w-64 ${
           isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
         }`}
       >
-        <div>
+        <div className="flex-1 flex flex-col min-h-0">
           {/* User Info */}
-          <Link
-            to="/komuna/profile"
-            className="flex items-center gap-3 mb-10 cursor-pointer hover:bg-gray-50 p-3 rounded-lg transition-all duration-200"
-          >
-            <div className="relative">
-              <UserCircleIcon className="w-12 h-12 text-indigo-500" />
-              <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-400 rounded-full border-2 border-white"></div>
-            </div>
-            <div className="flex-1">
-              <p className="text-xs font-medium text-gray-500 mb-0.5">Përdoruesi</p>
-              <div className="flex items-center gap-2">
-                <h2 className="text-sm font-semibold text-gray-800 truncate max-w-[140px]">
-                  {email}
-                </h2>
-                <ChevronDownIcon className="w-4 h-4 text-gray-400" />
+          <div className="flex-shrink-0">
+            <Link
+              to="/komuna/profile"
+              className="flex items-center gap-3 mb-10 cursor-pointer hover:bg-gray-50 p-3 rounded-lg transition-all duration-200"
+            >
+              <div className="relative">
+                <UserCircleIcon className="w-12 h-12 text-indigo-500" />
+                <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-400 rounded-full border-2 border-white"></div>
               </div>
-            </div>
-          </Link>
+              <div className="flex-1">
+                <p className="text-xs font-medium text-gray-500 mb-0.5">Përdoruesi</p>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-sm font-semibold text-gray-800 truncate max-w-[140px]">
+                    {userEmail}
+                  </h2>
+                  <ChevronDownIcon className="w-4 h-4 text-gray-400" />
+                </div>
+              </div>
+            </Link>
+          </div>
 
-          {/* Navigation */}
-          <nav className="space-y-2">
+          {/* Navigation with Scroll */}
+          <nav className="flex-1 space-y-2 overflow-y-auto overflow-x-hidden">
             <Link
               to="/komuna/dashboard"
               className={`flex items-center gap-3 px-4 py-2 rounded-lg transition ${isActive(
@@ -241,15 +262,8 @@ function Sidebar() {
                 >
                   <BuildingOffice2Icon className="w-4 h-4" /> Lista e Kontraktorëve
                 </Link>
-                <Link
-                  to="/komuna/kontraktoret/shto"
-                  className={`flex items-center gap-3 px-4 py-2 rounded-lg text-sm transition ${isActive(
-                    "/komuna/kontraktoret/shto"
-                  )}`}
-                >
-                  <DocumentDuplicateIcon className="w-4 h-4" /> Shto Kontraktor
-                </Link>
-              </div>            </div>            <Link
+              </div>
+            </div>            <Link
               to="/komuna/financat"
               className={`flex items-center gap-3 px-4 py-2 rounded-lg transition ${isActive(
                 "/komuna/financat"
@@ -261,8 +275,8 @@ function Sidebar() {
           </nav>
         </div>
 
-        {/* Sign Out */}
-        <div className="pt-6 border-t mt-8">
+        {/* Sign Out - Always visible at bottom */}
+        <div className="flex-shrink-0 pt-6 border-t mt-8">
           <button
             onClick={() => {
               logout(update);

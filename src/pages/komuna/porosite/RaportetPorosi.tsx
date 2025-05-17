@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import axios from "axios";
+import axiosInstance from "../../../api/axiosInstance";
 import { ClipboardDocumentListIcon } from "@heroicons/react/24/outline";
 import Sidebar from "../Sidebar";
 import { urlRaporti } from "../../../endpoints";
@@ -51,12 +51,20 @@ function RaportetPorosi() {
       if (filters.deriData) params.append("deriData", filters.deriData);
       filters.statuset.forEach((status) => params.append("statuset", status));
 
-      const response = await axios.get(`${urlRaporti}?${params.toString()}`);
-      // Access the data array directly from response.data.data
-      setRecords((response.data.data || []).map((r: any) => ({ ...r, selected: false })));
-    } catch (error) {
-      console.error("Gabim gjatë marrjes së raporteve:", error);
-      setToast({ message: "Gabim gjatë marrjes së të dhënave.", type: "error" });
+      const response = await axiosInstance.get(`${urlRaporti}?${params.toString()}`);
+      
+      if (response.data.succeeded) {
+        setRecords((response.data.data || []).map((r: any) => ({ ...r, selected: false })));
+      } else {
+        setToast({ message: response.data.message || "Gabim gjatë marrjes së të dhënave", type: "error" });
+        setRecords([]);
+      }
+    } catch (error: any) {
+      setToast({ 
+        message: error.response?.data?.message || "Gabim gjatë marrjes së të dhënave", 
+        type: "error" 
+      });
+      setRecords([]);
     } finally {
       setLoading(false);
     }
@@ -93,10 +101,82 @@ function RaportetPorosi() {
       onError: (message) => setToast({ message, type: "error" })
     });
   };
+
+  const renderTable = () => {
+    if (loading) {
+      return <div className="p-6 text-center text-gray-600">Duke ngarkuar të dhënat...</div>;
+    }
+
+    if (!records || records.length === 0) {
+      return (
+        <div className="flex flex-col items-center justify-center p-8 text-gray-500">
+          <ClipboardDocumentListIcon className="w-16 h-16 mb-4 text-gray-400" />
+          <p className="text-lg font-medium">Nuk ka të dhëna</p>
+          <p className="text-sm">Nuk u gjetën porosi që përputhen me kriteret e kërkimit</p>
+        </div>
+      );
+    }
+
+    return (
+      <table className="w-full text-sm text-left border-collapse">
+        <thead className="bg-gradient-to-r from-indigo-600 to-indigo-700 text-white">
+          <tr>
+            <th className="px-6 py-4 font-semibold border-b border-indigo-500">Porosia</th>
+            <th className="px-6 py-4 font-semibold border-b border-indigo-500">Sasia</th>
+            <th className="px-6 py-4 font-semibold border-b border-indigo-500">Kompania</th>
+            <th className="px-6 py-4 font-semibold border-b border-indigo-500">Shkolla</th>
+            <th className="px-6 py-4 font-semibold border-b border-indigo-500">Data</th>
+            <th className="px-6 py-4 font-semibold border-b border-indigo-500">Statusi</th>
+            <th
+              onClick={toggleSelectAll}
+              className="px-6 py-4 font-semibold border-b border-indigo-500 cursor-pointer hover:bg-indigo-600 transition-colors"
+            >
+              {selectAll ? "Ç'zgjedh të gjitha" : "Zgjidh të gjitha"}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {records.map((rec, index) => (
+            <tr 
+              key={rec.id} 
+              className={`
+                border-b border-gray-200 hover:bg-indigo-50 transition-colors
+                ${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}
+              `}
+            >
+              <td className="px-6 py-4">{rec.emri}</td>
+              <td className="px-6 py-4">{rec.sasia}</td>
+              <td className="px-6 py-4">{rec.kompania}</td>
+              <td className="px-6 py-4">{rec.shkolla}</td>
+              <td className="px-6 py-4">{new Date(rec.dataPorosise).toLocaleDateString("sq-AL")}</td>
+              <td className="px-6 py-4">
+                <span className={`
+                  px-3 py-1 rounded-full text-xs font-medium
+                  ${rec.statusi === 'Ne Pritje' ? 'bg-yellow-100 text-yellow-800' : ''}
+                  ${rec.statusi === 'Paguar' ? 'bg-green-100 text-green-800' : ''}
+                  ${rec.statusi === 'Fshire' ? 'bg-red-100 text-red-800' : ''}
+                `}>
+                  {rec.statusi}
+                </span>
+              </td>
+              <td className="px-6 py-4 text-center">
+                <input
+                  type="checkbox"
+                  checked={rec.selected}
+                  onChange={() => toggleSingleRecord(rec.id)}
+                  className="w-4 h-4 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500"
+                />
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    );
+  };
+
   return (
     <div className="flex flex-col md:flex-row min-h-screen bg-gray-50 text-gray-800">
       <Sidebar />
-
       <main className="flex-1 p-4 sm:p-6 md:p-10 relative">
         {toast && (
           <div className="fixed top-5 right-5 z-50">
@@ -189,73 +269,20 @@ function RaportetPorosi() {
         </div>
         <h3 className="text-lg font-semibold mb-3">Lista e Porosive:</h3>
         <div className="bg-white rounded-xl shadow-lg overflow-x-auto">
-          {loading ? (
-            <div className="p-6 text-center text-gray-600">Duke ngarkuar të dhënat...</div>
-          ) : (
-            <table className="w-full text-sm text-left border-collapse">
-              <thead className="bg-gradient-to-r from-indigo-600 to-indigo-700 text-white">
-                <tr>
-                  <th className="px-6 py-4 font-semibold border-b border-indigo-500">Porosia</th>
-                  <th className="px-6 py-4 font-semibold border-b border-indigo-500">Sasia</th>
-                  <th className="px-6 py-4 font-semibold border-b border-indigo-500">Kompania</th>
-                  <th className="px-6 py-4 font-semibold border-b border-indigo-500">Shkolla</th>
-                  <th className="px-6 py-4 font-semibold border-b border-indigo-500">Data</th>
-                  <th className="px-6 py-4 font-semibold border-b border-indigo-500">Statusi</th>
-                  <th
-                    onClick={toggleSelectAll}
-                    className="px-6 py-4 font-semibold border-b border-indigo-500 cursor-pointer hover:bg-indigo-600 transition-colors"
-                  >
-                    {selectAll ? "Ç'zgjedh të gjitha" : "Zgjidh të gjitha"}
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {records.map((rec, index) => (
-                  <tr 
-                    key={rec.id} 
-                    className={`
-                      border-b border-gray-200 hover:bg-indigo-50 transition-colors
-                      ${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}
-                    `}
-                  >
-                    <td className="px-6 py-4">{rec.emri}</td>
-                    <td className="px-6 py-4">{rec.sasia}</td>
-                    <td className="px-6 py-4">{rec.kompania}</td>
-                    <td className="px-6 py-4">{rec.shkolla}</td>
-                    <td className="px-6 py-4">{new Date(rec.dataPorosise).toLocaleDateString("sq-AL")}</td>
-                    <td className="px-6 py-4">
-                      <span className={`
-                        px-3 py-1 rounded-full text-xs font-medium
-                        ${rec.statusi === 'Ne Pritje' ? 'bg-yellow-100 text-yellow-800' : ''}
-                        ${rec.statusi === 'Paguar' ? 'bg-green-100 text-green-800' : ''}
-                        ${rec.statusi === 'Fshire' ? 'bg-red-100 text-red-800' : ''}
-                      `}>
-                        {rec.statusi}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-center">
-                      <input
-                        type="checkbox"
-                        checked={rec.selected}
-                        onChange={() => toggleSingleRecord(rec.id)}
-                        className="w-4 h-4 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500"
-                      />
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
+          {renderTable()}
         </div>
 
-        <div className="mt-6 text-center">
-          <button
-            onClick={handleGenerateRaportPDF}
-            className="bg-indigo-700 hover:bg-indigo-800 text-white px-8 py-3 rounded-lg font-semibold transition"
-          >
-            Gjenero PDF
-          </button>
-        </div>
+        {/* Only show the PDF button if there are records */}
+        {records.length > 0 && (
+          <div className="mt-6 text-center">
+            <button
+              onClick={handleGenerateRaportPDF}
+              className="bg-indigo-700 hover:bg-indigo-800 text-white px-8 py-3 rounded-lg font-semibold transition"
+            >
+              Gjenero PDF
+            </button>
+          </div>
+        )}
       </main>
     </div>
   );

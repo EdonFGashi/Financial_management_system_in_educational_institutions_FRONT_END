@@ -12,6 +12,19 @@ import Sidebar from "../Sidebar";
 import Toast from "../../../components/Toast";
 import Swal from "sweetalert2";
 import { urlListShkolla } from "../../../endpoints";
+import { urlAccounts } from "../../../endpoints";
+import axiosInstance from "../../../api/axiosInstance";
+
+interface UserInfoResponse {
+  data: {
+    email: string;
+    fullName: string | null;
+    komunaId: number;
+  };
+  succeeded: boolean;
+  message: string | null;
+  statusCode: number;
+}
 
 interface ShkollaForm {
   email: string;
@@ -31,35 +44,20 @@ function ShtoShkolle() {
   useEffect(() => {
     const fetchKomunaId = async () => {
       try {
-        const token = localStorage.getItem('token');
-        if (!token) {
-          throw new Error('Token-i nuk u gjet');
-        }
-
-        const response = await fetch(`${urlListShkolla}/get-all`, {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-
-        if (!response.ok) {
-          throw new Error('Gabim gjatë marrjes së të dhënave');
-        }
-
-        const result = await response.json();
-        if (result.data && result.data.length > 0) {
-          const komunaId = result.data[0].user?.komunaId;
+        const response = await axiosInstance.get<UserInfoResponse>(`${urlAccounts}/me`);
+        if (response.data.succeeded) {
+          const { komunaId } = response.data.data;
           if (komunaId) {
             setKomunaId(komunaId);
           } else {
             throw new Error('KomunaId nuk u gjet');
           }
         } else {
-          throw new Error('Nuk u gjetën të dhëna');
+          throw new Error(response.data.message || 'Nuk u gjetën të dhëna');
         }
       } catch (error: any) {
         setToast({
-          message: error.message,
+          message: error.message || 'Gabim gjatë marrjes së të dhënave',
           type: "error"
         });
       }
@@ -159,42 +157,31 @@ function ShtoShkolle() {
 
     if (result.isConfirmed) {
       try {
-        const response = await fetch(`${urlListShkolla}/register-shkolla`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          },
-          body: JSON.stringify({
-            email: values.email,
-            password: values.password,
-            emriShkolles: values.emriShkolles,
-            nrNxenesve: parseInt(values.nrNxenesve),
-            buxhetiAktual: 0,
-            buxhetiShfrytezuar: 0,
-            qyteti: komunaId,
-            drejtoriNumriPersonal: parseInt(values.drejtoriNumriPersonal),
-            kodiPostal: values.kodiPostal,
-            shkollaRruga: values.shkollaRruga
-          })
+        const response = await axiosInstance.post(`${urlListShkolla}/register-shkolla`, {
+          email: values.email,
+          password: values.password,
+          emriShkolles: values.emriShkolles,
+          nrNxenesve: parseInt(values.nrNxenesve),
+          buxhetiAktual: 0,
+          buxhetiShfrytezuar: 0,
+          qyteti: komunaId,
+          drejtoriNumriPersonal: parseInt(values.drejtoriNumriPersonal),
+          kodiPostal: values.kodiPostal,
+          shkollaRruga: values.shkollaRruga
         });
 
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || 'Ndodhi një gabim');
+        if (response.data.succeeded) {
+          resetForm();
+          setToast({
+            message: "Shkolla u shtua me sukses!",
+            type: "success"
+          });
+        } else {
+          throw new Error(response.data.message || 'Ndodhi një gabim');
         }
-
-        await response.json();
-        
-        // Reset form and show success message
-        resetForm();
-        setToast({
-          message: "Shkolla u shtua me sukses!",
-          type: "success"
-        });
       } catch (error: any) {
         setToast({
-          message: error.message || 'Ndodhi një gabim gjatë shtimit të shkollës',
+          message: error.response?.data?.message || error.message || 'Ndodhi një gabim gjatë shtimit të shkollës',
           type: "error"
         });
       }

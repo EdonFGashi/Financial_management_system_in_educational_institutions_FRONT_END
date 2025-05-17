@@ -5,7 +5,7 @@ import Sidebar from "../Sidebar";
 import Toast from "../../../components/Toast";
 import Swal from 'sweetalert2';
 import { urlListShkolla, urlShkolla } from "../../../endpoints"; 
-import axios from "axios";
+import axiosInstance from "../../../api/axiosInstance";
 
 interface School {
   id: number;
@@ -57,7 +57,7 @@ function Shkollat() {
   const fetchSchools = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(`${urlListShkolla}/get-all`);
+      const response = await axiosInstance.get(`${urlListShkolla}/get-all`);
       if (response.data.succeeded) {
         setSchools(response.data.data);
       } else {
@@ -78,7 +78,7 @@ function Shkollat() {
       if (filters.nrNxenesve) queryParams.append('nrNxenesve', filters.nrNxenesve);
       if (filters.buxheti) queryParams.append('buxheti', filters.buxheti);
 
-      const response = await axios.get(`${urlListShkolla}/get-all?${queryParams}`);
+      const response = await axiosInstance.get(`${urlListShkolla}/get-all?${queryParams}`);
       if (response.data.succeeded) {
         setSchools(response.data.data);
       } else {
@@ -106,7 +106,7 @@ function Shkollat() {
     if (result.isConfirmed) {
       try {
         console.log("IDJ e shkolles: ",id);
-        const response = await axios.delete(`${urlListShkolla}/${id}`);
+        const response = await axiosInstance.delete(`${urlListShkolla}/${id}`);
         
         if (response.data.succeeded) {
           setSchools(prevSchools => prevSchools.filter(school => school.id !== id));
@@ -139,7 +139,7 @@ function Shkollat() {
     if (!editingSchool) return;
 
     try {
-      const response = await axios.put(`${urlListShkolla}/${editingSchool.id}`, {
+      const response = await axiosInstance.put(`${urlListShkolla}/${editingSchool.id}`, {
         id: editingSchool.id,
         emriShkolles: editingSchool.emriShkolles,
         nrNxenesve: editingSchool.nrNxenesve,

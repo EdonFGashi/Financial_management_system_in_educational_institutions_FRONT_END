@@ -11,7 +11,7 @@ import Sidebar from "../Sidebar";
 import Toast from "../../../components/Toast";
 import Swal from "sweetalert2";
 import { urlNdarjetBuxhetit } from "../../../endpoints";
-import axios from "axios";
+import axiosInstance from "../../../api/axiosInstance";
 import { generateHistoryPDF } from "../../../components/PdfGenerator";
 
 interface HistorikuEntry {
@@ -81,34 +81,34 @@ function Historiku() {
       if (filters.deriData) params.dataDeri = filters.deriData;
       if (filters.drejtori) params.drejtori = filters.drejtori;
 
-      const response = await axios.get(urlNdarjetBuxhetit, { params });
+      const response = await axiosInstance.get(urlNdarjetBuxhetit, { params });
 
-      const entries = response.data.data;
-
-      if (!Array.isArray(entries)) {
-        console.error("Expected an array, but got:", entries);
-        return;
+      if (response.data && Array.isArray(response.data.data)) {
+        const mapped = response.data.data.map((entry: any): HistorikuEntry => {
+          const lloji = entry.shuma > 0 ? "Rritje" : "Zvogëlim";
+          return {
+            id: entry.id,
+            shkollaId: entry.shkollaId,
+            emriShkolles: entry.shkolla.emriShkolles,
+            shuma: Math.abs(entry.shuma),
+            lloji,
+            data: entry.data,
+            shenime: entry.shenime || "",
+            selected: false,
+            emriDrejtorit: entry.shkolla.person.emri,
+            mbiemriDrejtorit: entry.shkolla.person.mbiemri,
+          };
+        });
+        setEntries(mapped);
+      } else {
+        throw new Error("Invalid data structure received");
       }
-
-      const mapped = entries.map((entry: any): HistorikuEntry => {
-        const lloji = entry.shuma > 0 ? "Rritje" : "Zvogëlim";
-        return {
-          id: entry.id,
-          shkollaId: entry.shkollaId,
-          emriShkolles: entry.shkolla.emriShkolles,
-          shuma: Math.abs(entry.shuma),
-          lloji,
-          data: entry.data,
-          shenime: entry.shenime || "",
-          selected: false,
-          emriDrejtorit: entry.shkolla.person.emri,
-          mbiemriDrejtorit: entry.shkolla.person.mbiemri,
-        };
-      });
-
-      setEntries(mapped);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Gabim gjatë marrjes së të dhënave:", error);
+      setToast({ 
+        message: error.response?.data?.message || "Gabim gjatë marrjes së të dhënave", 
+        type: "error" 
+      });
     }
   };
   const handleDelete = async (id: number) => {
@@ -125,12 +125,18 @@ function Historiku() {
   
     if (confirm.isConfirmed) {
       try {
-        await axios.delete(`${urlNdarjetBuxhetit}/${id}`);
-        setEntries((prev) => prev.filter((e) => e.id !== id));
-        setToast({ message: "Regjistrimi u fshi me sukses", type: "success" });
-      } catch (error) {
-        console.error("Gabim gjatë fshirjes:", error);
-        setToast({ message: "Gabim gjatë fshirjes", type: "error" });
+        const response = await axiosInstance.delete(`${urlNdarjetBuxhetit}/${id}`);
+        if (response.data.succeeded) {
+          setEntries((prev) => prev.filter((e) => e.id !== id));
+          setToast({ message: "Regjistrimi u fshi me sukses", type: "success" });
+        } else {
+          throw new Error(response.data.message || "Gabim gjatë fshirjes");
+        }
+      } catch (error: any) {
+        setToast({ 
+          message: error.response?.data?.message || "Gabim gjatë fshirjes", 
+          type: "error" 
+        });
       }
     }
   };
