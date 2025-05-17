@@ -53,7 +53,7 @@ function ShkollaDashboard() {
                 {/* Navigation Cards */}
                 <div className="bg-gray-100 rounded-xl shadow-sm mx-4 sm:mx-6 md:mx-12 px-4 sm:px-6 py-8 sm:py-10 mb-12">
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <Link to="/shkolla/porosite">
+                        <Link to="/Shkolla/porosite/Historiku">
                             <div className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-md transition">
                                 <h3 className="text-lg font-semibold text-gray-800 mb-1">Porositë</h3>
                                 <p className="text-sm text-gray-500">
@@ -62,16 +62,16 @@ function ShkollaDashboard() {
                             </div>
                         </Link>
 
-                        <Link to="/shkolla/buxheti">
+                        <Link to="/Shkolla/porosite/Shporta">
                             <div className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-md transition">
-                                <h3 className="text-lg font-semibold text-gray-800 mb-1">Buxheti</h3>
+                                <h3 className="text-lg font-semibold text-gray-800 mb-1">Shporta</h3>
                                 <p className="text-sm text-gray-500">
-                                    Kontrolloni gjendjen dhe ndarjen e buxhetit.
+                                    Kontrolloni shportën dhe buxhetin aktual.
                                 </p>
                             </div>
                         </Link>
 
-                        <Link to="/shkolla/stafi">
+                        <Link to="/Shkolla/stafi/ListaStafit">
                             <div className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-md transition">
                                 <h3 className="text-lg font-semibold text-gray-800 mb-1">Stafi</h3>
                                 <p className="text-sm text-gray-500">
