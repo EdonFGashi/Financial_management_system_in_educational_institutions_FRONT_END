@@ -219,7 +219,7 @@ function ListaPorosive() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {porosite.length > 0 ? (
             porosite
-              .filter(p => p.statusi === "Pending") // Changed from "Ne Pritje" to "Pending"
+              .filter(p => p.statusi === "Ne Pritje") // Changed from "Ne Pritje" to "Pending"
               .map((porosi) => (
                 <div
   key={porosi.id}
