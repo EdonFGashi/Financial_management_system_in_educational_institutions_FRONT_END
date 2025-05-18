@@ -71,50 +71,56 @@ function RegisterKompani(props: authFormProps) {
     return () => clearInterval(interval);
   }, []);
 
-  const validationSchema = Yup.object({
-    
-    email: Yup.string()
-      .email("Email-i nuk është valid")
-      .required("Email-i është i detyrueshëm"),
-    password: Yup.string()
-      .required("Fjalëkalimi është i detyrueshëm")
-      .min(8, "Të paktën 8 karaktere")
-      .matches(/[A-Z]/, "Duhet të përmbajë një shkronjë të madhe")
-      .matches(/[0-9]/, "Duhet të përmbajë një numër")
-      .matches(/[^A-Za-z0-9]/, "Duhet të përmbajë një karakter special"),
-      confirmPassword: Yup.string()
-      .required("Konfirmimi është i detyrueshëm")
-      .test("passwords-match", "Fjalëkalimet nuk përputhen", function (value) {
-        return this.parent.password === value;
-      }),
-    role: Yup.string().required("Roli është i detyrueshëm"),
-    qyteti: Yup.string().when("role", ([role], schema) =>
-      role === "Komunë" ? schema.required("Emri Komunës është i detyrueshëm") : schema
-    ),
-    EmriShkolles: Yup.string().when("role", ([role], schema) =>
-      role === "Shkollë" ? schema.required("Emri Shkollës është i detyrueshëm") : schema
-    ),
-    komunaId: Yup.string().when("role", ([role], schema) =>
-      role === "Shkollë" ? schema.required("Komuna duhet të zgjidhet") : schema
-    ),
-    ShkollaRruga: Yup.string().when("role", ([role], schema) =>
-      role === "Shkollë" ? schema.required("Rruga e shkollës është e detyrueshme") : schema
-    ),
-    drejtori: Yup.object({
-      personalNumber: Yup.string().when("role", ([role], schema) =>
-        role === "Shkollë" ? schema.required("Numri personal i drejtorit është i detyrueshëm") : schema
-      ),
-      name: Yup.string().when("role", ([role], schema) =>
-        role === "Shkollë" ? schema.required("Emri i drejtorit është i detyrueshëm") : schema
-      ),
-      surname: Yup.string().when("role", ([role], schema) =>
-        role === "Shkollë" ? schema.required("Mbiemri i drejtorit është i detyrueshëm") : schema
-      ),
-      street: Yup.string().when("role", ([role], schema) =>
-        role === "Shkollë" ? schema.required("Rruga e drejtorit është e detyrueshme") : schema
-      )
-    })
-  });
+ const validationSchema = Yup.object({
+  email: Yup.string()
+    .email("Email-i nuk është valid")
+    .required("Email-i është i detyrueshëm"),
+
+  password: Yup.string()
+    .required("Fjalëkalimi është i detyrueshëm")
+    .min(8, "Të paktën 8 karaktere")
+    .matches(/[A-Z]/, "Duhet të përmbajë një shkronjë të madhe")
+    .matches(/[0-9]/, "Duhet të përmbajë një numër")
+    .matches(/[^A-Za-z0-9]/, "Duhet të përmbajë një karakter special"),
+
+  confirmPassword: Yup.string()
+    .required("Konfirmimi është i detyrueshëm")
+    .oneOf([Yup.ref("password")], "Fjalëkalimet nuk përputhen"),
+
+  role: Yup.string().required("Roli është i detyrueshëm"),
+
+  EmriKompanis: Yup.string().when("role", {
+    is: "Kompani",
+    then: schema => schema.required("Emri i Kompanisë është i detyrueshëm"),
+  }),
+
+  Sherbimi: Yup.string().when("role", {
+    is: "Kompani",
+    then: schema => schema.required("Sherbimi është i detyrueshëm"),
+  }),
+
+  NrXhirologaris: Yup.number()
+    .typeError("Duhet të jetë numër")
+    .required("Nr i xhirollogarisë është i detyrueshëm")
+    .moreThan(0, "Nuk mund të jetë zero"),
+
+  Qyteti: Yup.number()
+    .typeError("Zgjidhni një qytet")
+    .required("Qyteti është i detyrueshëm"),
+
+  KompaniaRruga: Yup.string().when("role", {
+    is: "Kompani",
+    then: schema => schema.required("Rruga e kompanisë është e detyrueshme"),
+  }),
+
+  PronariNumriPersonal: Yup.number()
+    .typeError("Duhet të jetë numër")
+    .required("Nr personal i pronarit është i detyrueshëm")
+    .test("length", "Duhet të ketë saktësisht 10 shifra", val => val?.toString().length === 10),
+
+  KodiPostal: Yup.string().nullable(), // Optional
+});
+
 
   const checkStrength = (password: string) => {
     let score = 0;
@@ -141,10 +147,10 @@ function RegisterKompani(props: authFormProps) {
   role: "Kompani",
   EmriKompanis: "",
   Sherbimi: "",
-  NrXhirologaris: 0,
+  NrXhirologaris: undefined,
   Qyteti: 0, // make sure it's a number!
   KompaniaRruga: "",
-  PronariNumriPersonal: 0, // must be number, not inside nested object
+  PronariNumriPersonal: undefined, // must be number, not inside nested object
   KodiPostal: "10000" // or optional
 }}
 
@@ -261,7 +267,7 @@ function RegisterKompani(props: authFormProps) {
                                         className="w-full p-3 pl-10 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-rose-500"
                                         onBlur={async (e: React.FocusEvent<HTMLInputElement>) => {
                                           const nr = e.target.value;
-                                          if (!nr) return;
+                                          if (!/^\d{10}$/.test(nr)) return;
                                           setLoadingDrejtor(true);
                                             const person = await fetchPersonByNrPersonal(nr);
                                             if (person) {
@@ -284,6 +290,11 @@ function RegisterKompani(props: authFormProps) {
                                     {loadingDrejtor && (
                                       <p className="text-rose-500 text-sm mt-1">Duke kërkuar drejtorin...</p>
                                     )}
+                                    {values.PronariNumriPersonal?.toString().length === 10 && !loadingDrejtor && !drejtorFetched && (
+                                        <p className="text-red-500 text-sm text-center mt-2">
+                                          Ju lutem siguroni që pronari ekziston para regjistrimit.
+                                        </p>
+                                      )}
                                     {drejtorFetched && !loadingDrejtor && (
                                         <>
                                           <div className="relative">
@@ -322,8 +333,12 @@ function RegisterKompani(props: authFormProps) {
 
                 <button
                   type="submit"
-                  className="w-full bg-rose-600 text-white p-3 rounded-lg hover:bg-rose-700 transition"
-                  disabled={strength < 4}
+                  className={`w-full p-3 rounded-lg transition text-white ${
+    strength < 4 || !drejtorFetched
+      ? "bg-gray-400 cursor-not-allowed"
+      : "bg-rose-600 hover:bg-rose-700"
+  }`}
+  disabled={strength < 4 || !drejtorFetched}
                 >
                   Regjistrohu
                 </button>
