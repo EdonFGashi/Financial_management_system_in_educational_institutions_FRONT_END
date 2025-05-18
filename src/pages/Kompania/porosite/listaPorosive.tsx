@@ -1,175 +1,180 @@
 import { useState } from "react";
-import { Formik, Form, Field, ErrorMessage } from "formik";
-import { PlusIcon } from "@heroicons/react/24/outline";
-import * as Yup from "yup";
+import { Formik, Form, Field } from "formik";
 import Sidebar from "../Sidebar";
-
-interface Porosia {
-    id: number;
-    item: string;
-    quantity: number;
-    dateCreated: string;
-    school: string;
-    approvalStatus: "Pending" | "Approved" | "Refused";
-    orderStatus: "Processing" | "Completed" | "Cancelled";
-    price: number;
-  }
-  
-  const initialPorosite: Porosia[] = [
-    {
-      id: 1,
-      item: "Laptop",
-      quantity: 2,
-      dateCreated: "2025-04-27",
-      school: "Shkolla 1",
-      approvalStatus: "Pending",
-      orderStatus: "Processing",
-      price: 1200,
-    },
-    {
-      id: 2,
-      item: "Libra",
-      quantity: 50,
-      dateCreated: "2025-04-26",
-      school: "Shkolla 2",
-      approvalStatus: "Approved",
-      orderStatus: "Completed",
-      price: 300,
-    },
-  ];
-
-
-
+import { usePorosite } from "../../../hooks/usePorosite";
+import { generateInvoice } from "../../../utils/InvoiceGenerator";
 
 export default function ListaPorosiveKompani() {
-  const [porosite] = useState<Porosia[]>(initialPorosite);
+  const { porosite, loading } = usePorosite();
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+
+  const [filterValues, setFilterValues] = useState({
+    item: "",
+    school: "",
+    shkolla: "",
+    orderStatus: "",
+    minPrice: "",
+    maxPrice: "",
+  });
+
+  const filteredPorosite = (porosite || []).filter((porosi) => {
+    const totalPrice = porosi.produktiCmimi * porosi.sasia;
+    return (
+      (!filterValues.item || porosi.produktiEmri.toLowerCase().includes(filterValues.item.toLowerCase())) &&
+      (!filterValues.school || porosi.kompaniaEmri.toLowerCase().includes(filterValues.school.toLowerCase())) &&
+      (!filterValues.shkolla || porosi.shkollaEmri?.toLowerCase().includes(filterValues.shkolla.toLowerCase())) &&
+      (!filterValues.orderStatus || porosi.statusi === filterValues.orderStatus) &&
+      (!filterValues.minPrice || totalPrice >= Number(filterValues.minPrice)) &&
+      (!filterValues.maxPrice || totalPrice <= Number(filterValues.maxPrice))
+    );
+  });
+
+  const handleSelect = (id: number) => {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+    );
+  };
+
+  const getSelectedPorosite = () => {
+    return selectedIds.length > 0
+      ? filteredPorosite.filter(p => selectedIds.includes(p.id))
+      : [];
+  };
 
   return (
     <div className="flex flex-col md:flex-row h-screen bg-gray-50 text-gray-800">
       <Sidebar />
-
       <main className="flex-1 pb-16 overflow-y-auto">
-        <div className="bg-gradient-to-r from-rose-800 to-red-500 text-white px-4 sm:px-6 md:px-12 py-8 md:py-10 sticky top-0 z-10">
-          <h1 className="text-2xl sm:text-3xl font-bold mb-2">Lista e Porosive</h1>
-          <p className="text-base sm:text-lg text-green-100">Lista dhe menaxhimi i produkteve</p>
+        <div className="bg-gradient-to-r from-rose-800 to-red-500 text-white px-6 py-8 sticky top-0 z-10">
+          <h1 className="text-3xl font-bold mb-2">Lista e Porosive</h1>
+          <p className="text-lg text-green-100">Lista dhe menaxhimi i produkteve</p>
         </div>
-        <div className="mx-4 sm:mx-6 md:mx-12">
-        <div className="mt-10">
-        <div className="p-6">
-      <Formik
-        initialValues={{
-          item: "",
-          school: "",
-          approvalStatus: "",
-          orderStatus: "",
-          minPrice: "",
-          maxPrice: "",
-        }}
-        onSubmit={() => {}}
-      >
-        {({ values, handleChange }) => {
-          const filteredPorosite = porosite.filter((porosi) => {
-            return (
-              (!values.item || porosi.item.toLowerCase().includes(values.item.toLowerCase())) &&
-              (!values.school || porosi.school.toLowerCase().includes(values.school.toLowerCase())) &&
-              (!values.approvalStatus || porosi.approvalStatus === values.approvalStatus) &&
-              (!values.orderStatus || porosi.orderStatus === values.orderStatus) &&
-              (!values.minPrice || porosi.price >= Number(values.minPrice)) &&
-              (!values.maxPrice || porosi.price <= Number(values.maxPrice))
-            );
-          });
 
-          return (
-            <>
-              <Form className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                <div>
-                  <label className="block mb-1 text-gray-700">Artikulli</label>
-                  <Field
-                    name="item"
-                    type="text"
-                    onChange={handleChange}
-                    className="w-full border p-2 rounded"
-                  />
-                </div>
-                <div>
-                  <label className="block mb-1 text-gray-700">Shkolla</label>
-                  <Field
-                    name="school"
-                    type="text"
-                    onChange={handleChange}
-                    className="w-full border p-2 rounded"
-                  />
-                </div>
-                <div>
-                  <label className="block mb-1 text-gray-700">Statusi i Miratimit</label>
-                  <Field
-                    name="approvalStatus"
-                    as="select"
-                    onChange={handleChange}
-                    className="w-full border p-2 rounded"
-                  >
-                    <option value="">Të gjitha</option>
-                    <option value="Pending">Në Pritje</option>
-                    <option value="Approved">Miratuar</option>
-                    <option value="Rejected">Refuzuar</option>
-                  </Field>
-                </div>
-                <div>
-                  <label className="block mb-1 text-gray-700">Statusi i Porosisë</label>
-                  <Field
-                    name="orderStatus"
-                    as="select"
-                    onChange={handleChange}
-                    className="w-full border p-2 rounded"
-                  >
-                    <option value="">Të gjitha</option>
-                    <option value="Processing">Në Proces</option>
-                    <option value="Completed">Përfunduar</option>
-                    <option value="Cancelled">Anuluar</option>
-                  </Field>
-                </div>
-                <div>
-                  <label className="block mb-1 text-gray-700">Çmimi Minimal (€)</label>
-                  <Field
-                    name="minPrice"
-                    type="number"
-                    onChange={handleChange}
-                    className="w-full border p-2 rounded"
-                  />
-                </div>
-                <div>
-                  <label className="block mb-1 text-gray-700">Çmimi Maksimal (€)</label>
-                  <Field
-                    name="maxPrice"
-                    type="number"
-                    onChange={handleChange}
-                    className="w-full border p-2 rounded"
-                  />
-                </div>
-              </Form>
+        <div className="mx-6 mt-8">
+          <Formik initialValues={filterValues} onSubmit={() => {}}>
+            {({ values, handleChange }) => {
+              setFilterValues(values);
 
-              
+              return (
+                <>
+                  {/* FILTERS */}
+                  <Form className="grid grid-cols-2 md:grid-cols-6 gap-4 mb-6">
+                    <Field name="item" placeholder="Artikulli" className="border p-2 rounded" onChange={handleChange} />
+                    <Field name="shkolla" placeholder="Shkolla" className="border p-2 rounded" onChange={handleChange} />
+                    <Field name="orderStatus" as="select" className="border p-2 rounded" onChange={handleChange}>
+                      <option value="">Statusi</option>
+                      <option value="Në pritje">Në proces</option>
+                      <option value="Paguar">Paguar</option>
+                      <option value="Anuluar">Anuluar</option>
+                    </Field>
+                    <Field name="minPrice" type="number" placeholder="Çmimi min" className="border p-2 rounded" onChange={handleChange} />
+                    <Field name="maxPrice" type="number" placeholder="Çmimi max" className="border p-2 rounded" onChange={handleChange} />
+                  </Form>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {filteredPorosite.map((porosi) => (
-                  <div key={porosi.id} className="border p-4 rounded shadow">
-                    <h3 className="font-bold text-lg">{porosi.item}</h3>
-                    <p>Sasia: {porosi.quantity}</p>
-                    <p>Shkolla: {porosi.school}</p>
-                    <p>Statusi i Miratimit: {porosi.approvalStatus}</p>
-                    <p>Statusi i Porosisë: {porosi.orderStatus}</p>
-                    <p>Çmimi: €{porosi.price.toFixed(2)}</p>
-                    <p>Data e Krijimit: {new Date(porosi.dateCreated).toLocaleDateString()}</p>
+                  {/* TABLE */}
+                  <div className="overflow-x-auto rounded shadow bg-white">
+                    <table className="w-full table-auto border-collapse text-sm">
+                      <thead className="bg-gray-100 text-gray-700">
+                        <tr>
+                          <th className="px-4 py-2 text-left">
+                            <label className="inline-flex items-center cursor-pointer gap-2">
+                              <input
+                                type="checkbox"
+                                checked={selectedIds.length === filteredPorosite.length && filteredPorosite.length > 0}
+                                onChange={() => {
+                                  if (selectedIds.length === filteredPorosite.length) {
+                                    setSelectedIds([]);
+                                  } else {
+                                    setSelectedIds(filteredPorosite.map(p => p.id));
+                                  }
+                                }}
+                                className="peer hidden"
+                              />
+                              <span className="w-4 h-4 rounded-full border border-gray-400 peer-checked:border-rose-600 peer-checked:bg-rose-600 transition-all relative flex items-center justify-center">
+                                {selectedIds.length === filteredPorosite.length && filteredPorosite.length > 0 && (
+                                  <span className="text-white text-[10px] font-bold">✓</span>
+                                )}
+                              </span>
+                              <span className="text-xs">Të gjitha</span>
+                            </label>
+                          </th>
+                          <th className="px-4 py-2 text-left">ID</th>
+                          <th className="px-4 py-2 text-left">Artikulli</th>
+                          <th className="px-4 py-2 text-left">Sasia</th>
+                          <th className="px-4 py-2 text-left">Data</th>
+                          <th className="px-4 py-2 text-left">Çmimi Total</th>
+                          <th className="px-4 py-2 text-left">Statusi</th>
+                          <th className="px-4 py-2 text-left">Shkolla</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {loading ? (
+                          <tr>
+                            <td colSpan={9} className="px-4 py-4 text-center text-gray-500">Duke u ngarkuar...</td>
+                          </tr>
+                        ) : filteredPorosite.length > 0 ? (
+                          filteredPorosite.map((porosi) => {
+                            const isChecked = selectedIds.includes(porosi.id);
+                            return (
+                              <tr key={porosi.id} className={`border-t ${isChecked ? "bg-rose-50" : ""}`}>
+                                <td className="px-4 py-2">
+                                  <label className="relative inline-flex items-center cursor-pointer">
+                                    <input
+                                      type="checkbox"
+                                      checked={isChecked}
+                                      onChange={() => handleSelect(porosi.id)}
+                                      className="peer hidden"
+                                    />
+                                    <span className="w-4 h-4 rounded-full border border-gray-400 peer-checked:border-rose-600 peer-checked:bg-rose-600 transition-all relative flex items-center justify-center">
+                                      {isChecked && (
+                                        <span className="text-white text-[10px] font-bold">✓</span>
+                                      )}
+                                    </span>
+                                  </label>
+                                </td>
+                                <td className="px-4 py-2">{porosi.id}</td>
+                                <td className="px-4 py-2">{porosi.produktiEmri}</td>
+                                <td className="px-4 py-2">{porosi.sasia}</td>
+                                <td className="px-4 py-2">{new Date(porosi.dataPorosise).toLocaleDateString()}</td>
+                                <td className="px-4 py-2">€{(porosi.produktiCmimi * porosi.sasia).toFixed(2)}</td>
+                                <td className="px-4 py-2">
+                                  <span className={`inline-block px-2 py-1 rounded text-xs font-medium ${
+                                    porosi.statusi === "Paguar"
+                                      ? "bg-green-100 text-green-800"
+                                      : porosi.statusi === "Në pritje"
+                                      ? "bg-yellow-100 text-yellow-800"
+                                      : "bg-red-100 text-red-800"
+                                  }`}>
+                                    {porosi.statusi}
+                                  </span>
+                                </td>
+                                <td className="px-4 py-2">{porosi.shkollaEmri || "—"}</td>
+                              </tr>
+                            );
+                          })
+                        ) : (
+                          <tr>
+                            <td colSpan={9} className="px-4 py-4 text-center text-gray-500">Nuk u gjet asnjë porosi</td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
                   </div>
-                ))}
-              </div>
-            </>
-          );
-        }}
-      </Formik>
-    </div>
 
-            </div>
+                  {/* INVOICE BUTTON */}
+                  <div className="mt-6 flex justify-end">
+                    <button
+                      className="bg-rose-600 hover:bg-rose-700 text-white px-6 py-2 rounded disabled:opacity-50"
+                      disabled={selectedIds.length === 0}
+                      onClick={() => generateInvoice(getSelectedPorosite())}
+                    >
+                      Shkarko Faturën
+                    </button>
+                  </div>
+                </>
+              );
+            }}
+          </Formik>
         </div>
       </main>
     </div>
