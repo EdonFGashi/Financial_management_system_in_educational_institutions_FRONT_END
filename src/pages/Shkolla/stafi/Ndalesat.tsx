@@ -16,11 +16,11 @@ interface Staff {
 interface Ndalesa {
     id: number;
     stafiShkollesId: number;
-    arsyeja: string;
+    arsyeja: string;        
     shumaNdaleses: number;
     data: string;
     pershkrimi?: string;
-    aprovuar: boolean;
+    aprovuari: boolean;
     stafi?: Staff;
 }
 
@@ -234,7 +234,7 @@ function Ndalesat() {
                                                     className="border rounded px-2 py-1 w-full"
                                                 />
                                             </td>
-                                            <td className="py-3 px-4">{entry.aprovuar ? "Po" : "Jo"}</td>
+                                            <td className="py-3 px-4">{entry.aprovuari ? "Po" : "Jo"}</td>
                                             <td className="py-3 px-4">
                                                 {entry.data ? entry.data.split("T")[0] : ""}
                                             </td>
