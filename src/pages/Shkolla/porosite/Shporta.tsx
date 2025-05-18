@@ -6,7 +6,8 @@ import axios from "axios";
 import {urlShporta} from "../../../endpoints";
 import Swal from "sweetalert2";
 import {urlListShkolla} from "../../../endpoints";
-import { urlPorosite } from "../../../endpoints";
+import {urlPorosite} from "../../../endpoints";
+import {urlProdukte} from "../../../endpoints";
 
 interface CartItem {
     id: number;
@@ -20,10 +21,14 @@ interface CartItem {
 function Shporta() {
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10;
+
     const [totalItems, setTotalItems] = useState(0);
     const [cartItems, setCartItems] = useState<CartItem[]>([]);
     const [buxhetiAktual, setBuxhetiAktual] = useState<number | null>(null);
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
 
+
+        // Merr produktet ne shporte
         const fetchShporta = async () => {
             try {
                 const response = await axios.get(`${urlShporta}/paginated`, {
@@ -45,6 +50,7 @@ function Shporta() {
             fetchShporta();
         }, [currentPage]);
 
+        // Update sasia
         const updateQuantity = async (id: number, newQuantity: number) => {
         if (newQuantity < 1) return;
 
@@ -63,6 +69,7 @@ function Shporta() {
         }
          };
 
+         // Delete nga shporta
         const removeItem = async (id: number) => {
         const result = await Swal.fire({
             title: "A jeni i sigurt?",
@@ -98,6 +105,7 @@ function Shporta() {
         }
     };
 
+    // Fetch Buxheti Aktual
     useEffect(() => {
         const fetchShkollaBudget = async () => {
             try {
@@ -111,15 +119,13 @@ function Shporta() {
         fetchShkollaBudget();
     });
 
-    // Funksione për menaxhimin e shportës
+    // Kalkulimi i totalit te shportes
     const calculateTotal = () => {
         return cartItems.reduce((total, item) => total + (item.cmimiProduktit * item.sasia), 0);
     };
-
     const remainingBudget = (buxhetiAktual ?? 0) - calculateTotal();
-    const totalPages = Math.ceil(totalItems / itemsPerPage);
 
-
+    // Kryerja e porosise
     const handleKryejPorosine = async () => {
             const { value: shenime } = await Swal.fire({
                 title: "Kryej Porosinë",
@@ -135,9 +141,11 @@ function Shporta() {
                 confirmButtonColor: "#16a34a"
             });
 
-            if (shenime === undefined) return; // user clicked cancel
+            if (shenime === undefined) return; 
 
+            const total = calculateTotal(); // ✅ calculate once before the loop
             try {
+
                 for (const item of cartItems) {
                     const porosiaPayload = {
                         sasia: item.sasia,
@@ -145,8 +153,37 @@ function Shporta() {
                         shenime: shenime || null
                     };
 
-                    await axios.post(`${urlPorosite}`, porosiaPayload);
-                    await axios.delete(`${urlShporta}/${item.id}`);
+                    try {
+                        await axios.post(`${urlPorosite}`, porosiaPayload);
+                        console.log("Order created for", item.produktiId);
+                    } catch (err) {
+                        console.error("❌ POST order failed", err);
+                    }
+
+                    try {
+                        await axios.patch(`${urlProdukte}/${item.produktiId}/sasia`, {
+                            sasiaPorositur: item.sasia
+                        });
+                        console.log("Stock updated for", item.produktiId);
+                    } catch (err) {
+                        console.error("❌ PATCH produkti stock failed", err);
+                    }
+
+                    try {
+                        await axios.delete(`${urlShporta}/${item.id}`);
+                        console.log("Item deleted from cart", item.id);
+                    } catch (err) {
+                        console.error("❌ DELETE from cart failed", err);
+                    }
+                }
+
+                try {
+                    await axios.patch(`${urlListShkolla}/buxheti`, {
+                        ShumaPorositur: total
+                    });
+                    console.log("✅ Buxheti updated successfully");
+                } catch (err) {
+                    console.error("❌ PATCH buxheti failed", err);
                 }
 
                 Swal.fire({
@@ -160,6 +197,7 @@ function Shporta() {
                 fetchShporta(); // refresh cart
             } catch (error) {
                 console.error("Gabim gjatë kryerjes së porosisë:", error);
+                console.log("Error response:", error);
                 Swal.fire({
                     icon: "error",
                     title: "Gabim",
