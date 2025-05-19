@@ -15,6 +15,8 @@ import {
   BuildingLibraryIcon,
   ClockIcon,
   BuildingOffice2Icon,
+  MinusCircleIcon,
+  PlusCircleIcon,
 } from "@heroicons/react/24/outline";
 import { useState, useEffect } from "react";
 import Authorized from "../../auth/Authorized";
@@ -33,6 +35,7 @@ function Sidebar() {
   const [isOpen, setIsOpen] = useState(true);
   const [financatHovered, setFinancatHovered] = useState(false);
   const [kontraktoretHovered, setKontraktoretHovered] = useState(false);
+  const [ndalesatHovered, setNdalesatHovered] = useState(false);
   const [userEmail, setUserEmail] = useState('');
 
   const {update, claims} = useContext(AuthenticationContext);
@@ -263,15 +266,46 @@ function Sidebar() {
                   <BuildingOffice2Icon className="w-4 h-4" /> Lista e Kontraktorëve
                 </Link>
               </div>
-            </div>            <Link
-              to="/komuna/financat"
-              className={`flex items-center gap-3 px-4 py-2 rounded-lg transition ${isActive(
-                "/komuna/financat"
-              )}`}
+            </div>            
+            {/* Ndalesat e Punetoreve dropdown with Orët Shtesë included */}
+            <div
+              onMouseEnter={() => setNdalesatHovered(true)}
+              onMouseLeave={() => setNdalesatHovered(false)}
+              className="relative"
             >
-              <DocumentDuplicateIcon className="w-5 h-5" />
-              <span className="text-sm">Ndalesat e Punëtorëve</span>
-            </Link>
+              <div className="flex items-center justify-between px-4 py-2 rounded-lg hover:bg-gray-100 cursor-pointer">
+                <span className="flex items-center gap-3 text-sm text-gray-700">
+                  <MinusCircleIcon className="w-5 h-5" /> Ndalesat e Punonjësve
+                </span>
+                <ChevronDownIcon
+                  className={`w-4 h-4 transform transition-transform duration-200 ${
+                    ndalesatHovered ? "rotate-180" : "rotate-0"
+                  }`}
+                />
+              </div>
+              <div
+                className={`overflow-hidden transition-all duration-300 ${
+                  ndalesatHovered ? "max-h-40 opacity-100" : "max-h-0 opacity-0"
+                } ml-4 mt-1 space-y-1`}
+              >
+                <Link
+                  to="/komuna/financat"
+                  className={`flex items-center gap-3 px-4 py-2 rounded-lg text-sm transition ${isActive(
+                    "/komuna/financat"
+                  )}`}
+                >
+                  <DocumentDuplicateIcon className="w-4 h-4" /> Ndalesat e Punëtorëve
+                </Link>
+                <Link
+                  to="/komuna/financat/oretshtese"
+                  className={`flex items-center gap-3 px-4 py-2 rounded-lg text-sm transition ${isActive(
+                    "/komuna/financat/oretshtese"
+                  )}`}
+                >
+                  <ClockIcon className="w-4 h-4" /> Orët Shtesë
+                </Link>
+              </div>
+            </div>
           </nav>
         </div>
 
