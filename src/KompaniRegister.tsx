@@ -99,9 +99,12 @@ export default function Register() {
       );
       console.log("VERIFIKIMI ", verifyResponse.data.succeeded);
       if (verifyResponse.data.succeeded) {
+        console.log("TE DHENAT E FORMES: ", formValues);
         const response = await axiosInstance.post(`${urlKompania}`, formValues);
 
+        console.log("TE DHENAT E REGJISTRIMIT: ", response.data);
         if (response) {
+          console.log("U REGJISTRU : ", response);
           saveToken(response.data);
           update(getClaims());
           navigate("/");
