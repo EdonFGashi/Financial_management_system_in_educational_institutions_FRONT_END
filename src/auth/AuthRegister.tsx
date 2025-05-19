@@ -173,9 +173,9 @@ function AuthRegister(props: authFormProps) {
 
                           setToast({ message: "Regjistrimi u krye me sukses!", type: "success" });
 
-                          setTimeout(() => {
-                              navigate("/signin");
-                          }, 1500);
+                          // setTimeout(() => {
+                          //     // navigate("/signin");
+                          // }, 1500);
                       }}
  
   
