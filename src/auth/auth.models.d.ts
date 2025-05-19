@@ -42,7 +42,7 @@ export interface userRegisterCredentialsKompania {
   EmriKompanis: string;
   Sherbimi: string;
   NrXhirologaris: number;
-  Qyteti: string;
+  Qyteti: number;
   KompaniaRruga: string;
   PronariNumriPersonal: number; 
   // KodiPostal?: string; // optional if you want

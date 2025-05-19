@@ -11,6 +11,7 @@ import { getClaims, saveToken } from "./auth/handleJWT";
 import KompaniRegister from "./auth/RegisterKompani";
 import axios from "axios";
 import TwoFAVerificationModal from "./components/TwoFAVerificationModal";
+import Swal from "sweetalert2";
 
 export default function Register() {
   const [errors, setErrors] = useState<string[]>([]);
@@ -21,76 +22,6 @@ export default function Register() {
   const [codeToVerify, setCodeToVerify] = useState("");
   const [formValues, setFormValues] =
     useState<userRegisterCredentialsKompania | null>(null);
-
-  // async function register(values: userRegisterCredentialsKompania) {
-  //   console.log("Submitted values:", values);
-  //   try {
-  //     setErrors([]);
-  //     let response;
-
-  //       console.log("Registering a Kompania ");
-  //       const dto: userRegisterCredentialsKompania = {
-  //         email: values.email,
-  //         password: values.password,
-  //         role: values.role,
-  //         Qyteti: values.Qyteti,
-  //         EmriKompanis: values.EmriKompanis,
-  //         Sherbimi: values.Sherbimi,
-  //         NrXhirologaris: values.NrXhirologaris,
-  //         KompaniaRruga: values.KompaniaRruga,
-  //         PronariNumriPersonal: values.PronariNumriPersonal
-
-  //       };
-  //       response = await axiosInstance.post(`${urlKompania}`, dto);
-
-  //     if (response) {
-  //       saveToken(response.data);
-  //       update(getClaims());
-  //       navigate("/");
-  //     }
-  //   } catch (error: any) {
-  //     if (error.response?.data) {
-  //       setErrors(error.response.data);
-  //     } else {
-  //       setErrors(["Unknown error occurred."]);
-  //     }
-  //   }
-  // }
-
-  // async function register(values: userRegisterCredentialsKompania) {
-  //   console.log("Submitted values:", values);
-  //   try {
-  //     setErrors([]);
-  //     let response;
-
-  //       console.log("Registering a Kompania ");
-  //       const dto: userRegisterCredentialsKompania = {
-  //         email: values.email,
-  //         password: values.password,
-  //         role: values.role,
-  //         Qyteti: values.Qyteti,
-  //         EmriKompanis: values.EmriKompanis,
-  //         Sherbimi: values.Sherbimi,
-  //         NrXhirologaris: values.NrXhirologaris,
-  //         KompaniaRruga: values.KompaniaRruga,
-  //         PronariNumriPersonal: values.PronariNumriPersonal
-
-  //       };
-  //       response = await axiosInstance.post(`${urlKompania}`, dto);
-
-  //     if (response) {
-  //       saveToken(response.data);
-  //       update(getClaims());
-  //       navigate("/");
-  //     }
-  //   } catch (error: any) {
-  //     if (error.response?.data) {
-  //       setErrors(error.response.data);
-  //     } else {
-  //       setErrors(["Unknown error occurred."]);
-  //     }
-  //   }
-  // }
 
   async function register(values: userRegisterCredentialsKompania) {
     try {
@@ -153,19 +84,34 @@ export default function Register() {
         const response = await axiosInstance.post(`${urlKompania}`, formValues);
 
         console.log("TE DHENAT E REGJISTRIMIT: ", response.data);
-        if (response) {
+        if (response.data) {
           console.log("U REGJISTRU : ", response);
-          saveToken(response.data);
-          update(getClaims());
-          navigate("/");
+          setShow2FAModal(false);
+        
+          const okej = await Swal.fire({
+            title: "Njoftim",
+            text: `Llogaria juaj është regjistruar me sukses !`,
+            icon: "info", // You can use 'success', 'warning', 'error', etc. depending on the context
+            confirmButtonColor: "#16a34a",
+            confirmButtonText: "OK"
+          });
+          if (okej.isConfirmed) {
+            navigate("/signin");
+          }
         }
       } else {
-        setErrors(["Kodi është i pasaktë ose ka skaduar."]);
+        Swal.fire({
+          title: "Gabim",
+          text: "Kodi nuk është i saktë ose ka skaduar!",
+          icon: "error",
+          confirmButtonColor: "#dc2626",
+          confirmButtonText: "OK"
+        });
       }
     } catch (error: any) {
       setErrors(["Gabim gjatë verifikimit ose regjistrimit."]);
     } finally {
-      setShow2FAModal(false);
+      // setShow2FAModal(false);
     }
   }
 
@@ -180,7 +126,7 @@ export default function Register() {
             EmriKompanis: "",
             Sherbimi: "",
             NrXhirologaris: 0,
-            Qyteti: "",
+            Qyteti: 0,
             KompaniaRruga: "",
             PronariNumriPersonal: 0,
           } as userRegisterCredentialsKompania
