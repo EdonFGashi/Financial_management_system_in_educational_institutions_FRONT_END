@@ -131,6 +131,10 @@ function RegisterKompani(props: authFormProps) {
     setStrength(score);
   };
 
+  function setShow2FAModal(arg0: boolean) {
+    throw new Error("Function not implemented.");
+  }
+
   return (
     <div className="min-h-screen flex">
       {/* Left side - Sign Up form */}
@@ -164,7 +168,9 @@ function RegisterKompani(props: authFormProps) {
       cleaned as userRegisterCredentialsKompania,
       actions as FormikHelpers<userRegisterCredentialsKompania>
     );
-    navigate("/");
+    
+    navigate("/register");
+    // setShow2FAModal(true);
 
   } catch (error) {
     console.error("Registration failed:", error);

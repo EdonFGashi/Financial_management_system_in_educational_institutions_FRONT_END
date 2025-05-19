@@ -1,5 +1,5 @@
-import axiosInstance from "./api/axiosInstance"; 
-import {urlKompania } from "./endpoints";
+import axiosInstance from "./api/axiosInstance";
+import { urlKompania } from "./endpoints";
 import {
   authenticationResponse,
   userRegisterCredentialsKompania,
@@ -9,63 +9,137 @@ import AuthenticationContext from "./auth/AuthenticationContext";
 import { useNavigate } from "react-router-dom";
 import { getClaims, saveToken } from "./auth/handleJWT";
 import KompaniRegister from "./auth/RegisterKompani";
+import axios from "axios";
+import TwoFAVerificationModal from "./components/TwoFAVerificationModal";
 
 export default function Register() {
   const [errors, setErrors] = useState<string[]>([]);
   const { update } = useContext(AuthenticationContext);
   const navigate = useNavigate();
 
+  const [show2FAModal, setShow2FAModal] = useState(false);
+  const [codeToVerify, setCodeToVerify] = useState("");
+  const [formValues, setFormValues] =
+    useState<userRegisterCredentialsKompania | null>(null);
+
+  // async function register(values: userRegisterCredentialsKompania) {
+  //   console.log("Submitted values:", values);
+  //   try {
+  //     setErrors([]);
+  //     let response;
+
+  //       console.log("Registering a Kompania ");
+  //       const dto: userRegisterCredentialsKompania = {
+  //         email: values.email,
+  //         password: values.password,
+  //         role: values.role,
+  //         Qyteti: values.Qyteti,
+  //         EmriKompanis: values.EmriKompanis,
+  //         Sherbimi: values.Sherbimi,
+  //         NrXhirologaris: values.NrXhirologaris,
+  //         KompaniaRruga: values.KompaniaRruga,
+  //         PronariNumriPersonal: values.PronariNumriPersonal
+
+  //       };
+  //       response = await axiosInstance.post(`${urlKompania}`, dto);
+
+  //     if (response) {
+  //       saveToken(response.data);
+  //       update(getClaims());
+  //       navigate("/");
+  //     }
+  //   } catch (error: any) {
+  //     if (error.response?.data) {
+  //       setErrors(error.response.data);
+  //     } else {
+  //       setErrors(["Unknown error occurred."]);
+  //     }
+  //   }
+  // }
   async function register(values: userRegisterCredentialsKompania) {
-    console.log("Submitted values:", values);
     try {
-      setErrors([]);
-      let response;
+      setErrors([]); // Clear previous errors
+      setFormValues(values); // Save form values for final registration
 
-        console.log("Registering a Kompania ");
-        const dto: userRegisterCredentialsKompania = {
+      // Make the API request to send the 2FA code
+      const sendCodeResponse = await axios.post(
+        "http://localhost:5102/api/TwoFA/send-code",
+        {
           email: values.email,
-          password: values.password,
-          role: values.role,
-          Qyteti: values.Qyteti,
-          EmriKompanis: values.EmriKompanis,
-          Sherbimi: values.Sherbimi,
-          NrXhirologaris: values.NrXhirologaris,
-          KompaniaRruga: values.KompaniaRruga,
-          PronariNumriPersonal: values.PronariNumriPersonal
+        }
+      );
+      console.log("MODALI: ", sendCodeResponse.data.succeeded);
+      console.log("MODALIII: ", sendCodeResponse.data.data);
 
-        };
-        response = await axiosInstance.post(`${urlKompania}`, dto);
-
-      if (response) {
-        saveToken(response.data);
-        update(getClaims());
-        navigate("/");
+      if (sendCodeResponse.data.succeeded) {
+        setShow2FAModal(true); // Show modal upon success
+      } else {
+        setErrors(["Dështoi dërgimi i kodit të verifikimit."]);
       }
     } catch (error: any) {
       if (error.response?.data) {
         setErrors(error.response.data);
       } else {
-        setErrors(["Unknown error occurred."]);
+        setErrors(["Gabim gjatë dërgimit të kodit."]);
       }
+    }
+  }
+
+  async function verifyAndRegister(code: string) {
+    try {
+      console.log("U hi te modalo");
+      if (!formValues) return;
+
+      const verifyResponse = await axios.post(
+        "http://localhost:5102/api/TwoFA/verify-code",
+        {
+          email: formValues.email,
+          code,
+        }
+      );
+      console.log("VERIFIKIMI ", verifyResponse.data.succeeded);
+      if (verifyResponse.data.succeeded) {
+        const response = await axiosInstance.post(`${urlKompania}`, formValues);
+
+        if (response) {
+          saveToken(response.data);
+          update(getClaims());
+          navigate("/");
+        }
+      } else {
+        setErrors(["Kodi është i pasaktë ose ka skaduar."]);
+      }
+    } catch (error: any) {
+      setErrors(["Gabim gjatë verifikimit ose regjistrimit."]);
+    } finally {
+      setShow2FAModal(false);
     }
   }
 
   return (
     <>
       <KompaniRegister
-  model={{
-  email: "",
-  password: "",
-  role: "Kompani",
-  EmriKompanis: "",
-  Sherbimi: "",
-  NrXhirologaris: 0,
-  Qyteti: "",
-  KompaniaRruga: "",
-  PronariNumriPersonal: 0
-  } as userRegisterCredentialsKompania}
-  onSubmit={register}
-/>
+        model={
+          {
+            email: "",
+            password: "",
+            role: "Kompani",
+            EmriKompanis: "",
+            Sherbimi: "",
+            NrXhirologaris: 0,
+            Qyteti: "",
+            KompaniaRruga: "",
+            PronariNumriPersonal: 0,
+          } as userRegisterCredentialsKompania
+        }
+        onSubmit={register}
+      />
+      <TwoFAVerificationModal
+        isOpen={show2FAModal} // Pass the correct state
+        email={formValues?.email || ""} // Pass the email from form values
+        onCancel={() => setShow2FAModal(false)} // Close modal on cancel
+        onVerify={verifyAndRegister} // Handle verification when the form is submitted
+      />
     </>
   );
 }

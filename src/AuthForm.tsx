@@ -50,10 +50,8 @@ function AuthForm(props: authFormProps) {
   ];
 
   const validationSchema = Yup.object({
-    email: Yup.string()
-      .required("Email-i është i detyrueshëm"),
-    password: Yup.string()
-      .required("Fjalëkalimi është i detyrueshëm")
+    email: Yup.string().required("Email-i është i detyrueshëm"),
+    password: Yup.string().required("Fjalëkalimi është i detyrueshëm"),
   });
 
   // const checkStrength = (password: string) => {
@@ -70,15 +68,11 @@ function AuthForm(props: authFormProps) {
       {/* Left side - Sign Up form */}
       <div className="w-full md:w-1/2 flex flex-col justify-center items-center px-10 py-16 bg-white">
         <div className="max-w-md w-full">
-          <h1 className="text-4xl font-bold text-indigo-700 mb-4">
-            Kyçu
-          </h1>
-          <p className="text-gray-600 mb-8">
-            Kyçuni në llogarinë tuaj.
-          </p>
+          <h1 className="text-4xl font-bold text-indigo-700 mb-4">Kyçu</h1>
+          <p className="text-gray-600 mb-8">Kyçuni në llogarinë tuaj.</p>
 
           <Formik
-            initialValues={{ email: "", password: ""}}
+            initialValues={{ email: "", password: "" }}
             validationSchema={validationSchema}
             onSubmit={props.onSubmit}
           >
