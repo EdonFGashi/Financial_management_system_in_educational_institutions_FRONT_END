@@ -56,10 +56,60 @@ export default function Register() {
   //     }
   //   }
   // }
+
+  // async function register(values: userRegisterCredentialsKompania) {
+  //   console.log("Submitted values:", values);
+  //   try {
+  //     setErrors([]);
+  //     let response;
+
+  //       console.log("Registering a Kompania ");
+  //       const dto: userRegisterCredentialsKompania = {
+  //         email: values.email,
+  //         password: values.password,
+  //         role: values.role,
+  //         Qyteti: values.Qyteti,
+  //         EmriKompanis: values.EmriKompanis,
+  //         Sherbimi: values.Sherbimi,
+  //         NrXhirologaris: values.NrXhirologaris,
+  //         KompaniaRruga: values.KompaniaRruga,
+  //         PronariNumriPersonal: values.PronariNumriPersonal
+
+  //       };
+  //       response = await axiosInstance.post(`${urlKompania}`, dto);
+
+  //     if (response) {
+  //       saveToken(response.data);
+  //       update(getClaims());
+  //       navigate("/");
+  //     }
+  //   } catch (error: any) {
+  //     if (error.response?.data) {
+  //       setErrors(error.response.data);
+  //     } else {
+  //       setErrors(["Unknown error occurred."]);
+  //     }
+  //   }
+  // }
+
   async function register(values: userRegisterCredentialsKompania) {
     try {
       setErrors([]); // Clear previous errors
-      setFormValues(values); // Save form values for final registration
+
+      const dto: userRegisterCredentialsKompania = {
+                email: values.email,
+                password: values.password,
+                role: values.role,
+                Qyteti: values.Qyteti,
+                EmriKompanis: values.EmriKompanis,
+                Sherbimi: values.Sherbimi,
+                NrXhirologaris: values.NrXhirologaris,
+                KompaniaRruga: values.KompaniaRruga,
+                PronariNumriPersonal: values.PronariNumriPersonal
+      
+              };
+
+      setFormValues(dto); // Save form values for final registration
 
       // Make the API request to send the 2FA code
       const sendCodeResponse = await axios.post(
