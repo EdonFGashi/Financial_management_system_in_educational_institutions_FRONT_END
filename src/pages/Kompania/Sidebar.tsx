@@ -79,9 +79,9 @@ function Sidebar() {
       </button>
 
       <aside
-        className={`h-screen bg-white border-r border-red-100 shadow-sm px-6 py-8 flex flex-col justify-between transition-all duration-300 w-64 
+        className={`fixed inset-y-0 left-0 bg-white border-r border-red-100 shadow-sm px-6 py-8 flex flex-col justify-between transition-all duration-300 w-64 overflow-y-auto
         ${isOpen ? "translate-x-0" : "-translate-x-full"} 
-        md:relative md:translate-x-0`}
+        md:translate-x-0 z-30`}
       >
         <div>
           {/* User Info */}
@@ -179,8 +179,8 @@ function Sidebar() {
         </div>
       </aside>
 
-      {/* This empty div serves as a placeholder for the sidebar when it's toggled off on mobile */}
-      <div className={`md:hidden ${isOpen ? "w-0" : "w-0"}`}></div>
+      {/* This div serves as a spacer to push content in mobile view */}
+      <div className={`md:hidden ${isOpen ? "w-64" : "w-0"}`}></div>
     </div>
   );
 }
