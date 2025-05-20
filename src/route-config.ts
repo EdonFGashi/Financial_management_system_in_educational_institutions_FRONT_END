@@ -27,6 +27,7 @@ import NdarjaBuxhetit from "./pages/komuna/buxheti/NdarjaBuxhetit";
 import BuxhetiHistoriku from "./pages/komuna/buxheti/Historiku";
 import KomunaListaKompanive from "./pages/komuna/kontraktoret/ListaKompanive";
 import UserProfile from "./pages/komuna/UserProfile";
+import KomunaOretShtese from "./pages/komuna/financat/KomunaOretShtese";
 
 /*
 * Shkolla routes
@@ -114,7 +115,7 @@ import KompaniaUserProfile from "./pages/Kompania/UserProfile";
 //   { 
 //     path: "/komuna/buxheti",
 //     component: NdarjaBuxhetit,
-//     allowedRoles: ["SuperAdmin","Admin", "Komunë"]
+//     allowedRoles: ["SuperAdmin","Admin", "Komuna"]
 //   },
 
 //   {
@@ -251,6 +252,11 @@ const routes = [
   component: KomunaListaKompanive,
   allowedRoles: ["SuperAdmin", "Admin", "Komunë", "Komunë", "komune"],
 },
+{
+    path: "/komuna/financat/oretshtese",
+    component: KomunaOretShtese,
+    allowedRoles: ["SuperAdmin", "Admin", "Komunë", "Komunë", "komune"],
+  },
 
 
   // Shkolla

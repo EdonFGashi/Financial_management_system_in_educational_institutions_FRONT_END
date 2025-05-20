@@ -1,5 +1,5 @@
 const baseURL = process.env.REACT_APP_API_URL; //menyra per tju qasur environemtn variables (process.env.)
-export const urlKomuna = `${baseURL}/Komuna`;
+export const urlKomuna = `${baseURL}/api/Komuna`;
 export const urlShkolla = `${baseURL}/Shkolla`;
 export const urlKompania = `http://localhost:5102/api/Kompania`;
 export const urlAccounts = `http://localhost:5102/api/accounts`;
