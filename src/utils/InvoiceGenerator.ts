@@ -1,8 +1,8 @@
 import jsPDF from "jspdf";
 import "jspdf-autotable"; // important to extend doc.autoTable types
-import { Porosia } from "../models/porosia.model";
+import { Fatura } from "../models/fatura.model";
 
-export function generateInvoice(porosite: Porosia[]) {
+export function generateInvoice(faturat: Fatura[]) {
   const doc = new jsPDF();
   const today = new Date().toLocaleDateString("sq-AL");
 
@@ -13,8 +13,8 @@ export function generateInvoice(porosite: Porosia[]) {
   doc.text(`Data: ${today}`, 14, 28);
 
   // Buyer Info
-  if (porosite.length > 0) {
-    const { kompaniaEmri } = porosite[0];
+  if (faturat.length > 0) {
+    const { kompaniaEmri } = faturat[0];
     doc.setFontSize(12);
     doc.text("Kompania:", 14, 38);
     doc.setFont("bold");
@@ -25,14 +25,14 @@ export function generateInvoice(porosite: Porosia[]) {
   // ✅ Correctly using doc.autoTable to get finalY
   doc.autoTable({
     startY: 48,
-    head: [["ID", "Produkti", "Sasia", "Data", "Çmimi", "Statusi"]],
-    body: porosite.map((p) => [
+    head: [["Fatura ID", "Porosia ID", "Produkti", "Sasia", "Çmimi Total", "Data e Pageses"]],
+    body: faturat.map((p) => [
       p.id,
-      p.produktiEmri,
+      p.porosiaId,
+      p.emriProduktit,
       p.sasia,
-      new Date(p.dataPorosise).toLocaleDateString("sq-AL"),
-      `€${(p.produktiCmimi * p.sasia).toFixed(2)}`,
-      p.statusi,
+      `€${(p.cmimiTotal).toFixed(2)}`,
+      new Date(p.dataPageses).toLocaleDateString("sq-AL")
     ]),
     theme: "grid",
     styles: { fontSize: 10 },
@@ -41,10 +41,10 @@ export function generateInvoice(porosite: Porosia[]) {
   const finalY = doc.autoTable.previous?.finalY ?? 90;
 
   // Total
-  const total = porosite.reduce((sum, p) => sum + p.produktiCmimi * p.sasia, 0);
+  const total = faturat.reduce((sum, p) => 0 + p.cmimiTotalMeTVSH * 1, 0);
   doc.setFontSize(12);
   doc.setFont("bold");
-  doc.text(`Totali: €${total.toFixed(2)}`, 14, finalY + 10);
+  doc.text(`Çmimi Total me TVSH: €${total.toFixed(2)}`, 14, finalY + 10);
 
   // Footer
   doc.setFontSize(10);

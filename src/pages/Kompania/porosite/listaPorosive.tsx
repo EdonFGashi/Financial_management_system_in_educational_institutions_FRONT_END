@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Formik, Form, Field } from "formik";
 import Sidebar from "../Sidebar";
 import { usePorosite } from "../../../hooks/usePorosite";
-import { generateInvoice } from "../../../utils/InvoiceGenerator";
 
 export default function ListaPorosiveKompani() {
   const { porosite, loading } = usePorosite();
@@ -159,18 +158,7 @@ export default function ListaPorosiveKompani() {
                         )}
                       </tbody>
                     </table>
-                  </div>
-
-                  {/* INVOICE BUTTON */}
-                  <div className="mt-6 flex justify-end">
-                    <button
-                      className="bg-rose-600 hover:bg-rose-700 text-white px-6 py-2 rounded disabled:opacity-50"
-                      disabled={selectedIds.length === 0}
-                      onClick={() => generateInvoice(getSelectedPorosite())}
-                    >
-                      Shkarko Faturën
-                    </button>
-                  </div>
+                  </div>                  
                 </>
               );
             }}
