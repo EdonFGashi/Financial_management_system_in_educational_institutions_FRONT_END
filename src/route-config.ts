@@ -49,7 +49,7 @@ import ShkollaUserProfile from "./pages/Shkolla/UserProfile";
 import KompaniaDashboard from "./pages/Kompania/KompaniaDashboard";
 import RegjistriProdukteve from "./pages/Kompania/produktet/regjistriProdukteve";
 import ListaPorosiveKompani from "./pages/Kompania/porosite/listaPorosive";
-import RaportiPorosiveKompani from "./pages/Kompania/porosite/raportiPorosive";
+import RaportiPorosiveKompani from "./pages/Kompania/porosite/faturat";
 import OperationsList from "./admin/OperationsList";
 import RolePermissions from "./admin/RolePermissions";
 import RoleBasedRegister from "./routes/RegisterRoute";

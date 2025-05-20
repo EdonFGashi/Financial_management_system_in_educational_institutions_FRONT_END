@@ -149,7 +149,7 @@ function Sidebar() {
                   to="/kompania/porosite/raporte"
                   className={`flex items-center gap-3 px-4 py-2 rounded-lg text-sm transition ${isActive("/kompania/porosite/raporte")}`}
                 >
-                  <DocumentIcon className="w-4 h-4" /> Raportet e Porosive
+                  <DocumentIcon className="w-4 h-4" /> Faturat
                 </Link>
               </div>
             </div>
