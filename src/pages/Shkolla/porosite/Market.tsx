@@ -11,6 +11,12 @@ import {
     FunnelIcon,
     ArrowsUpDownIcon,
     XMarkIcon,
+    ChevronLeftIcon,
+    ChevronRightIcon,
+    TagIcon,
+    BuildingStorefrontIcon,
+    CalendarIcon,
+    CheckBadgeIcon
 } from "@heroicons/react/24/outline";
 
 interface Produkt {
@@ -193,191 +199,267 @@ function ShkollaMarket() {
 
     return (
         <div className="flex flex-col md:flex-row min-h-screen bg-gray-50 text-gray-800">
-            <Sidebar />
+            {/* Sidebar */}
+            <div className="hidden md:block fixed h-full w-64 bg-white border-r shadow-sm z-20">
+                <Sidebar />
+            </div>
             
-            
+            {/* Toast notification */}
             {toast && (
-                <div className={`fixed top-10 right-4 z-50 px-10 py-6 rounded-lg shadow-lg text-white transition-all duration-300
-                    ${toast.type === 'success' ? 'bg-blue-600' : 'bg-red-600'}`}>
-                    {toast.message}
+                <div className={`fixed top-5 right-5 z-50 px-6 py-4 rounded-lg shadow-md flex items-center gap-3 transition-all duration-300 transform ${
+                    toast.type === 'success' ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-red-50 text-red-800 border border-red-200'
+                }`}>
+                    {toast.type === 'success' ? (
+                        <CheckBadgeIcon className="h-5 w-5 text-green-600" />
+                    ) : (
+                        <XMarkIcon className="h-5 w-5 text-red-600" />
+                    )}
+                    <p className="font-medium">{toast.message}</p>
+                    <button 
+                        onClick={() => setToast(null)}
+                        className="ml-2 text-gray-500 hover:text-gray-700"
+                    >
+                        <XMarkIcon className="h-4 w-4" />
+                    </button>
                 </div>
             )}
 
-            <main className="flex-1 pb-16 overflow-y-auto">
-                {/* Header */}
-                <div className="bg-gradient-to-r from-green-700 to-lime-600 text-white px-4 sm:px-6 md:px-12 py-8 md:py-10 mb-8 sticky top-0 z-10">
-                    <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-                        <div className="mb-4 md:mb-0">
-                            <h1 className="text-2xl sm:text-3xl font-bold mb-2">Market i Mjeteve Shkollore</h1>
-                            <p className="text-base sm:text-lg text-green-100">
-                                Zgjidhni mjetet shkollore nga furnitorët më të mirë
-                            </p>
+            <main className="flex-1 md:ml-64 pb-16 relative">
+                {/* Header - Updated with less fading */}
+                <div className="bg-green-600 relative overflow-hidden">
+                    <div className="absolute inset-0 bg-pattern opacity-20"></div>
+                    <div className="relative z-10 px-4 sm:px-6 lg:px-8 py-12 max-w-7xl mx-auto">
+                        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+                            <div>
+                                <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">Market i Mjeteve Shkollore</h1>
+                                <p className="text-white text-lg max-w-2xl">
+                                    Zgjidhni mjetet shkollore nga furnitorët më të mirë për nevojat e shkollës suaj
+                                </p>
+                            </div>
+                            <Link
+                                to="/shkolla/porosite/shporta"
+                                className="flex items-center gap-3 bg-white text-green-700 px-6 py-3 rounded-full shadow-lg hover:bg-green-50 transition duration-200 transform hover:scale-105 font-medium"
+                            >
+                                <ShoppingCartIcon className="w-5 h-5" />
+                                <span>Shiko Shportën</span>
+                            </Link>
                         </div>
-                        <Link
-                            to="/shkolla/porosite/shporta"
-                            className="flex items-center gap-2 bg-white text-green-700 px-4 py-2 rounded-lg hover:bg-gray-100 transition"
-                        >
-                            <ShoppingCartIcon className="w-5 h-5" />
-                            <span>Shiko Shportën</span>
-                        </Link>
                     </div>
+                    {/* Removed the bottom fade */}
                 </div>
 
-                {/* Kontrollat e filtrimit dhe sortimit */}
-                <div className="bg-white rounded-xl shadow-sm mx-4 sm:mx-6 md:mx-12 px-4 sm:px-6 py-6 mb-8">
-                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
-                        <div className="relative flex-1">
-                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
-                            </div>
-                            <input
-                                type="text"
-                                placeholder="Kërko produkte..."
-                                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                            />
-                        </div>
-
-                        <div className="flex gap-2">
-                            <button
-                                onClick={() => setShowFilters(!showFilters)}
-                                className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg transition"
-                            >
-                                <FunnelIcon className="w-5 h-5" />
-                                <span>Filtro</span>
-                            </button>
-
-                            <div className="relative">
-                                <select
-                                    className="block appearance-none bg-gray-100 hover:bg-gray-200 border border-gray-200 px-4 py-2 pr-8 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 cursor-pointer"
-                                    value={sortOption}
-                                    onChange={(e) => setSortOption(e.target.value)}
-                                >
-                                    <option value="default">Rendit sipas</option>
-                                    <option value="price-asc">Çmimi: Nga më i ulët</option>
-                                    <option value="price-desc">Çmimi: Nga më i lartë</option>
-                                    <option value="date-asc">Data: Nga më e vjetra</option>
-                                    <option value="date-desc">Data: Nga më e reja</option>
-                                    <option value="company-asc">Kompania: A-Z</option>
-                                    <option value="company-desc">Kompania: Z-A</option>
-                                </select>
-                                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                                    <ArrowsUpDownIcon className="w-4 h-4" />
+                {/* Main content */}
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
+                    {/* Search and filter controls - Enhanced design */}
+                    <div className="bg-white rounded-xl shadow-sm p-6 mb-8 border border-gray-100">
+                        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+                            <div className="relative flex-1">
+                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
                                 </div>
+                                <input
+                                    type="text"
+                                    placeholder="Kërko produkte sipas emrit ose përshkrimit..."
+                                    className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                />
                             </div>
-                        </div>
-                    </div>
 
-                    {/* Filtra të avancuar */}
-                    {showFilters && (
-                        <div className="bg-gray-50 p-4 rounded-lg mt-4 border border-gray-200">
-                            <div className="flex justify-between items-center mb-4">
-                                <h3 className="font-medium">Filtra të avancuar</h3>
+                            <div className="flex gap-3">
                                 <button
-                                    onClick={clearFilters}
-                                    className="text-sm text-green-600 hover:text-green-700 flex items-center gap-1"
+                                    onClick={() => setShowFilters(!showFilters)}
+                                    className={`flex items-center gap-2 px-4 py-3 rounded-lg transition-all duration-200 ${
+                                        showFilters 
+                                        ? 'bg-green-100 text-green-700 border border-green-200' 
+                                        : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                                    }`}
                                 >
-                                    <XMarkIcon className="w-4 h-4" />
-                                    Pastro filtrat
+                                    <FunnelIcon className="w-5 h-5" />
+                                    <span>Filtro</span>
                                 </button>
-                            </div>
 
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Kompania</label>
+                                <div className="relative">
                                     <select
-                                        className="block w-full px-3 py-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                                        value={selectedCompany}
-                                        onChange={(e) => setSelectedCompany(e.target.value)}
+                                        className="appearance-none bg-gray-100 border border-gray-200 px-4 py-3 pr-10 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 cursor-pointer transition-all duration-200 hover:bg-gray-200"
+                                        value={sortOption}
+                                        onChange={(e) => setSortOption(e.target.value)}
                                     >
-                                        {companies.map((kompania) => (
-                                            <option key={kompania} value={kompania}>
-                                                {kompania.charAt(0).toUpperCase() + kompania.slice(1)}
-                                            </option>
-                                        ))}
+                                        <option value="default">Rendit sipas</option>
+                                        <option value="price-asc">Çmimi: Nga më i ulët</option>
+                                        <option value="price-desc">Çmimi: Nga më i lartë</option>
+                                        <option value="date-asc">Data: Nga më e vjetra</option>
+                                        <option value="date-desc">Data: Nga më e reja</option>
+                                        <option value="company-asc">Kompania: A-Z</option>
+                                        <option value="company-desc">Kompania: Z-A</option>
                                     </select>
+                                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
+                                        <ArrowsUpDownIcon className="w-4 h-4" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Advanced filters - Improved layout */}
+                        {showFilters && (
+                            <div className="bg-gray-50 p-6 rounded-lg mt-4 border border-gray-200 animate-fadeIn">
+                                <div className="flex justify-between items-center mb-5">
+                                    <h3 className="text-lg font-medium text-gray-800">Filtra të avancuar</h3>
+                                    <button
+                                        onClick={clearFilters}
+                                        className="text-sm text-green-600 hover:text-green-700 flex items-center gap-1 bg-green-50 hover:bg-green-100 px-3 py-1 rounded-md transition-colors"
+                                    >
+                                        <XMarkIcon className="w-4 h-4" />
+                                        Pastro filtrat
+                                    </button>
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-2">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Çmimi min (€)</label>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">Kompania</label>
+                                        <select
+                                            className="block w-full px-4 py-3 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
+                                            value={selectedCompany}
+                                            onChange={(e) => setSelectedCompany(e.target.value)}
+                                        >
+                                            {companies.map((kompania) => (
+                                                <option key={kompania} value={kompania}>
+                                                    {kompania.charAt(0).toUpperCase() + kompania.slice(1)}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">Çmimi minimal (€)</label>
                                         <input
                                             type="number"
                                             min="0"
-                                            className="block w-full px-3 py-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                            className="block w-full px-4 py-3 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
                                             value={minPrice}
                                             onChange={(e) => setMinPrice(e.target.value)}
+                                            placeholder="Min"
                                         />
                                     </div>
+                                    
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Çmimi max (€)</label>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">Çmimi maksimal (€)</label>
                                         <input
                                             type="number"
                                             min="0"
-                                            className="block w-full px-3 py-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                            className="block w-full px-4 py-3 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
                                             value={maxPrice}
                                             onChange={(e) => setMaxPrice(e.target.value)}
+                                            placeholder="Max"
                                         />
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    )}
-                </div>
+                        )}
+                    </div>
 
-                {/* Lista e produkteve */}
-                <div className="mx-4 sm:mx-6 md:mx-12">
-                    {filteredProducts.length === 0 ? (
-                        <div className="bg-white rounded-xl shadow-sm p-8 text-center">
-                            <p className="text-gray-500">Nuk u gjet asnjë produkt me këto kritere kërkimi.</p>
+                    {/* Filter results summary */}
+                    <div className="flex justify-between items-center mb-6">
+                        <h2 className="text-xl font-semibold text-gray-800">
+                            {filteredProducts.length} produktet të disponueshme
+                        </h2>
+                        {searchTerm || selectedCompany !== "të gjitha" || minPrice || maxPrice ? (
                             <button
                                 onClick={clearFilters}
-                                className="mt-4 text-green-600 hover:text-green-700 font-medium"
+                                className="text-sm text-green-600 hover:text-green-700 flex items-center gap-1"
                             >
+                                <XMarkIcon className="w-4 h-4" />
+                                Pastro filtrat
+                            </button>
+                        ) : null}
+                    </div>
+
+                    {/* Products list - Enhanced card design with stronger shadows */}
+                    {filteredProducts.length === 0 ? (
+                        <div className="bg-white rounded-xl shadow-sm p-12 text-center border border-gray-100">
+                            <div className="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                                <MagnifyingGlassIcon className="w-8 h-8 text-gray-400" />
+                            </div>
+                            <h3 className="text-lg font-medium text-gray-800 mb-2">Nuk u gjet asnjë produkt</h3>
+                            <p className="text-gray-500 max-w-md mx-auto mb-6">Nuk u gjet asnjë produkt me këto kritere kërkimi. Provoni të ndryshoni filtrat për të gjetur atë që po kërkoni.</p>
+                            <button
+                                onClick={clearFilters}
+                                className="inline-flex items-center px-4 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors"
+                            >
+                                <XMarkIcon className="w-4 h-4 mr-2" />
                                 Pastro të gjitha filtrat
                             </button>
                         </div>
                     ) : (
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                             {filteredProducts.map((product) => (
-                                <div key={product.id} className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition">
-                                    <div className="p-4">
+                                <div key={product.id} className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 border border-gray-100 flex flex-col transform hover:-translate-y-1">
+                                    <div className="relative bg-gray-50 p-4 flex items-center justify-center h-64">
                                         <img
-                                            src={product.fotografia}
-                                            alt={product.fotografia}
-                                            className="w-full h-48 object-contain mb-4"
+                                            src={product.fotografia || 'https://via.placeholder.com/300x300.png?text=No+Image'}
+                                            alt={product.emri}
+                                            className="max-h-full max-w-full object-contain transition-transform duration-300 hover:scale-105"
                                         />
-                                        <div className="flex justify-between items-start mb-1">
-                                            <h3 className="text-lg font-semibold text-gray-800">{product.emri}</h3>
-                                        </div>
-                                        <p className="text-sm text-gray-600 mb-2">{product.pershkrimi}</p>
-                                        <p className="text-sm text-gray-500 mb-1">
-                                            Kompania: {product.kompaniaEmri || 'Kompani e panjohur'}
-                                        </p>
-                                        <p className="text-xs text-gray-400 mb-3">Shtuar: {new Date(product.createdAt).toLocaleDateString()}</p>
-                                        <p className="text-xl font-bold text-green-600 mb-4">€{product.cmimi.toFixed(2)}</p>
                                         {product.sasiaNeStok === 0 && (
-                                                <div className="text-red-600 font-semibold mb-2">Produkti jashtë stokut</div>
-                                            )}
+                                            <div className="absolute top-3 right-3 bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full">
+                                                Jashtë stokut
+                                            </div>
+                                        )}
+                                        {product.sasiaNeStok > 0 && product.sasiaNeStok <= 5 && (
+                                            <div className="absolute top-3 right-3 bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full">
+                                                Vetëm {product.sasiaNeStok} në stok
+                                            </div>
+                                        )}
+                                    </div>
+                                    
+                                    <div className="p-6 flex-grow">
+                                        <div className="flex justify-between items-start mb-2">
+                                            <h3 className="text-lg font-semibold text-gray-800 line-clamp-2">{product.emri}</h3>
+                                        </div>
+                                        
+                                        <p className="text-sm text-gray-600 mb-4 line-clamp-3">{product.pershkrimi}</p>
+                                        
+                                        <div className="space-y-2 mb-4">
+                                            <div className="flex items-center text-sm text-gray-500">
+                                                <BuildingStorefrontIcon className="w-4 h-4 mr-2 text-gray-400" />
+                                                {product.kompaniaEmri || 'Kompani e panjohur'}
+                                            </div>
+                                            
+                                            <div className="flex items-center text-xs text-gray-400">
+                                                <CalendarIcon className="w-4 h-4 mr-2 text-gray-300" />
+                                                Shtuar: {new Date(product.createdAt).toLocaleDateString()}
+                                            </div>
+                                        </div>
+                                        
+                                        <div className="flex items-center mb-4">
+                                            <TagIcon className="w-5 h-5 text-green-500 mr-2" />
+                                            <span className="text-2xl font-bold text-green-600">€{product.cmimi.toFixed(2)}</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="p-4 border-t border-gray-100 bg-gray-50">
                                         <div className="flex items-center justify-between">
                                             <div className="flex items-center">
                                                 <button
                                                     onClick={() => handleQuantityChange(product.id, (quantities[product.id] || 1) - 1)}
-                                                    className="bg-gray-200 text-gray-700 px-3 py-1 rounded-l-lg hover:bg-gray-300 transition"
+                                                    disabled={product.sasiaNeStok === 0}
+                                                    className="bg-white text-gray-700 px-3 py-2 rounded-l-lg border border-gray-300 hover:bg-gray-100 disabled:opacity-50 transition-colors"
                                                 >
                                                     -
                                                 </button>
                                                 <input
                                                     type="number"
                                                     min="1"
+                                                    max={product.sasiaNeStok}
                                                     value={quantities[product.id] || 1}
                                                     onChange={(e) => handleQuantityChange(product.id, parseInt(e.target.value))}
-                                                    className="w-12 text-center border-t border-b border-gray-300 py-1"
+                                                    disabled={product.sasiaNeStok === 0}
+                                                    className="w-14 text-center border-t border-b border-gray-300 py-2 bg-white disabled:bg-gray-100 disabled:text-gray-500"
                                                 />
                                                 <button
                                                     onClick={() => handleQuantityChange(product.id, (quantities[product.id] || 1) + 1)}
-                                                    className="bg-gray-200 text-gray-700 px-3 py-1 rounded-r-lg hover:bg-gray-300 transition"
+                                                    disabled={product.sasiaNeStok === 0}
+                                                    className="bg-white text-gray-700 px-3 py-2 rounded-r-lg border border-gray-300 hover:bg-gray-100 disabled:opacity-50 transition-colors"
                                                 >
                                                     +
                                                 </button>
@@ -385,13 +467,14 @@ function ShkollaMarket() {
                                             <button
                                                 onClick={() => addToCart(product)}
                                                 disabled={product.sasiaNeStok === 0}
-                                                className={`px-4 py-2 rounded-lg transition ${
+                                                className={`px-4 py-2 rounded-lg transition-colors flex items-center gap-2 ${
                                                     product.sasiaNeStok === 0
-                                                        ? 'bg-gray-400 cursor-not-allowed'
+                                                        ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
                                                         : 'bg-green-600 text-white hover:bg-green-700'
                                                 }`}
                                             >
-                                                {product.sasiaNeStok === 0 ? "Jashtë stokut" : "Shto në Shportë"}
+                                                <ShoppingCartIcon className="w-4 h-4" />
+                                                {product.sasiaNeStok === 0 ? "Jashtë stokut" : "Shto"}
                                             </button>
                                         </div>
                                     </div>
@@ -399,24 +482,66 @@ function ShkollaMarket() {
                             ))}
                         </div>
                     )}
-                </div>
-                <div className="flex justify-center mt-8">
-                    <button
-                        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                        className="px-4 py-2 mx-1 bg-gray-200 rounded hover:bg-gray-300"
-                        disabled={currentPage === 1}
-                    >
-                        Faqja Paraprake
-                    </button>
-                    <span className="px-4 py-2">{currentPage}</span>
-                    <button
-                        onClick={() => setCurrentPage(prev => prev + 1)}
-                        className="px-4 py-2 mx-1 bg-gray-200 rounded hover:bg-gray-300"
-                    >
-                        Faqja Tjetër
-                    </button>
+
+                    {/* Pagination - Modernized */}
+                    <div className="flex justify-center mt-12">
+                        <nav className="flex items-center space-x-2">
+                            <button
+                                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                                className={`p-2 rounded-md flex items-center ${
+                                    currentPage === 1 
+                                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+                                    : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                                }`}
+                                disabled={currentPage === 1}
+                            >
+                                <ChevronLeftIcon className="h-5 w-5" />
+                                <span className="sr-only">Previous</span>
+                            </button>
+                            
+                            <span className="px-4 py-2 bg-green-100 text-green-700 font-medium rounded-md">
+                                Faqe {currentPage}
+                            </span>
+                            
+                            <button
+                                onClick={() => setCurrentPage(prev => prev + 1)}
+                                className="p-2 rounded-md bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 flex items-center"
+                            >
+                                <span className="sr-only">Next</span>
+                                <ChevronRightIcon className="h-5 w-5" />
+                            </button>
+                        </nav>
+                    </div>
                 </div>
             </main>
+            
+            {/* CSS styles without the jsx attribute */}
+            <style>
+                {`
+                @keyframes fadeIn {
+                    from { opacity: 0; transform: translateY(-10px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+                .animate-fadeIn {
+                    animation: fadeIn 0.3s ease-out forwards;
+                }
+                .bg-pattern {
+                    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.15'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+                }
+                .line-clamp-2 {
+                    display: -webkit-box;
+                    -webkit-line-clamp: 2;
+                    -webkit-box-orient: vertical;
+                    overflow: hidden;
+                }
+                .line-clamp-3 {
+                    display: -webkit-box;
+                    -webkit-line-clamp: 3;
+                    -webkit-box-orient: vertical;
+                    overflow: hidden;
+                }
+                `}
+            </style>
         </div>
     );
 }
