@@ -5,14 +5,16 @@ import {
   BuildingLibraryIcon,
   CalendarIcon,
   ChartBarIcon,
+  ArrowTrendingUpIcon,
+  ArrowPathIcon,
+  CurrencyDollarIcon
 } from "@heroicons/react/24/outline";
 import Sidebar from "../Sidebar";
 import Toast from "../../../components/Toast";
 import Swal from "sweetalert2";
 import axiosInstance from "../../../api/axiosInstance";
 import { urlListKomuna, urlListShkolla } from "../../../endpoints";
-import { StringLiteral } from "@babel/types";
-import axios from "axios";
+import { isAxiosError } from "axios"; // Keep only the isAxiosError helper
 
 interface SchoolObject {
   id: number;
@@ -60,7 +62,6 @@ function NdarjaBuxhetit() {
     message: string;
     type: "success" | "error";
   } | null>(null);
-  const [autoAllocate, setAutoAllocate] = useState(false);
   const [daysInterval, setDaysInterval] = useState("5");
 
   // Add state for allocation input
@@ -68,44 +69,8 @@ function NdarjaBuxhetit() {
     [key: number]: { amount: string; isPercentage: boolean };
   }>({});
 
-  // Mock data
   useEffect(() => {
-    setSchoolRecord([
-      {
-        id: 1,
-        emriShkolles: "Sami Frasheri",
-        nrNxenesve: 850,
-        buxhetiShfrytezuar: 500, // 32% of 500
-        shfrytezimiAktualPerqindje: 50,
-        buxhetiAktual: 1000,
-        autoNdarja: false,
-        drejtori: "Drejtori 1",
-        adresaId: 1,
-      },
-      {
-        id: 3,
-        emriShkolles: "Xhevdet Doda",
-        nrNxenesve: 720,
-        buxhetiShfrytezuar: 400, // 32% of 500
-        shfrytezimiAktualPerqindje: 80,
-        buxhetiAktual: 500,
-        autoNdarja: true,
-        drejtori: "Drejtori 1",
-        adresaId: 1,
-      },
-    ]);
-    // setNdarje([
-    //   {
-    //     shkollaId: 1,
-    //     shuma: 850,
-    //     data: "25/05/2025",  // 32% of 500
-    //   },
-    //   {
-    //     shkollaId: 3,
-    //     shuma: 1000,
-    //     data: "25/05/2025",  // 32% of 500
-    //   }
-    // ]);
+    // Remove mock data
     loadSchools();
     loadKomunaBudget();
   }, []);
@@ -330,7 +295,7 @@ function NdarjaBuxhetit() {
           shkollaId: schoolId,
           shuma: allocationAmount,
           data: new Date().toISOString(),
-          shenime: school.shenime, // Or pass textarea note if needed
+          shenime: school.shenime,
         });   
 
         setToast({
@@ -356,9 +321,9 @@ function NdarjaBuxhetit() {
       } catch (error: any) {
         console.error(error);
       
-        // Check if it's an Axios error and the specific error message is returned
+        // Update to use the imported isAxiosError helper
         if (
-          axios.isAxiosError(error) &&
+          isAxiosError(error) &&
           error.response?.data === "Ju nuk keni buxhet të mjaftueshëm !"
         ) {
           await Swal.fire({
@@ -368,7 +333,7 @@ function NdarjaBuxhetit() {
             confirmButtonColor: "#dc2626",
             confirmButtonText: "OK"
           });
-          return; // Stop execution if this specific error occurred
+          return;
         }
       
         // Fallback for other errors
@@ -381,11 +346,32 @@ function NdarjaBuxhetit() {
     }
   };
 
+  // Calculate budget allocation statistics
+  const calculateBudgetStats = () => {
+    if (!schoolRecord || schoolRecord.length === 0) {
+      return {
+        totalAllocated: 0,
+        highestAllocation: 0
+      };
+    }
+
+    const totalAllocated = schoolRecord.reduce((sum, school) => sum + school.buxhetiAktual, 0);
+    const highestAllocation = Math.max(...schoolRecord.map(school => school.buxhetiAktual));
+
+    return {
+      totalAllocated,
+      highestAllocation
+    };
+  };
+
+  const budgetStats = calculateBudgetStats();
+
   return (
     <div className="flex flex-col md:flex-row min-h-screen bg-gray-50">
       <Sidebar />
 
-      <main className="flex-1 p-4 sm:p-6 md:p-10">
+      <main className="flex-1 pb-16 overflow-y-auto">
+        {/* Toast notification */}
         {toast && (
           <div className="fixed top-5 right-5 z-50">
             <Toast
@@ -396,243 +382,305 @@ function NdarjaBuxhetit() {
           </div>
         )}
 
-        {/* Header Section */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
-          <h2 className="text-2xl sm:text-3xl font-bold flex items-center gap-2">
-            <BanknotesIcon className="w-7 h-7 text-indigo-600" />
-            Ndarja e Buxhetit
-          </h2>
-          <Link
-            to="/komuna/dashboard"
-            className="bg-indigo-600 text-white px-4 py-2 rounded-md shadow hover:bg-indigo-700 transition text-sm"
-          >
-            ← Kthehu te Dashboard
-          </Link>
+        {/* Blue header with pattern */}
+        <div className="bg-blue-800 text-white relative overflow-hidden">
+          <div className="absolute inset-0 bg-pattern opacity-10"></div>
+          <div className="relative z-10 px-4 sm:px-6 lg:px-8 py-12 max-w-7xl mx-auto">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+              <div>
+                <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">Ndarja e Buxhetit</h1>
+                <p className="text-blue-100 text-lg max-w-2xl">
+                  Menaxhoni dhe ndani buxhetin për institucionet arsimore
+                </p>
+              </div>
+              <Link
+                to="/komuna/dashboard"
+                className="inline-flex items-center px-5 py-2.5 rounded-lg bg-white text-blue-700 shadow-lg hover:bg-blue-50 transition-all duration-200 font-medium self-start"
+              >
+                ← Kthehu te Dashboard
+              </Link>
+            </div>
+          </div>
         </div>
+        
+        {/* Budget Dashboard */}
+        <div className="px-4 sm:px-6 lg:px-8 pt-8">
+          <div className="max-w-7xl mx-auto">
+            {/* Total Budget Overview Card */}
+            <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl shadow-lg p-6 mb-8 text-white overflow-hidden relative">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-10 rounded-full -mt-16 -mr-16"></div>
+              
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center relative z-10">
+                <div>
+                  <h3 className="text-lg font-medium text-blue-100 mb-1">Buxheti në dispozicion</h3>
+                  <p className="text-4xl font-bold">{totalBudget.toLocaleString()} €</p>
+                  <p className="text-blue-200 mt-1">Për muajin: {selectedMonth}</p>
+                </div>
+                <div className="mt-4 md:mt-0">
+                  <button 
+                    onClick={() => loadKomunaBudget()} 
+                    className="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg text-sm font-medium backdrop-blur-sm transition-all duration-200 flex items-center"
+                  >
+                    <ArrowPathIcon className="w-4 h-4 mr-2" />
+                    Rifresko Buxhetin
+                  </button>
+                </div>
+              </div>
+            </div>
 
-        {/* Budget Overview Cards */}
-        <div className="grid grid-cols-1 gap-6 mb-8">
-          <div className="bg-green-50 p-6 rounded-xl border border-green-200">
-            <h3 className="text-green-700 font-semibold mb-2">
-              Buxheti në dispozicion:
-            </h3>
-            <p className="text-3xl font-bold text-green-600">{totalBudget} €</p>
+            {/* Budget Statistics - Updated to 2 columns */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+              {/* Total Allocated Card */}
+              <div className="bg-gradient-to-br from-white to-blue-50 rounded-xl shadow-sm border border-blue-100 p-6 overflow-hidden relative">
+                <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-blue-100 to-blue-50 rounded-bl-[100px] -z-0"></div>
+                <div className="flex flex-col items-start mb-2 relative z-10">
+                  <div className="p-3 rounded-xl bg-blue-100 mb-3">
+                    <BanknotesIcon className="h-6 w-6 text-blue-600" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-800">Totali i Ndarjes</h3>
+                </div>
+                <p className="text-3xl font-bold text-blue-700 relative z-10">
+                  €{budgetStats.totalAllocated.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                </p>
+              </div>
+              
+              {/* Highest Allocation Card */}
+              <div className="bg-gradient-to-br from-white to-purple-50 rounded-xl shadow-sm border border-purple-100 p-6 overflow-hidden relative">
+                <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-purple-100 to-purple-50 rounded-bl-[100px] -z-0"></div>
+                <div className="flex flex-col items-start mb-2 relative z-10">
+                  <div className="p-3 rounded-xl bg-purple-100 mb-3">
+                    <ArrowTrendingUpIcon className="h-6 w-6 text-purple-600" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-800">Ndarja Maksimale</h3>
+                </div>
+                <p className="text-3xl font-bold text-purple-700 relative z-10">
+                  €{budgetStats.highestAllocation.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                </p>
+              </div>
+            </div>
           </div>
         </div>
 
         {/* Controls Section */}
-        <div className="bg-white p-4 sm:p-6 rounded-xl shadow mb-8">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Për muajin:
-              </label>
-              <select
-                value={selectedMonth}
-                onChange={(e) => setSelectedMonth(e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded-md text-sm"
-              >
-                <option>Qershor 2025</option>
-                <option>Korrik 2025</option>
-                <option>Gusht 2025</option>
-              </select>
-            </div>
+        <div className="px-4 sm:px-6 lg:px-8">
+          <div className="max-w-7xl mx-auto">
+            <div className="bg-white p-6 rounded-xl shadow-md mb-8 border border-gray-100">
+              <h3 className="text-lg font-medium text-gray-800 mb-4 flex items-center">
+                <CalendarIcon className="w-5 h-5 mr-2 text-blue-600" />
+                Parametrat e Ndarjes
+              </h3>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Për muajin:
+                  </label>
+                  <select
+                    value={selectedMonth}
+                    onChange={(e) => setSelectedMonth(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-sm"
+                  >
+                    <option>Qershor 2025</option>
+                    <option>Korrik 2025</option>
+                    <option>Gusht 2025</option>
+                  </select>
+                </div>
 
-            {/* <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Ndarja automatike:
-              </label>
-              <div className="flex h-10 items-center">
-                <input
-                  type="checkbox"
-                  checked={autoAllocate}
-                  onChange={(e) => setAutoAllocate(e.target.checked)}
-                  className="h-4 w-4 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500"
-                />
-                <span className="ml-2 text-sm text-gray-600">Auto</span>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Çdo (ditë):
+                  </label>
+                  <select
+                    value={daysInterval}
+                    onChange={(e) => setDaysInterval(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-sm"
+                  >
+                    <option value="1">1 ditë</option>
+                    <option value="2">2 ditë</option>
+                    <option value="3">3 ditë</option>
+                    <option value="5">5 ditë</option>
+                    <option value="7">7 ditë</option>
+                    <option value="10">10 ditë</option>
+                    <option value="14">14 ditë</option>
+                    <option value="30">30 ditë</option>
+                  </select>
+                </div>
+
+                <div className="flex items-end sm:col-span-2">
+                  <button
+                    onClick={() => {
+                      setToast({
+                        message: "Parametrat u aplikuan me sukses",
+                        type: "success",
+                      });
+                    }}
+                    className="w-full px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-lg transition flex items-center justify-center"
+                  >
+                    <ArrowPathIcon className="w-4 h-4 mr-2" /> Apliko
+                  </button>
+                </div>
               </div>
-            </div> */}
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Çdo (ditë):
-              </label>
-              <select
-                value={daysInterval}
-                onChange={(e) => setDaysInterval(e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded-md text-sm"
-                // disabled={!autoAllocate}
-              >
-                <option value="1">1 ditë</option>
-                <option value="2">2 ditë</option>
-                <option value="3">3 ditë</option>
-                <option value="5">5 ditë</option>
-                <option value="7">7 ditë</option>
-                <option value="10">10 ditë</option>
-                <option value="14">14 ditë</option>
-                <option value="30">30 ditë</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                &nbsp;
-              </label>
-              <button
-                onClick={() => {
-                  // Add your filter logic here
-                  setToast({
-                    message: "Filtrat u aplikuan me sukses",
-                    type: "success",
-                  });
-                }}
-                className="w-full p-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition text-sm"
-              >
-                Filtro
-              </button>
             </div>
           </div>
         </div>
 
-        {/* Responsive Table Container */}
-        <div className="bg-white rounded-xl shadow overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold text-gray-900">
-                    Shkolla
-                  </th>
-                  <th className="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold text-gray-900">
-                    Shfrytëzimi i buxhetit
-                  </th>
-                  <th className="px-4 sm:px-6 py-3 sm:py-4 text-center text-xs sm:text-sm font-semibold text-gray-900">
-                    Shuma e ndarjes
-                  </th>
-                  {/* <th className="hidden sm:table-cell px-2 sm:px-2 py-2 sm:py-2 w-10 text-center text-center text-xs sm:text-sm font-semibold text-gray-900">
-                    Ndarja automatike
-                  </th> */}
-                  <td className="hidden md:table-cell px-4 sm:px-6 py-3 sm:py-4 w-48 sm:w-64 text-center text-xs sm:text-sm font-semibold text-gray-900">
-                    Shenime
-                  </td>
+        {/* Schools Table */}
+        <div className="px-4 sm:px-6 lg:px-8">
+          <div className="max-w-7xl mx-auto">
+            <div className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100 mb-8">
+              <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                <h3 className="text-lg font-medium text-gray-800 flex items-center">
+                  <BuildingLibraryIcon className="w-5 h-5 mr-2 text-blue-600" />
+                  Lista e Shkollave
+                </h3>
+              </div>
+              
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-blue-50">
+                    <tr>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">
+                        Shkolla
+                      </th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">
+                        Shfrytëzimi i buxhetit
+                      </th>
+                      <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-blue-700 uppercase tracking-wider">
+                        Shuma e ndarjes
+                      </th>
+                      <th scope="col" className="hidden md:table-cell px-6 py-3 text-center text-xs font-medium text-blue-700 uppercase tracking-wider">
+                        Shënime
+                      </th>
+                      <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-blue-700 uppercase tracking-wider">
+                        Veprime
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {schoolRecord.map((school, index) => (
+                      <tr key={school.id} className={`hover:bg-blue-50 transition-colors ${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}`}>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            <BuildingLibraryIcon className="h-5 w-5 text-gray-400 mr-2 flex-shrink-0" />
+                            <div>
+                              <div className="text-sm font-medium text-gray-900">{school.emriShkolles}</div>
+                              <div className="text-xs text-gray-500">{school.nrNxenesve} nxënës</div>
+                            </div>
+                          </div>
+                        </td>
 
-                  <th className="px-4 sm:px-4 py-3 sm:py-4 text-center text-xs sm:text-sm font-semibold text-gray-900">
-                    Veprime
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {schoolRecord.map((school) => (
-                  <tr key={school.id} className="hover:bg-gray-50">
-                    <td className="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <BuildingLibraryIcon className="h-4 sm:h-5 w-4 sm:w-5 text-gray-400 mr-2 flex-shrink-0" />
-                        <span className="text-sm font-medium">
-                          {school.emriShkolles}
-                        </span>
-                      </div>
-                    </td>
+                        <td className="px-6 py-4">
+                          <div className="space-y-2">
+                            <div className="w-full bg-gray-200 rounded-full h-2.5">
+                              <div
+                                className={`h-2.5 rounded-full ${
+                                  school.shfrytezimiAktualPerqindje <= 40
+                                    ? "bg-green-500" // Green for 0% - 40%
+                                    : school.shfrytezimiAktualPerqindje <= 60
+                                    ? "bg-yellow-500" // Yellow for 41% - 60%
+                                    : school.shfrytezimiAktualPerqindje <= 80
+                                    ? "bg-orange-500" // Orange for 61% - 80%
+                                    : "bg-red-500" // Red for 81% - 100%
+                                }`}
+                                style={{width: `${Math.min(school.shfrytezimiAktualPerqindje, 100)}%`}}
+                              ></div>
+                            </div>
+                            <div className="flex justify-between text-xs text-gray-500">
+                              <div className="flex flex-col">
+                                <span className="font-medium">Total:</span>
+                                <span className="text-gray-900">{school.buxhetiAktual}€</span>
+                              </div>
+                              <div className="flex flex-col">
+                                <span className="font-medium">Shfrytëzuar:</span>
+                                <span className="text-gray-900">{school.buxhetiShfrytezuar}€</span>
+                              </div>
+                              <div className="flex flex-col">
+                                <span className="font-medium">Përqindja:</span>
+                                <span className={`text-gray-900 ${
+                                  school.shfrytezimiAktualPerqindje > 80 ? 'text-red-600 font-medium' : ''
+                                }`}>
+                                  {school.shfrytezimiAktualPerqindje}%
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </td>
 
-                    <td className="px-4 sm:px-6 py-3 sm:py-4">
-                      <div className="space-y-1">
-                        <div className="w-full bg-gray-200 rounded-full h-2">
-                          <div
-                            className={`h-2 rounded-full ${
-                              school.shfrytezimiAktualPerqindje <= 40
-                                ? "bg-green-600" // Green for 0% - 40%
-                                : school.shfrytezimiAktualPerqindje <= 60
-                                ? "bg-yellow-500" // Yellow for 41% - 60%
-                                : school.shfrytezimiAktualPerqindje <= 80
-                                ? "bg-orange-500" // Orange for 61% - 80%
-                                : "bg-red-600" // Red for 81% - 100%
-                            }`}
-                            style={{width: `${Math.min(school.shfrytezimiAktualPerqindje, 100)}%`,
+                        <td className="px-6 py-4">
+                          <div className="flex items-center justify-center gap-2">
+                            <div className="relative rounded-md shadow-sm">
+                              <input
+                                type="number"
+                                value={allocations[school.id]?.amount || ""}
+                                onChange={(e) => handleAllocationChange(school.id, e.target.value)}
+                                className="w-28 pl-3 pr-12 py-2 border border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500 text-center"
+                                placeholder="Shuma"
+                              />
+                              <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+                                <span 
+                                  className="text-gray-500 sm:text-sm cursor-pointer"
+                                  onClick={() => handleAllocationTypeToggle(school.id)}
+                                >
+                                  €
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+
+                        <td className="hidden md:table-cell px-6 py-4">
+                          <textarea
+                            value={school.shenime || ""}
+                            onChange={(e) => {
+                              const newNote = e.target.value;
+                              setSchoolRecord((prev) =>
+                                prev.map((s) =>
+                                  s.id === school.id ? { ...s, shenime: newNote } : s
+                                )
+                              );
                             }}
-                          ></div>
-                        </div>
-                        <div className="flex justify-between text-xs sm:text-sm text-gray-500">
-                          <span>Total: {school.buxhetiAktual}€</span>
-                          <span>Shfrytezuar: {school.buxhetiShfrytezuar}€</span>
-                          <span>{school.shfrytezimiAktualPerqindje}%</span>
-                        </div>
-                      </div>
-                    </td>
+                            className="w-full h-16 px-3 py-2 border border-gray-300 rounded-lg text-sm resize-none focus:ring-blue-500 focus:border-blue-500"
+                            placeholder="Shënime për ndarjen e buxhetit..."
+                          />
+                        </td>
 
-                    <td className="px-4 sm:px-6 py-3 sm:py-4">
-                      <div className="flex items-center justify-center gap-1 sm:gap-2">
-                        <input
-                          type="number"
-                          value={allocations[school.id]?.amount || ""}
-                          onChange={(e) =>
-                            handleAllocationChange(
-                              school.id,
-                              e.target.value
-                            )
-                          }
-                          className="w-16 sm:w-24 p-1 sm:p-2 border border-gray-300 rounded-md text-xs sm:text-sm text-center"
-                          placeholder="Shuma"
-                        />
-                        <button
-                          onClick={() =>
-                            handleAllocationTypeToggle(school.id)
-                          }
-                          className="px-1.5 sm:px-2 py-1 text-xs sm:text-sm text-gray-500 hover:text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50"
-                        >
-                          {"€"}
-                        </button>
-                      </div>
-                    </td>
-
-                    {/* <td className="hidden sm:table-cell px-4 sm:px-6 py-3 sm:py-4">
-                      <div className="flex justify-center">
-                        <input
-                          type="checkbox"
-                          checked={school.autoNdarja}
-                          onChange={(e) =>
-                            handleAutoNdarjaChange(
-                              school.shkollaId,
-                              e.target.checked
-                            )
-                          }
-                          className="h-4 w-4 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500"
-                        />
-                      </div>
-                    </td> */}
-
-                    <td className="hidden md:table-cell px-2 sm:px-2 py-2 sm:py-2 w-48 sm:w-64 text-center text-xs sm:text-sm">
-                      <textarea
-                        value={school.shenime} // Bind the textarea value to the school note
-                        onChange={(e) => {
-                          const newNote = e.target.value;
-                          setSchoolRecord((prev) =>
-                            prev.map((s) =>
-                              s.id === school.id
-                                ? { ...s, shenime: newNote } // Update the note in state
-                                : s
-                            )
-                          );
-                        }}
-                        className="w-full h-16 p-2 border border-gray-300 rounded-md text-sm resize-none"
-                        placeholder="Vërejtje..."
-                      />
-                    </td>
-
-                    <td className="px-4 sm:px-2 py-3 sm:py-4">
-                      <div className="flex justify-center">
-                        <button
-                          onClick={() => handleAllocation(school.id)}
-                          className="bg-indigo-600 text-white px-2 sm:px-4 py-1 sm:py-2 rounded-md text-xs sm:text-sm hover:bg-indigo-700 transition"
-                        >
-                          Ndaj
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                        <td className="px-6 py-4">
+                          <div className="flex justify-center">
+                            <button
+                              onClick={() => handleAllocation(school.id)}
+                              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm"
+                            >
+                              Ndaj
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                    
+                    {schoolRecord.length === 0 && (
+                      <tr>
+                        <td colSpan={5} className="px-6 py-10 text-center text-gray-500">
+                          <BuildingLibraryIcon className="w-16 h-16 mx-auto text-gray-300 mb-4" />
+                          <h3 className="text-lg font-medium text-gray-900 mb-1">Nuk u gjetën shkolla</h3>
+                          <p className="text-gray-500">Nuk u gjetën shkolla për të shfaqur.</p>
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
         </div>
+
+        {/* Pattern background style */}
+        <style>
+          {`
+          .bg-pattern {
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.15'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+          }
+          `}
+        </style>
       </main>
     </div>
   );
