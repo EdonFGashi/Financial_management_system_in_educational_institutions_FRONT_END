@@ -141,7 +141,7 @@ function ListaPorosive() {
     fetchPorosite();
   };
 
-  const handlePaguaj = async (id: number) => {
+  const handlePaguaj = async (id: number, cmimi: number, sasia: number) => {
     const result = await Swal.fire({
       title: "A jeni i sigurt?",
       text: "Dëshironi të paguani këtë porosi?",
@@ -156,6 +156,9 @@ function ListaPorosive() {
     if (result.isConfirmed) {
       try {
         const response = await axiosInstance.patch(`${urlPorosite}/${id}`, {
+          id: id,
+          produkriCmimi: cmimi,
+          sasia: sasia,
           statusi: "Paguar", // Optional
         });
 
@@ -500,7 +503,7 @@ function ListaPorosive() {
                       {/* Actions */}
                       <div className="flex gap-3 mt-3">
                         <button
-                          onClick={() => handlePaguaj(porosi.id)}
+                          onClick={() => handlePaguaj(porosi.id, porosi.cmimi, porosi.sasia)}
                           className="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-lg text-sm font-semibold transition"
                         >
                           Paguaj
