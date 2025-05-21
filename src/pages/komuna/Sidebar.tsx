@@ -273,6 +273,14 @@ function Sidebar() {
                 >
                   <BuildingOffice2Icon className="w-4 h-4" /> Lista e Kontraktorëve
                 </Link>
+                <Link
+                  to="/komuna/kontraktoret/marreveshjet"
+                  className={`flex items-center gap-3 px-4 py-2 rounded-lg text-sm transition ${isActive(
+                    "/komuna/kontraktoret/marreveshjet"
+                  )}`}
+                >
+                  <DocumentDuplicateIcon className="w-4 h-4" /> Marrëveshjet
+                </Link>
               </div>
             </div>            
             {/* Ndalesat e Punetoreve dropdown with Orët Shtesë included */}
