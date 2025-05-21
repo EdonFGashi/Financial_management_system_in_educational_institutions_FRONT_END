@@ -157,7 +157,7 @@ function ListaPorosive() {
       try {
         const response = await axiosInstance.patch(`${urlPorosite}/${id}`, {
           id: id,
-          produkriCmimi: cmimi,
+          produktiCmimi: cmimi,  // Fixed typo: produkriCmimi -> produktiCmimi
           sasia: sasia,
           statusi: "Paguar", // Optional
         });
