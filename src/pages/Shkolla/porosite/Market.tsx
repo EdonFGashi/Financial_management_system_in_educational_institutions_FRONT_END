@@ -394,11 +394,12 @@ function ShkollaMarket() {
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                             {filteredProducts.map((product) => (
                                 <div key={product.id} className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 border border-gray-100 flex flex-col transform hover:-translate-y-1">
-                                    <div className="relative bg-gray-50 p-4 flex items-center justify-center h-64">
+                                    <div className="relative bg-white p-6 flex items-center justify-center h-72">
                                         <img
                                             src={product.fotografia || 'https://via.placeholder.com/300x300.png?text=No+Image'}
                                             alt={product.emri}
                                             className="max-h-full max-w-full object-contain transition-transform duration-300 hover:scale-105"
+                                            style={{ maxHeight: "100%", width: "auto" }}
                                         />
                                         {product.sasiaNeStok === 0 && (
                                             <div className="absolute top-3 right-3 bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full">

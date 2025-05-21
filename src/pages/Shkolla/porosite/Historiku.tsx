@@ -299,11 +299,15 @@ function Historiku() {
                                                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
                                                         ${p.statusi === "Paguar" 
                                                             ? "bg-green-100 text-green-800" 
-                                                            : "bg-yellow-100 text-yellow-800"}`}
+                                                            : p.statusi === "Fshire"
+                                                                ? "bg-red-100 text-red-800"
+                                                                : "bg-yellow-100 text-yellow-800"}`}
                                                     >
                                                         {p.statusi === "Paguar" 
                                                             ? <><CheckCircleIcon className="h-3 w-3 mr-1" /> Paguar</> 
-                                                            : <><ClockIcon className="h-3 w-3 mr-1" /> Ne pritje</>}
+                                                            : p.statusi === "Fshire"
+                                                                ? <><XMarkIcon className="h-3 w-3 mr-1" /> Fshire</>
+                                                                : <><ClockIcon className="h-3 w-3 mr-1" /> Ne pritje</>}
                                                     </span>
                                                 </td>
                                                 <td className="py-3 px-4 text-gray-600">{p.kompaniaEmri}</td>

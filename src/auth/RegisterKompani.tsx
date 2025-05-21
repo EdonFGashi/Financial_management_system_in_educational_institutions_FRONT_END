@@ -1,22 +1,30 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { Formik, Form, Field, ErrorMessage, FormikHelpers } from "formik";
 import * as Yup from "yup";
-import * as FiIcons from "react-icons/fi";
-import { userRegisterCredentialsShkolla, userRegisterCredentialsKomuna } from "./auth.models";
+import { 
+  UserIcon, 
+  EnvelopeIcon, 
+  LockClosedIcon, 
+  HomeIcon,
+  BuildingOfficeIcon,
+  MapPinIcon,
+  WrenchScrewdriverIcon,
+  CreditCardIcon,
+  IdentificationIcon,
+  ArrowLeftIcon,
+  EyeIcon,
+  EyeSlashIcon,
+  CurrencyDollarIcon,
+  CheckCircleIcon
+} from "@heroicons/react/24/outline";
+import { userRegisterCredentialsKomuna } from "./auth.models";
 import { useKomunaOptions } from "../hooks/useKomunaOptions";
 import { fetchPersonByNrPersonal } from "../hooks/grabPersonDetails";
 
 
 
-const FiUser = FiIcons.FiUser as unknown as React.FC<React.SVGProps<SVGSVGElement>>;
-const FiMail = FiIcons.FiMail as unknown as React.FC<React.SVGProps<SVGSVGElement>>;
-const FiLock = FiIcons.FiLock as unknown as React.FC<React.SVGProps<SVGSVGElement>>;
-const FiHouse= FiIcons.FiHome as unknown as React.FC<React.SVGProps<SVGSVGElement>>;
-const FiBook= FiIcons.FiBook as unknown as React.FC<React.SVGProps<SVGSVGElement>>;
-const FiRoad= FiIcons.FiCompass as unknown as React.FC<React.SVGProps<SVGSVGElement>>;
-const FiLicense= FiIcons.FiCreditCard as unknown as React.FC<React.SVGProps<SVGSVGElement>>;
 type FormValues = {
   email: string;
   password: string;
@@ -44,11 +52,40 @@ function RegisterKompani(props: authFormProps) {
   const navigate = useNavigate();
   const [drejtorFetched, setDrejtorFetched] = useState(false);
   const [loadingDrejtor, setLoadingDrejtor] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const komunaOptions = useKomunaOptions();
   const [strength, setStrength] = useState(0);
   const [animatedText, setAnimatedText] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
-  const fullText = "Krijoni një llogari për të menaxhuar Kompani.";
+  const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
+  const [lastNrValue, setLastNrValue] = useState(""); // Track the last personal number value
+  const [backgroundIndex, setBackgroundIndex] = useState(0);
+  const fullText = "Menaxhim i automatizuar i shërbimeve të furnizuesve për institucionet arsimore.";
+  
+  const strengthLabel = ["Shumë e dobët", "E dobët", "Mesatare", "Perfekte"];
+  const strengthColor = [
+    "bg-red-400",
+    "bg-orange-400",
+    "bg-yellow-400",
+    "bg-green-400",
+  ];
+
+  // Collection of background images to cycle through
+  const backgroundImages = [
+    "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    "https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    "https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    "https://images.unsplash.com/photo-1550565118-3a14e8d0386f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+  ];
+
+  useEffect(() => {
+    // Set up a timer to switch background images every 10 seconds
+    const timer = setInterval(() => {
+      setBackgroundIndex((prevIndex) => (prevIndex + 1) % backgroundImages.length);
+    }, 10000);
+    
+    return () => clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     let i = 0;
@@ -131,250 +168,423 @@ function RegisterKompani(props: authFormProps) {
     setStrength(score);
   };
 
-  function setShow2FAModal(arg0: boolean) {
-    throw new Error("Function not implemented.");
-  }
-
   return (
-    <div className="min-h-screen flex">
-      {/* Left side - Sign Up form */}
-      <div className="w-full md:w-1/2 flex flex-col justify-center items-center px-10 py-16 bg-white">
-        <div className="max-w-md w-full">
-          <h1 className="text-4xl font-bold text-rose-700 mb-4">Regjistro Kompaninë</h1>
-          <p className="text-gray-600 mb-8">Krijoni një llogari të re për të vazhduar.</p>
+    <>
+      {toast && (
+        <div className="fixed top-5 right-5 z-50 bg-rose-600 text-white px-4 py-2 rounded shadow-lg flex items-center">
+          <CheckCircleIcon className="w-5 h-5 mr-2" />
+          {toast.message}
+        </div>
+      )}
+      
+      <div className="min-h-screen flex">
+        {/* Left side - Sign Up form */}
+        <div className="w-full md:w-1/2 flex flex-col justify-center items-center px-10 py-16 bg-white">
+          <div className="max-w-md w-full">
+            <div className="mb-8">
+              <h1 className="text-4xl font-bold text-rose-700 mb-4">
+                <span className="relative">
+                  Regjistro Kompaninë
+                  <span className="absolute -bottom-1 left-0 w-1/2 h-1 bg-rose-400 rounded"></span>
+                </span>
+              </h1>
+              <p className="text-gray-600">Krijoni një llogari për kompaninë tuaj dhe bëhuni pjesë e platformës sonë për furnizim të institucioneve arsimore.</p>
+            </div>
 
-          <Formik<userRegisterCredentialsKompania>
-  initialValues={{
-  email: "",
-  password: "",
-  confirmPassword: "",
-  role: "Kompani",
-  EmriKompanis: "",
-  Sherbimi: "",
-  NrXhirologaris: undefined,
-  Qyteti: 0, // make sure it's a number!
-  KompaniaRruga: "",
-  PronariNumriPersonal: undefined, // must be number, not inside nested object
-  KodiPostal: "10000" // or optional
-}}
-
-
-  validationSchema={validationSchema}
-  onSubmit={(values, actions) => {
-    const { confirmPassword, ...cleaned } = values;
-  try {
-    console.log("Submitted raw values:", values);
-      props.onSubmit(
-      cleaned as userRegisterCredentialsKompania,
-      actions as FormikHelpers<userRegisterCredentialsKompania>
-    );
-    
-    navigate("/register");
-    // setShow2FAModal(true);
-
-  } catch (error) {
-    console.error("Registration failed:", error);
-  }
-  }}
->
-
-
-            {({ values, handleChange, handleBlur, setFieldValue }) => (
-              <Form className="space-y-5">
-
-                
-
-                {/* Email */}
-                <div className="relative">
-                  <FiMail className="w-5 h-5 text-gray-400 absolute left-3 top-3.5" />
-                  <Field
-                    name="email"
-                    type="email"
-                    placeholder="Email-i juaj"
-                    className="w-full p-3 pl-10 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-rose-500"
-                  />
-                  <ErrorMessage name="email" component="p" className="text-red-500 text-sm mt-1" />
-                </div>
-
-                {/* Password */}
-                <div className="relative">
-                  <FiLock className="w-5 h-5 text-gray-400 absolute left-3 top-3.5" />
-                  <Field
-                    name="password"
-                    type={passwordVisible ? "text" : "password"}
-                    placeholder="Fjalëkalimi"
-                    className="w-full p-3 pl-10 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-rose-500"
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                      handleChange(e);
-                      checkStrength(e.target.value);
-                    }}
-                    onBlur={handleBlur}
-                    value={values.password}
-                  />
-                  <button
-                    type="button"
-                    className="absolute right-3 top-3.5 text-rose-600 text-sm"
-                    onClick={() => setPasswordVisible(!passwordVisible)}
-                  >
-                    {passwordVisible ? "Hide" : "Show"}
-                  </button>
-                  <ErrorMessage name="password" component="p" className="text-red-500 text-sm mt-1" />
-                </div>
-
-                {/* Confirm Password */}
-                <div className="relative">
-                  <FiLock className="w-5 h-5 text-gray-400 absolute left-3 top-3.5" />
-                  <Field
-                    name="confirmPassword"
-                    type={passwordVisible ? "text" : "password"}
-                    placeholder="Konfirmo fjalëkalimin"
-                    className="w-full p-3 pl-10 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-rose-500"
-                  />
-                  <ErrorMessage name="confirmPassword" component="p" className="text-red-500 text-sm mt-1" />
-                </div>
-
-                <div className="relative">
-                <FiBook className="w-5 h-5 text-gray-400 absolute left-3 top-3.5" />
-                <Field name="EmriKompanis" placeholder="Emri i Kompanisë" className="w-full p-3 pl-10 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-rose-500"
-                />
-                <ErrorMessage name="EmriKompanis" component="p" className="text-red-500 text-sm mt-1" />
-                </div>
-                <div className="relative">
-                <FiHouse className="w-5 h-5 text-gray-400 absolute left-3 top-3.5" />
-                <Field as="select" name="Qyteti" className="w-full p-3 pl-10 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-rose-500">
-                  <option value="">Zgjidh Komunën</option>
-                  {komunaOptions.map(k => (
-                    <option key={k.komunaId} value={k.komunaId}>{k.qyteti}</option>
-                  ))}
-                </Field>
-                <ErrorMessage name="Qyteti" component="p" className="text-red-500 text-sm mt-1" />
-                </div>
-                <div className="relative">
-                <FiRoad className="w-5 h-5 text-gray-400 absolute left-3 top-3.5" />
-                <Field name="KompaniaRruga" placeholder="Rruga e Kompanis" className="w-full p-3 pl-10 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-rose-500"/>
-                <ErrorMessage name="KompaniaRruga" component="p" className="text-red-500 text-sm mt-1" />
-                </div>
-                <div className="relative">
-                <FiRoad className="w-5 h-5 text-gray-400 absolute left-3 top-3.5" />
-                <Field name="Sherbimi" placeholder="Sherbimi" className="w-full p-3 pl-10 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-rose-500"/>
-                <ErrorMessage name="Sherbimi" component="p" className="text-red-500 text-sm mt-1" />
-                </div>
-                <div className="relative">
-                <FiRoad className="w-5 h-5 text-gray-400 absolute left-3 top-3.5" />
-                <Field name="NrXhirologaris"  placeholder="Numri i Xhirrollagaris" className="w-full p-3 pl-10 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-rose-500"/>
-                <ErrorMessage name="NrXhirologaris" component="p" className="text-red-500 text-sm mt-1" />
-                </div>
-                <div className="relative">
-                                      <FiLicense className="w-5 h-5 text-gray-400 absolute left-3 top-3.5" />
-                                      <Field
-                                        name="PronariNumriPersonal"
-                                        
-                                        placeholder="Nr Personal Pronari"
-                                        className="w-full p-3 pl-10 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-rose-500"
-                                        onBlur={async (e: React.FocusEvent<HTMLInputElement>) => {
-                                          const nr = e.target.value;
-                                          if (!/^\d{10}$/.test(nr)) return;
-                                          setLoadingDrejtor(true);
-                                            const person = await fetchPersonByNrPersonal(nr);
-                                            if (person) {
-                                              setFieldValue("pronari.name", person.emri);
-                                              setFieldValue("pronari.surname", person.mbiemri);
-                                              setFieldValue("pronari.street", person.adresa?.rruga || "");
-                
-                                              setDrejtorFetched(true);
-                                            } else {
-                                              setFieldValue("pronari.name", "");
-                                              setFieldValue("pronari.surname", "");
-                                              setFieldValue("pronari.street", "");
-                                              setDrejtorFetched(false);
-                                            }
-                                            setLoadingDrejtor(false);
-                                        }}
-                                      />
-                                      <ErrorMessage name="pronari.personalNumber" component="p" className="text-red-500 text-sm mt-1" />
-                                    </div>
-                                    {loadingDrejtor && (
-                                      <p className="text-rose-500 text-sm mt-1">Duke kërkuar drejtorin...</p>
-                                    )}
-                                    {values.PronariNumriPersonal?.toString().length === 10 && !loadingDrejtor && !drejtorFetched && (
-                                        <p className="text-red-500 text-sm text-center mt-2">
-                                          Ju lutem siguroni që pronari ekziston para regjistrimit.
-                                        </p>
-                                      )}
-                                    {drejtorFetched && !loadingDrejtor && (
-                                        <>
-                                          <div className="relative">
-                                            <FiUser className="w-5 h-5 text-gray-400 absolute left-3 top-3.5" />
-                                            <Field
-                                              name="pronari.name"
-                                              placeholder="Emri i Pronari"
-                                              readOnly
-                                              className="w-full p-3 pl-10 rounded-lg border border-gray-300 bg-gray-100 cursor-not-allowed"
-                                            />
-                                            <ErrorMessage name="pronari.name" component="p" className="text-red-500 text-sm mt-1" />
-                                          </div>
-                                          <div className="relative">
-                                            <FiUser className="w-5 h-5 text-gray-400 absolute left-3 top-3.5" />
-                                            <Field
-                                              name="pronari.surname"
-                                              placeholder="Mbiemri i Pronari"
-                                              readOnly
-                                              className="w-full p-3 pl-10 rounded-lg border border-gray-300 bg-gray-100 cursor-not-allowed"
-                                            />
-                                            <ErrorMessage name="pronari.surname" component="p" className="text-red-500 text-sm mt-1" />
-                                          </div>
-                                          <div className="relative">
-                                            <FiRoad className="w-5 h-5 text-gray-400 absolute left-3 top-3.5" />
-                                            <Field
-                                              name="pronari.street"
-                                              placeholder="Rruga e Pronarit"
-                                              readOnly
-                                              className="w-full p-3 pl-10 rounded-lg border border-gray-300 bg-gray-100 cursor-not-allowed"
-                                            />
-                                            <ErrorMessage name="pronari.street" component="p" className="text-red-500 text-sm mt-1" />
-                                          </div>
-                                        </>
-                                      )}
+            <Formik<userRegisterCredentialsKompania>
+              initialValues={{
+                email: "",
+                password: "",
+                confirmPassword: "",
+                role: "Kompani",
+                EmriKompanis: "",
+                Sherbimi: "",
+                NrXhirologaris: undefined,
+                Qyteti: 0,
+                KompaniaRruga: "",
+                PronariNumriPersonal: undefined,
+                KodiPostal: "10000"
+              }}
+              validationSchema={validationSchema}
+              onSubmit={async (values, actions) => {
+                setIsSubmitting(true);
+                try {
+                  const { confirmPassword, ...cleaned } = values;
+                  console.log("Submitted raw values:", values);
                   
+                  // Call onSubmit without checking its return value
+                  await props.onSubmit(
+                    cleaned as userRegisterCredentialsKompania,
+                    actions as FormikHelpers<userRegisterCredentialsKompania>
+                  );
+                  
+                  // Consider it a success if we reach here without errors being thrown
+                  // We can assume if the API call succeeded without exceptions, registration was successful
+                  setToast({ message: "Kompania u regjistrua me sukses!", type: "success" });
+                  setTimeout(() => {
+                    navigate("/register");
+                  }, 1500);
+                  
+                } catch (error) {
+                  console.error("Registration failed:", error);
+                  // Show an error toast
+                  setToast({ message: "Regjistrimi dështoi. Provoni përsëri.", type: "error" });
+                } finally {
+                  setIsSubmitting(false);
+                }
+              }}
+            >
+              {({ values, handleChange, handleBlur, setFieldValue }) => {
+                // Define fetchPersonDetails inside Formik context to have access to setFieldValue
+                const fetchPersonDetails = async (personalNumber: string) => {
+                  if (personalNumber.length === 10 && personalNumber !== lastNrValue) {
+                    setLastNrValue(personalNumber);
+                    setLoadingDrejtor(true);
+                    try {
+                      const person = await fetchPersonByNrPersonal(personalNumber);
+                      if (person) {
+                        setFieldValue("pronari.name", person.emri);
+                        setFieldValue("pronari.surname", person.mbiemri);
+                        setFieldValue("pronari.street", person.adresa?.rruga || "");
+                        setDrejtorFetched(true);
+                      } else {
+                        setFieldValue("pronari.name", "");
+                        setFieldValue("pronari.surname", "");
+                        setFieldValue("pronari.street", "");
+                        setDrejtorFetched(false);
+                      }
+                    } catch (error) {
+                      console.error("Error fetching person:", error);
+                      setDrejtorFetched(false);
+                    } finally {
+                      setLoadingDrejtor(false);
+                    }
+                  } else if (personalNumber.length !== 10) {
+                    // Clear fetched state when number is incomplete
+                    setDrejtorFetched(false);
+                  }
+                };
 
-                <button
-                  type="submit"
-                  className={`w-full p-3 rounded-lg transition text-white ${
-    strength < 4 || !drejtorFetched
-      ? "bg-gray-400 cursor-not-allowed"
-      : "bg-rose-600 hover:bg-rose-700"
-  }`}
-  disabled={strength < 4 || !drejtorFetched}
-                >
-                  Regjistrohu
-                </button>
-              </Form>
-            )}
-          </Formik>
+                return (
+                <Form className="space-y-5">
+                    {/* Email */}
+                    <div className="relative group">
+                      <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                        <EnvelopeIcon className="w-5 h-5 text-gray-400 group-focus-within:text-rose-500 transition-colors" />
+                      </div>
+                      <Field
+                        name="email"
+                        type="email"
+                        placeholder="Email-i i kompanisë"
+                        className="w-full p-3 pl-10 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all"
+                      />
+                      <ErrorMessage name="email" component="p" className="text-red-500 text-sm mt-1 font-medium" />
+                    </div>
 
-          <p className="text-center mt-6">
-            Keni llogari?{" "}
-            <Link to="/signin" className="text-rose-600 hover:underline">
-              Kyçu këtu
+                    {/* Password */}
+                    <div className="relative group">
+                      <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                        <LockClosedIcon className="w-5 h-5 text-gray-400 group-focus-within:text-rose-500 transition-colors" />
+                      </div>
+                      <Field
+                        name="password"
+                        type={passwordVisible ? "text" : "password"}
+                        placeholder="Fjalëkalimi"
+                        className="w-full p-3 pl-10 pr-10 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all"
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                          handleChange(e);
+                          checkStrength(e.target.value);
+                        }}
+                        onBlur={handleBlur}
+                        value={values.password}
+                      />
+                      <button
+                        type="button"
+                        className="absolute inset-y-0 right-0 flex items-center pr-3"
+                        onClick={() => setPasswordVisible(!passwordVisible)}
+                      >
+                        {passwordVisible ? (
+                          <EyeSlashIcon className="w-5 h-5 text-gray-400 hover:text-rose-500" />
+                        ) : (
+                          <EyeIcon className="w-5 h-5 text-gray-400 hover:text-rose-500" />
+                        )}
+                      </button>
+                      <ErrorMessage name="password" component="p" className="text-red-500 text-sm mt-1 font-medium" />
+                    </div>
+
+                    {values.password && (
+                    <>
+                      <div className="w-full bg-gray-200 rounded-lg overflow-hidden h-2">
+                        <div
+                          className={`h-full ${strengthColor[strength - 1] || ''}`}
+                          style={{ width: `${(strength / 4) * 100}%` }}
+                        ></div>
+                      </div>
+                      <p className={`text-sm ${strength < 3 ? "text-red-500" : "text-green-600"}`}>
+                        Forca e fjalëkalimit: <strong>{strengthLabel[strength - 1] || 'Nuk plotëson kriteret'}</strong>
+                      </p>
+                    </>
+                  )}
+
+                  {/* Confirm Password */}
+                  <div className="relative group">
+                    <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                      <LockClosedIcon className="w-5 h-5 text-gray-400 group-focus-within:text-rose-500 transition-colors" />
+                    </div>
+                    <Field
+                      name="confirmPassword"
+                      type={passwordVisible ? "text" : "password"}
+                      placeholder="Konfirmo fjalëkalimin"
+                      className="w-full p-3 pl-10 pr-10 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all"
+                    />
+                    <ErrorMessage name="confirmPassword" component="p" className="text-red-500 text-sm mt-1 font-medium" />
+                  </div>
+
+                  <div className="pt-2 border-t border-gray-200">
+                    <h3 className="text-sm font-medium text-gray-700 mb-3">Të dhënat e Kompanisë</h3>
+                  </div>
+
+                  <div className="relative group">
+                    <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                      <BuildingOfficeIcon className="w-5 h-5 text-gray-400 group-focus-within:text-rose-500 transition-colors" />
+                    </div>
+                    <Field 
+                      name="EmriKompanis" 
+                      placeholder="Emri i Kompanisë" 
+                      className="w-full p-3 pl-10 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all"
+                    />
+                    <ErrorMessage name="EmriKompanis" component="p" className="text-red-500 text-sm mt-1 font-medium" />
+                  </div>
+
+                  <div className="relative group">
+                    <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                      <HomeIcon className="w-5 h-5 text-gray-400 group-focus-within:text-rose-500 transition-colors" />
+                    </div>
+                    <Field 
+                      as="select" 
+                      name="Qyteti" 
+                      className="w-full p-3 pl-10 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all appearance-none"
+                    >
+                      <option value="">Zgjidh Komunën</option>
+                      {komunaOptions.map(k => (
+                        <option key={k.komunaId} value={k.komunaId}>{k.qyteti}</option>
+                      ))}
+                    </Field>
+                    <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                      <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </div>
+                    <ErrorMessage name="Qyteti" component="p" className="text-red-500 text-sm mt-1 font-medium" />
+                  </div>
+
+                  <div className="relative group">
+                    <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                      <MapPinIcon className="w-5 h-5 text-gray-400 group-focus-within:text-rose-500 transition-colors" />
+                    </div>
+                    <Field 
+                      name="KompaniaRruga" 
+                      placeholder="Rruga e Kompanisë" 
+                      className="w-full p-3 pl-10 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all"
+                    />
+                    <ErrorMessage name="KompaniaRruga" component="p" className="text-red-500 text-sm mt-1 font-medium" />
+                  </div>
+
+                  <div className="relative group">
+                    <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                      <WrenchScrewdriverIcon className="w-5 h-5 text-gray-400 group-focus-within:text-rose-500 transition-colors" />
+                    </div>
+                    <Field 
+                      name="Sherbimi" 
+                      placeholder="Shërbimi që ofron kompania" 
+                      className="w-full p-3 pl-10 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all"
+                    />
+                    <ErrorMessage name="Sherbimi" component="p" className="text-red-500 text-sm mt-1 font-medium" />
+                  </div>
+
+                  <div className="relative group">
+                    <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                      <CreditCardIcon className="w-5 h-5 text-gray-400 group-focus-within:text-rose-500 transition-colors" />
+                    </div>
+                    <Field 
+                      name="NrXhirologaris"  
+                      placeholder="Numri i Xhirollogarisë" 
+                      className="w-full p-3 pl-10 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all"
+                    />
+                    <ErrorMessage name="NrXhirologaris" component="p" className="text-red-500 text-sm mt-1 font-medium" />
+                  </div>
+
+                  <div className="pt-2 border-t border-gray-200">
+                    <h3 className="text-sm font-medium text-gray-700 mb-3">Të dhënat e Pronarit</h3>
+                  </div>
+
+                  <div className="relative group">
+                    <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                      <IdentificationIcon className="w-5 h-5 text-gray-400 group-focus-within:text-rose-500 transition-colors" />
+                    </div>
+                    <Field
+                      name="PronariNumriPersonal"
+                      placeholder="Nr Personal i Pronarit"
+                      className="w-full p-3 pl-10 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all"
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                        handleChange(e);
+                        // Call fetchPersonDetails when value changes
+                        fetchPersonDetails(e.target.value);
+                      }}
+                      onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
+                        handleBlur(e);
+                        // Keep the onBlur for validation purposes
+                        fetchPersonDetails(e.target.value);
+                      }}
+                    />
+                    <ErrorMessage name="PronariNumriPersonal" component="p" className="text-red-500 text-sm mt-1 font-medium" />
+                  </div>
+
+                  {loadingDrejtor && (
+                    <div className="flex items-center justify-center space-x-2 text-rose-600">
+                      <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      <span>Duke verifikuar pronarin...</span>
+                    </div>
+                  )}
+
+                  {values.PronariNumriPersonal?.toString().length === 10 && !loadingDrejtor && !drejtorFetched && (
+                    <div className="bg-red-50 p-3 rounded-lg border border-red-100">
+                      <p className="text-red-600 text-sm font-medium flex items-center">
+                        <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                        Personi me këtë numër personal nuk u gjet. Ju lutem verifikoni numrin.
+                      </p>
+                    </div>
+                  )}
+
+                  {drejtorFetched && !loadingDrejtor && (
+                    <div className="bg-rose-50 p-4 rounded-lg border border-rose-100">
+                      <h3 className="text-rose-700 font-medium mb-2 text-sm">Të dhënat e pronarit:</h3>
+                      <div className="space-y-2">
+                        <div className="relative group">
+                          <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                            <UserIcon className="w-5 h-5 text-gray-400" />
+                          </div>
+                          <Field
+                            name="pronari.name"
+                            placeholder="Emri i Pronarit"
+                            readOnly
+                            className="w-full p-3 pl-10 rounded-lg border border-rose-200 bg-white/70 cursor-not-allowed"
+                          />
+                        </div>
+                        <div className="relative group">
+                          <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                            <UserIcon className="w-5 h-5 text-gray-400" />
+                          </div>
+                          <Field
+                            name="pronari.surname"
+                            placeholder="Mbiemri i Pronarit"
+                            readOnly
+                            className="w-full p-3 pl-10 rounded-lg border border-rose-200 bg-white/70 cursor-not-allowed"
+                          />
+                        </div>
+                        <div className="relative group">
+                          <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                            <MapPinIcon className="w-5 h-5 text-gray-400" />
+                          </div>
+                          <Field
+                            name="pronari.street"
+                            placeholder="Rruga e Pronarit"
+                            readOnly
+                            className="w-full p-3 pl-10 rounded-lg border border-rose-200 bg-white/70 cursor-not-allowed"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  <button
+                    type="submit"
+                    className={`w-full bg-rose-600 text-white p-3 rounded-lg hover:bg-rose-700 transition transform hover:scale-[1.02] active:scale-[0.98] flex justify-center items-center disabled:opacity-70 disabled:cursor-not-allowed ${(strength < 4 || !drejtorFetched) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    disabled={strength < 4 || !drejtorFetched || isSubmitting}
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Duke regjistruar kompaninë...
+                      </>
+                    ) : (
+                      "Regjistro Kompaninë"
+                    )}
+                  </button>
+                </Form>
+              );
+            }}
+            </Formik>
+
+            <p className="text-center mt-6 text-gray-600">
+              Keni llogari?{" "}
+              <Link to="/signin" className="text-rose-600 font-medium hover:underline">
+                Kyçu këtu
+              </Link>
+            </p>
+
+            <Link
+              to="/"
+              className="block mt-8 text-center text-rose-600 hover:underline flex items-center justify-center gap-1"
+            >
+              <ArrowLeftIcon className="w-4 h-4" />
+              Kthehu në ballinë
             </Link>
-          </p>
+          </div>
+        </div>
 
-          <Link
-            to="/"
-            className="block mt-6 text-center text-rose-600 hover:underline"
-          >
-            ← Kthehu në ballinë
-          </Link>
+        {/* Right side - Gradient background with animated text centered */}
+        <div className="hidden md:flex w-1/2 relative bg-gradient-to-br from-rose-700 via-red-600 to-red-700 items-center justify-center overflow-hidden">
+          {/* Background image with crossfade effect */}
+          {backgroundImages.map((url, index) => (
+            <div 
+              key={url}
+              className={`absolute w-full h-full bg-cover bg-center transition-opacity duration-1000 ${
+                index === backgroundIndex ? 'opacity-10' : 'opacity-0'
+              }`}
+              style={{backgroundImage: `url(${url})`}}
+            ></div>
+          ))}
+          
+          <div className="relative z-10 max-w-md px-8 py-12 bg-white/10 backdrop-blur-sm rounded-xl shadow-2xl">
+            {/* Background image controls */}
+            <div className="absolute top-2 right-2 flex space-x-1">
+              {backgroundImages.map((_, index) => (
+                <button 
+                  key={index}
+                  onClick={() => setBackgroundIndex(index)}
+                  className={`w-2 h-2 rounded-full transition-all ${
+                    index === backgroundIndex ? 'bg-white' : 'bg-white/40'
+                  }`}
+                  aria-label={`Switch to background ${index + 1}`}
+                ></button>
+              ))}
+            </div>
+            
+            <div className="flex justify-center mb-6">
+              <div className="p-2 bg-white rounded-full">
+                <BuildingOfficeIcon className="w-6 h-6 text-rose-600" />
+              </div>
+            </div>
+            <h2 className="text-white text-xl md:text-2xl lg:text-3xl font-semibold text-center mb-4">
+              {animatedText}
+            </h2>
+            <p className="text-white/80 text-center mb-6">
+              Si kompani e regjistruar në platformën tonë, do të keni mundësinë të ofroni shërbimet tuaja për institucionet arsimore në mënyrë të automatizuar dhe transparent.
+            </p>
+            
+          </div>
         </div>
       </div>
-
-      {/* Right side - Gradient background with animated text centered */}
-      <div className="hidden md:flex w-1/2 relative bg-gradient-to-br from-rose-700 via-red-500 to-red-700 items-center justify-center">
-        <h2 className="text-white text-xl md:text-2xl lg:text-3xl font-semibold text-center px-10">
-          {animatedText}
-        </h2>
-      </div>
-    </div>
+    </>
   );
 }
 

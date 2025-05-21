@@ -26,7 +26,7 @@ const slideVariants = {
 const getLoadingTime = (pathname: string): number => {
   // Dashboard pages might need more time to load charts and data
   if (pathname.includes('dashboard')) {
-    return 1500;
+    return 200;
   }
   // Complex pages with tables, forms, or heavy data
   if (
@@ -35,7 +35,7 @@ const getLoadingTime = (pathname: string): number => {
     pathname.includes('buxheti') ||
     pathname.includes('regjistri')
   ) {
-    return 1000;
+    return 200;
   }
   // Simple pages with static content or minimal data
   if (
@@ -43,10 +43,10 @@ const getLoadingTime = (pathname: string): number => {
     pathname.includes('signin') ||
     pathname.includes('register')
   ) {
-    return 500;
+    return 200;
   }
   // Default loading time for other pages
-  return 800;
+  return 200;
 };
 
 function AnimatedRoutes({ children }: AnimatedRoutesProps) {

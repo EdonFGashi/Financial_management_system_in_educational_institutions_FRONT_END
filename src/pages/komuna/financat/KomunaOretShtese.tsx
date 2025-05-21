@@ -232,17 +232,17 @@ function KomunaOretShtese() {
     return status === "ne pritje" || status === "pritje";
   }
   
-  // Calculate summary stats with updated status check
+  // Calculate summary stats with updated status check and null protection
   const totalRequests = totalRecords;
-  const pendingRequests = requests.filter(r => isPending(r.statusi)).length;
-  const approvedRequests = requests.filter(r => r.statusi === "aprovuar").length;
-  const rejectedRequests = requests.filter(r => r.statusi === "refuzuar").length;
+  const pendingRequests = (requests || []).filter(r => isPending(r.statusi)).length;
+  const approvedRequests = (requests || []).filter(r => r.statusi === "aprovuar").length;
+  const rejectedRequests = (requests || []).filter(r => r.statusi === "refuzuar").length;
   
-  const totalPendingAmount = requests
+  const totalPendingAmount = (requests || [])
     .filter(r => isPending(r.statusi))
     .reduce((sum, r) => sum + r.totalPagesa, 0);
   
-  const totalApprovedAmount = requests
+  const totalApprovedAmount = (requests || [])
     .filter(r => r.statusi === "aprovuar")
     .reduce((sum, r) => sum + r.totalPagesa, 0);
     
@@ -442,7 +442,7 @@ function KomunaOretShtese() {
   };
 
   // No need to slice the data since it's already paginated from the API
-  const displayedRequests = requests;
+  const displayedRequests = requests || [];
 
   return (
     <div className="flex flex-col md:flex-row min-h-screen bg-gray-50">
@@ -905,7 +905,7 @@ function KomunaOretShtese() {
         <style>
           {`
           .bg-pattern {
-            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.15'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.15'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zM36 0V4h-2V0h-4v2h4v4h2V2h4V0h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V2h4V0H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
           }
           `}
         </style>
