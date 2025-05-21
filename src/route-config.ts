@@ -54,6 +54,8 @@ import OperationsList from "./admin/OperationsList";
 import RolePermissions from "./admin/RolePermissions";
 import RoleBasedRegister from "./routes/RegisterRoute";
 import KompaniaUserProfile from "./pages/Kompania/UserProfile";
+import ListaFaturat from "./pages/komuna/faturat/ListaFaturat";
+import path from "path";
 
 
 // const routes = [
@@ -256,6 +258,11 @@ const routes = [
     path: "/komuna/financat/oretshtese",
     component: KomunaOretShtese,
     allowedRoles: ["SuperAdmin", "Admin", "Komunë", "Komunë", "komune"],
+  },
+  {
+    path: "/komuna/faturat/listafaturave",
+    component: ListaFaturat,
+    allowedRoles: ["SuperAdmin", "Admin", "Komunë", "Komunë", "komune"],   
   },
 
 

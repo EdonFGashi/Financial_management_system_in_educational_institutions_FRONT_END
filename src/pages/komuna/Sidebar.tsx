@@ -135,7 +135,7 @@ function Sidebar() {
               </div>
               <div
                 className={`overflow-hidden transition-all duration-300 ${
-                  hovered ? "max-h-40 opacity-100" : "max-h-0 opacity-0"
+                  hovered ? "max-h-52 opacity-100" : "max-h-0 opacity-0"
                 } ml-4 mt-1 space-y-1`}
               >
                 <Link
@@ -154,6 +154,14 @@ function Sidebar() {
                 >
                   <ClipboardDocumentListIcon className="w-4 h-4" /> Raportet e
                   Porosive
+                </Link>
+                <Link
+                  to="/komuna/faturat/listafaturave"
+                  className={`flex items-center gap-3 px-4 py-2 rounded-lg text-sm transition ${isActive(
+                    "/komuna/faturat/listafaturave"
+                  )}`}
+                >
+                  <BanknotesIcon className="w-4 h-4" /> Lista e Faturave
                 </Link>
               </div>
             </div>
