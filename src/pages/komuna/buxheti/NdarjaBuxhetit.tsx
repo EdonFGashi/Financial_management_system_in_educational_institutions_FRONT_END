@@ -461,69 +461,6 @@ function NdarjaBuxhetit() {
           </div>
         </div>
 
-        {/* Controls Section */}
-        <div className="px-4 sm:px-6 lg:px-8">
-          <div className="max-w-7xl mx-auto">
-            <div className="bg-white p-6 rounded-xl shadow-md mb-8 border border-gray-100">
-              <h3 className="text-lg font-medium text-gray-800 mb-4 flex items-center">
-                <CalendarIcon className="w-5 h-5 mr-2 text-blue-600" />
-                Parametrat e Ndarjes
-              </h3>
-              
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Për muajin:
-                  </label>
-                  <select
-                    value={selectedMonth}
-                    onChange={(e) => setSelectedMonth(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-sm"
-                  >
-                    <option>Qershor 2025</option>
-                    <option>Korrik 2025</option>
-                    <option>Gusht 2025</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Çdo (ditë):
-                  </label>
-                  <select
-                    value={daysInterval}
-                    onChange={(e) => setDaysInterval(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-sm"
-                  >
-                    <option value="1">1 ditë</option>
-                    <option value="2">2 ditë</option>
-                    <option value="3">3 ditë</option>
-                    <option value="5">5 ditë</option>
-                    <option value="7">7 ditë</option>
-                    <option value="10">10 ditë</option>
-                    <option value="14">14 ditë</option>
-                    <option value="30">30 ditë</option>
-                  </select>
-                </div>
-
-                <div className="flex items-end sm:col-span-2">
-                  <button
-                    onClick={() => {
-                      setToast({
-                        message: "Parametrat u aplikuan me sukses",
-                        type: "success",
-                      });
-                    }}
-                    className="w-full px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-lg transition flex items-center justify-center"
-                  >
-                    <ArrowPathIcon className="w-4 h-4 mr-2" /> Apliko
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
         {/* Schools Table */}
         <div className="px-4 sm:px-6 lg:px-8">
           <div className="max-w-7xl mx-auto">

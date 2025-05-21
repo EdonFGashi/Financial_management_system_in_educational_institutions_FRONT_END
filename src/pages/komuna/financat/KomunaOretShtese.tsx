@@ -135,9 +135,9 @@ function KomunaOretShtese() {
       const response = await axiosInstance.get<KomunaResponse[]>(`${urlListKomuna}`);
       
       if (response.data && response.data.length > 0) {
-        // Get the first komuna's budget or sum up all budgets if there are multiple
-        const totalBudget = response.data.reduce((sum, komuna) => sum + komuna.buxhetiAktual, 0);
-        setBuxheti(totalBudget);
+        // Just use the first komuna's budget instead of summing all of them
+        const komunaBudget = response.data[0].buxhetiAktual;
+        setBuxheti(komunaBudget);
       } else {
         console.error("Failed to fetch budget data: No komuna data returned");
       }
@@ -232,7 +232,12 @@ function KomunaOretShtese() {
     return status === "ne pritje" || status === "pritje";
   }
   
-  // Calculate summary stats with updated status check and null protection
+  // Helper function to calculate the correct total payment
+  const calculateTotalPayment = (request: OretShteseRequest): number => {
+    return request.nrOreve * request.pagesaPerOre;
+  };
+  
+  // Calculate summary stats with updated status check, null protection, and correct total calculation
   const totalRequests = totalRecords;
   const pendingRequests = (requests || []).filter(r => isPending(r.statusi)).length;
   const approvedRequests = (requests || []).filter(r => r.statusi === "aprovuar").length;
@@ -240,11 +245,11 @@ function KomunaOretShtese() {
   
   const totalPendingAmount = (requests || [])
     .filter(r => isPending(r.statusi))
-    .reduce((sum, r) => sum + r.totalPagesa, 0);
+    .reduce((sum, r) => sum + calculateTotalPayment(r), 0);
   
   const totalApprovedAmount = (requests || [])
     .filter(r => r.statusi === "aprovuar")
-    .reduce((sum, r) => sum + r.totalPagesa, 0);
+    .reduce((sum, r) => sum + calculateTotalPayment(r), 0);
     
   const handleApprove = async (id: number) => {
     try {
@@ -642,7 +647,7 @@ function KomunaOretShtese() {
                                     <span className="text-gray-500"> × {request.pagesaPerOre.toFixed(2)}€</span>
                                   </div>
                                   <div className="text-sm font-bold text-indigo-600">
-                                    {request.totalPagesa.toFixed(2)}€
+                                    {calculateTotalPayment(request).toFixed(2)}€
                                   </div>
                                 </td>
                                 <td className="px-6 py-4">
@@ -830,7 +835,7 @@ function KomunaOretShtese() {
                     <div className="mt-2 flex justify-between items-center">
                       <div>
                         <p className="text-gray-500 text-sm">{selectedRequest.nrOreve} orë × {selectedRequest.pagesaPerOre.toFixed(2)}€</p>
-                        <p className="text-xl font-bold text-indigo-600">{selectedRequest.totalPagesa.toFixed(2)}€</p>
+                        <p className="text-xl font-bold text-indigo-600">{calculateTotalPayment(selectedRequest).toFixed(2)}€</p>
                       </div>
                       <CurrencyEuroIcon className="h-10 w-10 text-indigo-300" />
                     </div>
