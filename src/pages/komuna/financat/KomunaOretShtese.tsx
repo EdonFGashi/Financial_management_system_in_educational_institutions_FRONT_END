@@ -135,9 +135,9 @@ function KomunaOretShtese() {
       const response = await axiosInstance.get<KomunaResponse[]>(`${urlListKomuna}`);
       
       if (response.data && response.data.length > 0) {
-        // Get the first komuna's budget or sum up all budgets if there are multiple
-        const totalBudget = response.data.reduce((sum, komuna) => sum + komuna.buxhetiAktual, 0);
-        setBuxheti(totalBudget);
+        // Just use the first komuna's budget instead of summing all of them
+        const komunaBudget = response.data[0].buxhetiAktual;
+        setBuxheti(komunaBudget);
       } else {
         console.error("Failed to fetch budget data: No komuna data returned");
       }
