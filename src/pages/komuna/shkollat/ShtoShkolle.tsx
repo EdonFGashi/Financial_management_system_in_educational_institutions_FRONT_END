@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { 
   BuildingLibraryIcon, 
   AcademicCapIcon, 
   BookOpenIcon, 
   PencilIcon, 
-  CalculatorIcon 
+  CalculatorIcon,
+  ArrowLeftIcon,
+  UserPlusIcon
 } from "@heroicons/react/24/outline";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import Sidebar from "../Sidebar";
@@ -190,167 +192,227 @@ function ShtoShkolle() {
   };
 
   return (
-    <div className="flex flex-col md:flex-row min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-blue-50 relative overflow-hidden">
-      {/* Animated Background Icons */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-10 left-10 animate-float-slow">
-          <AcademicCapIcon className="w-16 h-16 text-indigo-200" />
-        </div>
-        <div className="absolute top-1/3 right-10 animate-float-delayed">
-          <BookOpenIcon className="w-12 h-12 text-blue-200" />
-        </div>
-        <div className="absolute bottom-20 left-1/4 animate-float">
-          <PencilIcon className="w-10 h-10 text-indigo-200" />
-        </div>
-        <div className="absolute top-1/2 right-1/4 animate-float-slow">
-          <CalculatorIcon className="w-14 h-14 text-blue-200" />
-        </div>
+    <div className="flex flex-col md:flex-row min-h-screen bg-gray-50 text-gray-800">
+      <div className="hidden md:block fixed h-full w-64 bg-white shadow-sm z-30">
+        <Sidebar />
       </div>
-
-      <Sidebar />
-
-      <main className="flex-1 p-4 sm:p-6 md:p-10 relative z-10">
+      
+      <main className="flex-1 min-h-screen w-full md:pl-64 overflow-y-auto">
+        {/* Toast notification */}
         {toast && (
           <div className="fixed top-5 right-5 z-50">
             <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />
           </div>
         )}
 
-        <div className="max-w-2xl mx-auto">
-          <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg p-8 relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/50 via-transparent to-blue-50/50"></div>
-            
-            <div className="relative">
-              <h2 className="text-2xl sm:text-3xl font-bold flex items-center gap-3 mb-8">
-                <BuildingLibraryIcon className="w-8 h-8 text-indigo-600" />
-                <span className="bg-gradient-to-r from-indigo-600 to-blue-600 bg-clip-text text-transparent">
-                  Shto Shkollë të Re
-                </span>
-              </h2>
-
-              <Formik
-                initialValues={initialValues}
-                validate={validate}
-                onSubmit={handleSubmit}
-                validateOnBlur={false}
-                validateOnChange={false}
+        {/* Blue header with pattern */}
+        <div className="bg-blue-800 text-white relative overflow-hidden">
+          <div className="absolute inset-0 bg-pattern opacity-10"></div>
+          <div className="relative z-10 px-4 sm:px-6 lg:px-8 py-12 max-w-7xl mx-auto">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+              <div>
+                <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">Regjistro Shkollë të Re</h1>
+                <p className="text-blue-100 text-lg max-w-2xl">
+                  Shtoni institucion të ri arsimor në sistemin e komunës suaj
+                </p>
+              </div>
+              <Link
+                to="/komuna/shkollat"
+                className="inline-flex items-center px-5 py-2.5 rounded-lg bg-white text-blue-700 shadow-lg hover:bg-blue-50 transition-all duration-200 font-medium self-start"
               >
-                {({ isSubmitting }) => (
-                  <Form className="space-y-6">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Emri i shkollës
-                      </label>
-                      <Field
-                        name="emriShkolles"
-                        type="text"
-                        className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                        placeholder="Emri i shkollës"
-                      />
-                      <ErrorMessage name="emriShkolles" component="div" className="text-red-500 text-sm mt-1" />
-                    </div>
+                <ArrowLeftIcon className="w-5 h-5 mr-2" />
+                Kthehu te Shkollat
+              </Link>
+            </div>
+          </div>
+        </div>
 
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Rruga
-                      </label>
-                      <Field
-                        name="shkollaRruga"
-                        type="text"
-                        className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                        placeholder="Rruga"
-                      />
-                      <ErrorMessage name="shkollaRruga" component="div" className="text-red-500 text-sm mt-1" />
-                    </div>
+        <div className="px-4 sm:px-6 lg:px-8 pt-8 pb-12">
+          <div className="max-w-3xl mx-auto">
+            {/* Form card */}
+            <div className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100">
+              <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                <h3 className="text-lg font-medium text-gray-800 flex items-center">
+                  <UserPlusIcon className="w-5 h-5 mr-2 text-blue-600" />
+                  Formulari i Regjistrimit
+                </h3>
+              </div>
+              
+              <div className="p-6">
+                <Formik
+                  initialValues={{
+                    email: "",
+                    password: "",
+                    emriShkolles: "",
+                    nrNxenesve: "",
+                    kodiPostal: "",
+                    shkollaRruga: "",
+                    drejtoriNumriPersonal: "",
+                  }}
+                  validate={validate}
+                  onSubmit={handleSubmit}
+                  validateOnBlur={false}
+                  validateOnChange={false}
+                >
+                  {({ isSubmitting }) => (
+                    <Form className="space-y-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="md:col-span-2">
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Emri i shkollës
+                          </label>
+                          <Field
+                            name="emriShkolles"
+                            type="text"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                            placeholder="Emri i shkollës"
+                          />
+                          <ErrorMessage name="emriShkolles" component="div" className="text-red-500 text-sm mt-1" />
+                        </div>
 
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Kodi Postal
-                      </label>
-                      <Field
-                        name="kodiPostal"
-                        type="text"
-                        className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                        placeholder="Kodi Postal"
-                      />
-                      <ErrorMessage name="kodiPostal" component="div" className="text-red-500 text-sm mt-1" />
-                    </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Rruga
+                          </label>
+                          <Field
+                            name="shkollaRruga"
+                            type="text"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                            placeholder="Rruga"
+                          />
+                          <ErrorMessage name="shkollaRruga" component="div" className="text-red-500 text-sm mt-1" />
+                        </div>
 
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Numri i nxënësve
-                      </label>
-                      <Field
-                        name="nrNxenesve"
-                        type="number"
-                        className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                        placeholder="Numri i nxënësve"
-                      />
-                      <ErrorMessage name="nrNxenesve" component="div" className="text-red-500 text-sm mt-1" />
-                    </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Kodi Postal
+                          </label>
+                          <Field
+                            name="kodiPostal"
+                            type="text"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                            placeholder="Kodi Postal"
+                          />
+                          <ErrorMessage name="kodiPostal" component="div" className="text-red-500 text-sm mt-1" />
+                        </div>
 
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Email
-                      </label>
-                      <Field
-                        name="email"
-                        type="email"
-                        className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                        placeholder="Email adresa"
-                      />
-                      <ErrorMessage name="email" component="div" className="text-red-500 text-sm mt-1" />
-                    </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Numri i nxënësve
+                          </label>
+                          <Field
+                            name="nrNxenesve"
+                            type="number"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                            placeholder="Numri i nxënësve"
+                          />
+                          <ErrorMessage name="nrNxenesve" component="div" className="text-red-500 text-sm mt-1" />
+                        </div>
 
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Fjalëkalimi
-                      </label>
-                      <Field
-                        name="password"
-                        type="password"
-                        className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                        placeholder="Fjalëkalimi"
-                      />
-                      <ErrorMessage name="password" component="div" className="text-red-500 text-sm mt-1" />
-                    </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Numri Personal i Drejtorit
+                          </label>
+                          <Field
+                            name="drejtoriNumriPersonal"
+                            type="text"
+                            pattern="\d*"
+                            maxLength={10}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                            placeholder="10 shifra"
+                            onKeyPress={(e: React.KeyboardEvent) => {
+                              if (!/[0-9]/.test(e.key)) {
+                                e.preventDefault();
+                              }
+                            }}
+                          />
+                          <ErrorMessage name="drejtoriNumriPersonal" component="div" className="text-red-500 text-sm mt-1" />
+                        </div>
+                        
+                        <div className="md:col-span-2">
+                          <div className="bg-blue-50 p-4 rounded-lg border border-blue-100 mb-6">
+                            <h4 className="text-blue-800 font-medium mb-2">Të dhënat e Llogarisë</h4>
+                            <p className="text-blue-600 text-sm mb-4">
+                              Këto të dhëna do të përdoren për qasjen në sistem nga personeli i shkollës.
+                            </p>
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                  Email
+                                </label>
+                                <Field
+                                  name="email"
+                                  type="email"
+                                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                                  placeholder="Email adresa"
+                                />
+                                <ErrorMessage name="email" component="div" className="text-red-500 text-sm mt-1" />
+                              </div>
 
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Numri Personal i Drejtorit
-                      </label>
-                      <Field
-                        name="drejtoriNumriPersonal"
-                        type="text"
-                        pattern="\d*"
-                        maxLength={10}
-                        className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                        placeholder="Numri personal i drejtorit (10 shifra)"
-                        onKeyPress={(e: React.KeyboardEvent) => {
-                          if (!/[0-9]/.test(e.key)) {
-                            e.preventDefault();
-                          }
-                        }}
-                      />
-                      <ErrorMessage name="drejtoriNumriPersonal" component="div" className="text-red-500 text-sm mt-1" />
-                    </div>
+                              <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                  Fjalëkalimi
+                                </label>
+                                <Field
+                                  name="password"
+                                  type="password"
+                                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                                  placeholder="Fjalëkalimi"
+                                />
+                                <ErrorMessage name="password" component="div" className="text-red-500 text-sm mt-1" />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
 
-                    <div className="flex pt-4">
-                      <button
-                        type="submit"
-                        disabled={isSubmitting}
-                        className="w-full bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition disabled:opacity-50"
-                      >
-                        {isSubmitting ? "Duke u procesuar..." : "Shto Shkollën"}
-                      </button>
-                    </div>
-                  </Form>
-                )}
-              </Formik>
+                      <div className="flex justify-end pt-4 border-t border-gray-100">
+                        <button
+                          type="button"
+                          onClick={() => navigate('/komuna/shkollat')}
+                          className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg mr-4 hover:bg-gray-50"
+                        >
+                          Anulo
+                        </button>
+                        <button
+                          type="submit"
+                          disabled={isSubmitting}
+                          className="px-6 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-lg shadow-sm disabled:opacity-50 flex items-center"
+                        >
+                          {isSubmitting ? (
+                            <>
+                              <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                              </svg>
+                              Duke u procesuar...
+                            </>
+                          ) : (
+                            <>
+                              <BuildingLibraryIcon className="w-5 h-5 mr-2" />
+                              Regjistro Shkollën
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    </Form>
+                  )}
+                </Formik>
+              </div>
             </div>
           </div>
         </div>
       </main>
+
+      {/* Pattern background style */}
+      <style>
+        {`
+        .bg-pattern {
+          background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.15'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+        `}
+      </style>
     </div>
   );
 }

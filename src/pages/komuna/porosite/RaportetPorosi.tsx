@@ -1,7 +1,13 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import axiosInstance from "../../../api/axiosInstance";
-import { ClipboardDocumentListIcon } from "@heroicons/react/24/outline";
+import { 
+  ClipboardDocumentListIcon,
+  DocumentTextIcon,
+  ChartBarIcon,
+  PresentationChartLineIcon,
+  DocumentMagnifyingGlassIcon
+} from "@heroicons/react/24/outline";
 import Sidebar from "../Sidebar";
 import { urlRaporti } from "../../../endpoints";
 import Toast from "../../../components/Toast";
@@ -36,6 +42,48 @@ function RaportetPorosi() {
     deriData: "",
     statuset: ["Ne Pritje", "Paguar", "Fshire"], // All statuses selected by default
   });
+
+  // Add report metrics state
+  const [reportMetrics, setReportMetrics] = useState({
+    totalReports: 0,
+    completedOrders: 0,
+    pendingOrders: 0,
+    canceledOrders: 0
+  });
+
+  useEffect(() => {
+    fetchRaportet();
+    calculateReportMetrics();
+  }, []);
+
+  // Calculate metrics when records change or on initial load
+  useEffect(() => {
+    calculateReportMetrics();
+  }, [records]);
+
+  const calculateReportMetrics = () => {
+    if (!records || records.length === 0) {
+      setReportMetrics({
+        totalReports: 0,
+        completedOrders: 0,
+        pendingOrders: 0,
+        canceledOrders: 0
+      });
+      return;
+    }
+
+    const totalReports = records.length;
+    const completedOrders = records.filter(r => r.statusi === 'Paguar').length;
+    const pendingOrders = records.filter(r => r.statusi === 'Ne Pritje').length;
+    const canceledOrders = records.filter(r => r.statusi === 'Fshire').length;
+
+    setReportMetrics({
+      totalReports,
+      completedOrders,
+      pendingOrders,
+      canceledOrders
+    });
+  };
 
   useEffect(() => {
     fetchRaportet();
@@ -177,113 +225,241 @@ function RaportetPorosi() {
   return (
     <div className="flex flex-col md:flex-row min-h-screen bg-gray-50 text-gray-800">
       <Sidebar />
-      <main className="flex-1 p-4 sm:p-6 md:p-10 relative">
+      <main className="flex-1 pb-16 overflow-y-auto">
+        {/* Toast notification */}
         {toast && (
           <div className="fixed top-5 right-5 z-50">
             <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />
           </div>
         )}
 
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
-          <h2 className="text-2xl sm:text-3xl font-bold flex items-center gap-2">
-            <ClipboardDocumentListIcon className="w-6 sm:w-7 h-6 sm:h-7 text-indigo-600" />
-            Raportet e Porosive
-          </h2>
-          <Link
-            to="/komuna/dashboard"
-            className="bg-indigo-600 text-white px-4 py-2 rounded-md shadow hover:bg-indigo-700 transition text-sm"
-          >
-            ← Kthehu te Dashboard
-          </Link>
+        {/* Blue header with pattern */}
+        <div className="bg-blue-800 text-white relative overflow-hidden">
+          <div className="absolute inset-0 bg-pattern opacity-10"></div>
+          <div className="relative z-10 px-4 sm:px-6 lg:px-8 py-12 max-w-7xl mx-auto">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+              <div>
+                <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">Raportet e Porosive</h1>
+                <p className="text-blue-100 text-lg max-w-2xl">
+                  Analizoni dhe gjeneroni raporte për porositë dhe shpenzimet
+                </p>
+              </div>
+              <Link
+                to="/komuna/dashboard"
+                className="inline-flex items-center px-5 py-2.5 rounded-full bg-white text-blue-700 shadow-lg hover:bg-blue-50 transition-all duration-200 font-medium self-start"
+              >
+                ← Kthehu te Dashboard
+              </Link>
+            </div>
+          </div>
         </div>
 
-        <div className="bg-white rounded-xl shadow p-6 mb-8 space-y-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4">
-            <div className="flex flex-col">
-              <label htmlFor="ngaData" className="font-medium text-gray-700">Nga:</label>
-              <input
-                id="ngaData"
-                type="date"
-                value={filters.ngaData}
-                onChange={(e) => setFilters({ ...filters, ngaData: e.target.value })}
-                className="p-3 border border-gray-300 rounded-md text-sm"
-              />
-            </div>
-            <div className="flex flex-col">
-              <label htmlFor="deriData" className="font-medium text-gray-700">Deri:</label>
-              <input
-                id="deriData"
-                type="date"
-                value={filters.deriData}
-                onChange={(e) => setFilters({ ...filters, deriData: e.target.value })}
-                className="p-3 border border-gray-300 rounded-md text-sm"
-              />
-            </div>
-            <div className="flex flex-col">
-            <label htmlFor="kompania" className="font-medium text-gray-700">Kompania:</label>
-
-            <input
-              type="text"
-              value={filters.kompania}
-              onChange={(e) => setFilters({ ...filters, kompania: e.target.value })}
-              placeholder="Kompania..."
-              className="p-3 border border-gray-300 rounded-md text-sm"
-            />
-            </div>
-            <div className="flex flex-col">
-            <label htmlFor="shkolla" className="font-medium text-gray-700">Shkolla:</label>
-
-            <input
-              type="text"
-              value={filters.shkolla}
-              onChange={(e) => setFilters({ ...filters, shkolla: e.target.value })}
-              placeholder="Shkolla..."
-              className="p-3 border border-gray-300 rounded-md text-sm"
-            />
-            </div>
-            <div className="flex flex-col gap-1 text-sm">
-              <label className="font-medium text-gray-700">Statusi</label>
-              <div className="flex gap-3 flex-wrap">
-                {["Ne Pritje", "Paguar", "Fshire"].map((status) => (
-                  <label key={status} className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      checked={filters.statuset.includes(status)}
-                      onChange={() => handleStatusChange(status)}
-                    />
-                    {status}
-                  </label>
-                ))}
+        {/* Report metrics dashboard */}
+        <div className="px-4 sm:px-6 lg:px-8 pt-8">
+          <div className="max-w-7xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+              {/* Total Reports Card */}
+              <div className="bg-gradient-to-br from-white to-blue-50 rounded-xl shadow-sm border border-blue-100 p-6 overflow-hidden relative">
+                <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-blue-100 to-blue-50 rounded-bl-[100px] -z-0"></div>
+                <div className="flex flex-col items-start mb-2 relative z-10">
+                  <div className="p-3 rounded-xl bg-blue-100 mb-3">
+                    <DocumentTextIcon className="h-6 w-6 text-blue-600" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-800">Totali i Raporteve</h3>
+                </div>
+                {loading ? (
+                  <div className="h-8 w-20 bg-gray-200 animate-pulse rounded-md mt-2"></div>
+                ) : (
+                  <p className="text-3xl font-bold text-blue-700 relative z-10">{reportMetrics.totalReports}</p>
+                )}
+              </div>
+              
+              {/* Completed Orders Card */}
+              <div className="bg-gradient-to-br from-white to-green-50 rounded-xl shadow-sm border border-green-100 p-6 overflow-hidden relative">
+                <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-green-100 to-green-50 rounded-bl-[100px] -z-0"></div>
+                <div className="flex flex-col items-start mb-2 relative z-10">
+                  <div className="p-3 rounded-xl bg-green-100 mb-3">
+                    <ChartBarIcon className="h-6 w-6 text-green-600" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-800">Porosi të Përfunduara</h3>
+                </div>
+                {loading ? (
+                  <div className="h-8 w-20 bg-gray-200 animate-pulse rounded-md mt-2"></div>
+                ) : (
+                  <p className="text-3xl font-bold text-green-700 relative z-10">{reportMetrics.completedOrders}</p>
+                )}
+              </div>
+              
+              {/* Pending Orders Card */}
+              <div className="bg-gradient-to-br from-white to-amber-50 rounded-xl shadow-sm border border-amber-100 p-6 overflow-hidden relative">
+                <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-amber-100 to-amber-50 rounded-bl-[100px] -z-0"></div>
+                <div className="flex flex-col items-start mb-2 relative z-10">
+                  <div className="p-3 rounded-xl bg-amber-100 mb-3">
+                    <PresentationChartLineIcon className="h-6 w-6 text-amber-600" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-800">Porosi në Pritje</h3>
+                </div>
+                {loading ? (
+                  <div className="h-8 w-20 bg-gray-200 animate-pulse rounded-md mt-2"></div>
+                ) : (
+                  <p className="text-3xl font-bold text-amber-700 relative z-10">{reportMetrics.pendingOrders}</p>
+                )}
+              </div>
+              
+              {/* Canceled Orders Card */}
+              <div className="bg-gradient-to-br from-white to-red-50 rounded-xl shadow-sm border border-red-100 p-6 overflow-hidden relative">
+                <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-red-100 to-red-50 rounded-bl-[100px] -z-0"></div>
+                <div className="flex flex-col items-start mb-2 relative z-10">
+                  <div className="p-3 rounded-xl bg-red-100 mb-3">
+                    <DocumentMagnifyingGlassIcon className="h-6 w-6 text-red-600" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-800">Porosi të Anuluara</h3>
+                </div>
+                {loading ? (
+                  <div className="h-8 w-20 bg-gray-200 animate-pulse rounded-md mt-2"></div>
+                ) : (
+                  <p className="text-3xl font-bold text-red-700 relative z-10">{reportMetrics.canceledOrders}</p>
+                )}
               </div>
             </div>
           </div>
-
-          <div className="mt-4">
-            <button
-              onClick={handleFilter}
-              className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-md transition"
-            >
-              Filtro
-            </button>
-          </div>
-        </div>
-        <h3 className="text-lg font-semibold mb-3">Lista e Porosive:</h3>
-        <div className="bg-white rounded-xl shadow-lg overflow-x-auto">
-          {renderTable()}
         </div>
 
-        {/* Only show the PDF button if there are records */}
-        {records.length > 0 && (
-          <div className="mt-6 text-center">
-            <button
-              onClick={handleGenerateRaportPDF}
-              className="bg-indigo-700 hover:bg-indigo-800 text-white px-8 py-3 rounded-lg font-semibold transition"
-            >
-              Gjenero PDF
-            </button>
+        {/* Filters - enhanced styling */}
+        <div className="px-4 sm:px-6 lg:px-8">
+          <div className="max-w-7xl mx-auto">
+            <div className="bg-white rounded-xl shadow-md p-6 mb-8 border border-gray-100">
+              <h3 className="text-lg font-medium text-gray-800 mb-4">Filtro Raportet</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4">
+                <div className="flex flex-col">
+                  <label htmlFor="ngaData" className="font-medium text-gray-700 mb-1 text-sm">Nga Data:</label>
+                  <input
+                    id="ngaData"
+                    type="date"
+                    value={filters.ngaData}
+                    onChange={(e) => setFilters({ ...filters, ngaData: e.target.value })}
+                    className="p-2 border border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                <div className="flex flex-col">
+                  <label htmlFor="deriData" className="font-medium text-gray-700 mb-1 text-sm">Deri në Datën:</label>
+                  <input
+                    id="deriData"
+                    type="date"
+                    value={filters.deriData}
+                    onChange={(e) => setFilters({ ...filters, deriData: e.target.value })}
+                    className="p-2 border border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                <div className="flex flex-col">
+                  <label htmlFor="kompania" className="font-medium text-gray-700 mb-1 text-sm">Kompania:</label>
+                  <input
+                    id="kompania"
+                    type="text"
+                    value={filters.kompania}
+                    onChange={(e) => setFilters({ ...filters, kompania: e.target.value })}
+                    placeholder="Emri i kompanisë..."
+                    className="p-2 border border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                <div className="flex flex-col">
+                  <label htmlFor="shkolla" className="font-medium text-gray-700 mb-1 text-sm">Shkolla:</label>
+                  <input
+                    id="shkolla"
+                    type="text"
+                    value={filters.shkolla}
+                    onChange={(e) => setFilters({ ...filters, shkolla: e.target.value })}
+                    placeholder="Emri i shkollës..."
+                    className="p-2 border border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                <div className="flex flex-col">
+                  <label className="font-medium text-gray-700 mb-1 text-sm">Statusi:</label>
+                  <div className="space-y-1">
+                    {["Ne Pritje", "Paguar", "Fshire"].map((status) => (
+                      <label key={status} className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={filters.statuset.includes(status)}
+                          onChange={() => handleStatusChange(status)}
+                          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        />
+                        <span className="text-sm">{status}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-4 flex gap-3">
+                <button
+                  onClick={handleFilter}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition font-medium text-sm flex items-center"
+                >
+                  <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                  </svg>
+                  Apliko Filtrat
+                </button>
+                <button
+                  onClick={() => {
+                    setFilters({
+                      kompania: "",
+                      shkolla: "",
+                      ngaData: "",
+                      deriData: "",
+                      statuset: ["Ne Pritje", "Paguar", "Fshire"],
+                    });
+                    fetchRaportet();
+                  }}
+                  className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-2 rounded-lg transition font-medium text-sm"
+                >
+                  Pastro
+                </button>
+              </div>
+            </div>
           </div>
-        )}
+        </div>
+
+        {/* Table section */}
+        <div className="px-4 sm:px-6 lg:px-8">
+          <div className="max-w-7xl mx-auto">
+            <div className="bg-white rounded-xl shadow-md overflow-hidden mb-8 border border-gray-100">
+              <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                <h3 className="text-lg font-medium text-gray-800 flex items-center">
+                  <ClipboardDocumentListIcon className="w-5 h-5 mr-2 text-blue-600" />
+                  Lista e Porosive
+                </h3>
+              </div>
+              <div className="overflow-x-auto">
+                {renderTable()}
+              </div>
+            </div>
+
+            {/* PDF generation button */}
+            {records.length > 0 && (
+              <div className="flex justify-center mb-8">
+                <button
+                  onClick={handleGenerateRaportPDF}
+                  className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-8 py-3 rounded-lg font-semibold transition shadow-md flex items-center"
+                >
+                  <DocumentTextIcon className="w-5 h-5 mr-2" />
+                  Gjenero Raportin PDF
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
       </main>
+
+      {/* Pattern background style */}
+      <style>
+        {`
+        .bg-pattern {
+          background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.15'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zM36 0V4h-2V0h-4v2h4v4h2V2h4V0h-4zM0 34v-4H2v4h4v2H2v4H0v-4H2v-2H0zM0 0V4h2V0h4v2H2v4H0V2h4V0H0z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+        `}
+      </style>
     </div>
   );
 }

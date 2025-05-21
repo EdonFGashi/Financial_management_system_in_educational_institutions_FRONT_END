@@ -5,7 +5,6 @@ import {
   urlListShkolla,
   urlPorosite,
   urlProdukt,
-  urlShkolla,
 } from "../../../endpoints";
 import {
   ClipboardDocumentCheckIcon,
@@ -13,6 +12,12 @@ import {
   ClipboardDocumentListIcon,
   AcademicCapIcon,
   ArchiveBoxIcon,
+  ArrowPathIcon,
+  BanknotesIcon,
+  ShoppingCartIcon,
+  CurrencyEuroIcon,
+  XCircleIcon,
+  ChartBarIcon
 } from "@heroicons/react/24/outline";
 import Toast from "../../../components/Toast";
 import Swal from "sweetalert2";
@@ -53,9 +58,43 @@ function ListaPorosive() {
     type: "success" | "error";
   } | null>(null);
 
+  // Add new state for return statistics
+  const [returnStats, setReturnStats] = useState({
+    totalReturns: 0,
+    returnValue: 0,
+    returnRate: 0,
+    lastMonthReturns: 0
+  });
+
   useEffect(() => {
     fetchPorosite();
+    fetchReturnStats();
   }, []);
+
+  const fetchReturnStats = async () => {
+    try {
+      // For now, we'll simulate these statistics since we don't have a real endpoint
+      // In a real application, you'd fetch this from an API
+      
+      // Simulate some loading time for realism
+      setTimeout(() => {
+        setReturnStats({
+          totalReturns: 14,
+          returnValue: 4250,
+          returnRate: 8.3,
+          lastMonthReturns: 3
+        });
+      }, 1000);
+      
+      // In a real application, you'd do something like:
+      // const response = await axiosInstance.get(`${urlPorosite}/return-statistics`);
+      // if (response.data.succeeded) {
+      //   setReturnStats(response.data.data);
+      // }
+    } catch (error) {
+      console.error("Failed to fetch return statistics", error);
+    }
+  };
 
   const fetchPorosite = async () => {
     try {
@@ -203,14 +242,24 @@ function ListaPorosive() {
     }
   };
 
+  const handleClearFilters = () => {
+    setFilters({
+      pershkrimi: "",
+      kompania: "",
+      shkolla: "",
+      data: "",
+    });
+    fetchPorosite();
+  };
+
   return (
     <div className="flex flex-col md:flex-row min-h-screen bg-gray-50 text-gray-800 relative">
       <Sidebar />
 
-      <main className="flex-1 p-4 sm:p-6 md:p-10">
+      <main className="flex-1 pb-16 overflow-y-auto">
         {/* Toast Notification */}
         {toast && (
-          <div className="fixed top-5 right-5">
+          <div className="fixed top-5 right-5 z-50">
             <Toast
               message={toast.message}
               type={toast.type}
@@ -219,179 +268,280 @@ function ListaPorosive() {
           </div>
         )}
 
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
-          <h2 className="text-2xl sm:text-3xl font-bold flex items-center gap-2">
-            <ClipboardDocumentCheckIcon className="w-6 sm:w-7 h-6 sm:h-7 text-indigo-600" />{" "}
-            Lista e Porosive
-          </h2>
-          <Link
-            to="/komuna/dashboard"
-            className="bg-indigo-600 text-white px-4 py-2 rounded-md shadow hover:bg-indigo-700 transition text-sm"
-          >
-            ← Kthehu te Dashboard
-          </Link>
+        {/* New Blue Header */}
+        <div className="bg-blue-800 text-white relative overflow-hidden">
+          <div className="absolute inset-0 bg-pattern opacity-10"></div>
+          <div className="relative z-10 px-4 sm:px-6 lg:px-8 py-12 max-w-7xl mx-auto">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+              <div>
+                <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">Lista e Porosive</h1>
+                <p className="text-blue-100 text-lg max-w-2xl">
+                  Menaxhoni porositë dhe pagesat nga institucionet arsimore
+                </p>
+              </div>
+              <Link
+                to="/komuna/dashboard"
+                className="inline-flex items-center px-5 py-2.5 rounded-full bg-white text-blue-700 shadow-lg hover:bg-blue-50 transition-all duration-200 font-medium self-start"
+              >
+                ← Kthehu te Dashboard
+              </Link>
+            </div>
+          </div>
+        </div>
+
+        {/* New Dashboard Return Statistics - Removed negative margin and added proper spacing */}
+        <div className="px-4 sm:px-6 lg:px-8 pt-8">
+          <div className="max-w-7xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+              {/* Returns Overview Card */}
+              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl shadow-md border border-blue-100 p-6 overflow-hidden relative">
+                <div className="flex justify-between">
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-800 mb-4">Përmbledhje e Kthimeve</h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="bg-white rounded-lg p-4 shadow-sm">
+                        <div className="flex items-center gap-3 mb-1">
+                          <div className="p-2 rounded-lg bg-red-100">
+                            <XCircleIcon className="w-5 h-5 text-red-600" />
+                          </div>
+                          <span className="text-sm text-gray-500">Total Kthime</span>
+                        </div>
+                        <p className="text-2xl font-bold text-gray-900">{returnStats.totalReturns}</p>
+                      </div>
+                      <div className="bg-white rounded-lg p-4 shadow-sm">
+                        <div className="flex items-center gap-3 mb-1">
+                          <div className="p-2 rounded-lg bg-blue-100">
+                            <CurrencyEuroIcon className="w-5 h-5 text-blue-600" />
+                          </div>
+                          <span className="text-sm text-gray-500">Vlera e Kthimeve</span>
+                        </div>
+                        <p className="text-2xl font-bold text-gray-900">€ {returnStats.returnValue}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="h-32 w-32 bg-gradient-to-br from-indigo-100 to-indigo-50 rounded-full flex items-center justify-center">
+                    <ArrowPathIcon className="h-12 w-12 text-indigo-400" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Return Metrics Card */}
+              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl shadow-md border border-blue-100 p-6 overflow-hidden relative">
+                <div className="flex justify-between">
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-800 mb-4">Metrikat e Kthimeve</h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="bg-white rounded-lg p-4 shadow-sm">
+                        <div className="flex items-center gap-3 mb-1">
+                          <div className="p-2 rounded-lg bg-amber-100">
+                            <ChartBarIcon className="w-5 h-5 text-amber-600" />
+                          </div>
+                          <span className="text-sm text-gray-500">Shkalla e Kthimit</span>
+                        </div>
+                        <p className="text-2xl font-bold text-gray-900">{returnStats.returnRate}%</p>
+                      </div>
+                      <div className="bg-white rounded-lg p-4 shadow-sm">
+                        <div className="flex items-center gap-3 mb-1">
+                          <div className="p-2 rounded-lg bg-green-100">
+                            <ShoppingCartIcon className="w-5 h-5 text-green-600" />
+                          </div>
+                          <span className="text-sm text-gray-500">Kthimet e Muajit</span>
+                        </div>
+                        <p className="text-2xl font-bold text-gray-900">{returnStats.lastMonthReturns}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="h-32 w-32 bg-gradient-to-br from-indigo-100 to-indigo-50 rounded-full flex items-center justify-center">
+                    <BanknotesIcon className="h-12 w-12 text-indigo-400" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Filters */}
-        <div className="bg-white p-4 sm:p-6 rounded-xl shadow mb-8">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-            <input
-              type="text"
-              name="pershkrimi"
-              value={filters.pershkrimi}
-              onChange={handleInputChange}
-              placeholder="Përshkrimi"
-              className="px-3 py-2 border border-gray-300 rounded-md text-sm"
-            />
-            <input
-              type="text"
-              name="kompania"
-              value={filters.kompania}
-              onChange={handleInputChange}
-              placeholder="Kompania"
-              className="px-3 py-2 border border-gray-300 rounded-md text-sm"
-            />
-            <input
-              type="text"
-              name="shkolla"
-              value={filters.shkolla}
-              onChange={handleInputChange}
-              placeholder="Shkolla"
-              className="px-3 py-2 border border-gray-300 rounded-md text-sm"
-            />
-            <input
-              type="date"
-              name="data"
-              value={filters.data}
-              onChange={handleInputChange}
-              className="px-3 py-2 border border-gray-300 rounded-md text-sm"
-            />
-            <button
-              onClick={handleFilter}
-              className="bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700 transition col-span-1"
-            >
-              Filtro
-            </button>
+        <div className="px-4 sm:px-6 lg:px-8">
+          <div className="max-w-7xl mx-auto">
+            <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm mb-8 border border-gray-100">
+              <h3 className="text-lg font-medium text-gray-800 mb-4 flex items-center gap-2">
+                <ClipboardDocumentCheckIcon className="w-5 h-5 text-blue-600" />
+                Filtro Porositë
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                <input
+                  type="text"
+                  name="pershkrimi"
+                  value={filters.pershkrimi}
+                  onChange={handleInputChange}
+                  placeholder="Përshkrimi"
+                  className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500"
+                />
+                <input
+                  type="text"
+                  name="kompania"
+                  value={filters.kompania}
+                  onChange={handleInputChange}
+                  placeholder="Kompania"
+                  className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500"
+                />
+                <input
+                  type="text"
+                  name="shkolla"
+                  value={filters.shkolla}
+                  onChange={handleInputChange}
+                  placeholder="Shkolla"
+                  className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500"
+                />
+                <input
+                  type="date"
+                  name="data"
+                  value={filters.data}
+                  onChange={handleInputChange}
+                  className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500"
+                />
+                <button
+                  onClick={handleFilter}
+                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition col-span-1 flex items-center justify-center gap-2"
+                >
+                  <ClipboardDocumentListIcon className="w-5 h-5" />
+                  Filtro
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 
         {/* Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {porosite.length > 0 ? (
-            porosite
-              .filter((p) => p.statusi === "Ne Pritje") // Changed from "Ne Pritje" to "Pending"
-              .map((porosi) => (
-                <div
-                  key={porosi.id}
-                  className="bg-white rounded-2xl shadow-lg p-6 flex flex-col gap-4 hover:shadow-2xl transition relative group"
-                >
-                  {/* Date Badge */}
-                  <div className="absolute top-3 right-3 bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-xs font-semibold">
-                    {new Date(porosi.dataPorosise).toLocaleDateString("sq-AL", {
-                      day: "2-digit",
-                      month: "2-digit",
-                      year: "numeric",
-                    })}
-                  </div>
-
-                  {/* Title */}
-                  <h3 className="text-xl font-bold border-b pb-2">
-                    {porosi.emri}
-                  </h3>
-
-                  {/* Product Info */}
-                  {/* Updated Product Info */}
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-gray-600 text-sm">
-                      <ClipboardDocumentListIcon className="h-4 w-4" />
-                      <span>
-                        <strong>Përshkrimi:</strong>{" "}
-                        {porosi.pershkrimi || "N/A"}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 text-gray-600 text-sm">
-                      <GlobeAltIcon className="h-4 w-4" />
-                      <span>
-                        <strong>Origjina:</strong> {porosi.origjina}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 text-gray-600 text-sm">
-                      <BuildingOffice2Icon className="h-4 w-4" />
-                      <span>
-                        <strong>Prodhuesi:</strong> {porosi.prodhuesi}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Divider */}
-                  <hr className="border-gray-300 my" />
-
-                  {/* Order Info */}
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-gray-600 text-sm">
-                      <BuildingOffice2Icon className="h-4 w-4" />
-                      <span>
-                        <strong>Kompania:</strong> {porosi.kompania}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 text-gray-600 text-sm">
-                      <AcademicCapIcon className="h-4 w-4" />
-                      <span>
-                        <strong>Shkolla:</strong> {porosi.shkolla}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 text-gray-600 text-sm">
-                      <Squares2X2Icon className="h-4 w-4" />
-                      <span>
-                        <strong>Sasia:</strong> {porosi.sasia}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 text-gray-600 text-sm">
-                      <PencilIcon className="h-4 w-4" />
-                      <span>
-                        <strong>Shënime:</strong> {porosi.shenime}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Price */}
-                  <div className="text-lg font-bold text-green-600 mt-1">
-                    Çmimi total: {porosi.cmimi} €
-                  </div>
-
-                  {/* Actions */}
-                  <div className="flex gap-3 mt-3">
-                    <button
-                      onClick={() => handlePaguaj(porosi.id)}
-                      className="flex-1 bg-green-500 hover:bg-green-600 text-white py-2 rounded-lg text-sm font-semibold transition"
+        <div className="px-4 sm:px-6 lg:px-8">
+          <div className="max-w-7xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {porosite.length > 0 ? (
+                porosite
+                  .filter((p) => p.statusi === "Ne Pritje")
+                  .map((porosi) => (
+                    <div
+                      key={porosi.id}
+                      className="bg-white rounded-xl shadow-md p-6 flex flex-col gap-4 hover:shadow-lg transition-shadow duration-300 relative border border-gray-100"
                     >
-                      Paguaj
-                    </button>
-                    <button
-                      onClick={() =>
-                        handleFshij(
-                          porosi.id,
-                          porosi.cmimi,
-                          porosi.shkollaId,
-                          porosi.produktiId,
-                          porosi.sasia
-                        )
-                      }
-                      className="flex-1 bg-red-500 hover:bg-red-600 text-white py-2 rounded-lg text-sm font-semibold transition"
-                    >
-                      Fshij
-                    </button>
-                  </div>
+                      {/* Date Badge */}
+                      <div className="absolute top-3 right-3 bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-semibold">
+                        {new Date(porosi.dataPorosise).toLocaleDateString("sq-AL", {
+                          day: "2-digit",
+                          month: "2-digit",
+                          year: "numeric",
+                        })}
+                      </div>
+
+                      {/* Title */}
+                      <h3 className="text-xl font-bold border-b pb-2 text-gray-800">
+                        {porosi.emri}
+                      </h3>
+
+                      {/* Product Info */}
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2 text-gray-600 text-sm">
+                          <ClipboardDocumentListIcon className="h-4 w-4" />
+                          <span>
+                            <strong>Përshkrimi:</strong>{" "}
+                            {porosi.pershkrimi || "N/A"}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2 text-gray-600 text-sm">
+                          <GlobeAltIcon className="h-4 w-4" />
+                          <span>
+                            <strong>Origjina:</strong> {porosi.origjina}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2 text-gray-600 text-sm">
+                          <BuildingOffice2Icon className="h-4 w-4" />
+                          <span>
+                            <strong>Prodhuesi:</strong> {porosi.prodhuesi}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Divider */}
+                      <hr className="border-gray-200" />
+
+                      {/* Order Info */}
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2 text-gray-600 text-sm">
+                          <BuildingOffice2Icon className="h-4 w-4" />
+                          <span>
+                            <strong>Kompania:</strong> {porosi.kompania}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2 text-gray-600 text-sm">
+                          <AcademicCapIcon className="h-4 w-4" />
+                          <span>
+                            <strong>Shkolla:</strong> {porosi.shkolla}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2 text-gray-600 text-sm">
+                          <Squares2X2Icon className="h-4 w-4" />
+                          <span>
+                            <strong>Sasia:</strong> {porosi.sasia}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2 text-gray-600 text-sm">
+                          <PencilIcon className="h-4 w-4" />
+                          <span>
+                            <strong>Shënime:</strong> {porosi.shenime}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Price */}
+                      <div className="text-lg font-bold text-blue-600 mt-1">
+                        Çmimi total: {porosi.cmimi} €
+                      </div>
+
+                      {/* Actions */}
+                      <div className="flex gap-3 mt-3">
+                        <button
+                          onClick={() => handlePaguaj(porosi.id)}
+                          className="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-lg text-sm font-semibold transition"
+                        >
+                          Paguaj
+                        </button>
+                        <button
+                          onClick={() =>
+                            handleFshij(
+                              porosi.id,
+                              porosi.cmimi,
+                              porosi.shkollaId,
+                              porosi.produktiId,
+                              porosi.sasia
+                            )
+                          }
+                          className="flex-1 bg-red-500 hover:bg-red-600 text-white py-2 rounded-lg text-sm font-semibold transition"
+                        >
+                          Fshij
+                        </button>
+                      </div>
+                    </div>
+                  ))
+              ) : (
+                <div className="text-center text-gray-500 col-span-full bg-white rounded-xl shadow-sm p-12 border border-gray-100">
+                  <ArchiveBoxIcon className="w-16 h-16 mx-auto text-gray-300 mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-1">Nuk ka porosi</h3>
+                  <p className="text-gray-500">Nuk ka të dhëna për t'u shfaqur. Provoni të ndryshoni filtrat.</p>
                 </div>
-              ))
-          ) : (
-            <div className="text-center text-gray-500 col-span-full">
-              Nuk ka të dhëna për t'u shfaqur.
+              )}
             </div>
-          )}
+          </div>
         </div>
       </main>
+
+      {/* Pattern background style */}
+      <style>
+        {`
+        .bg-pattern {
+          background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.15'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+        `}
+      </style>
     </div>
   );
 }

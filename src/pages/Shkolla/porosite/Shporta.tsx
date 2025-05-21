@@ -1,7 +1,18 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Sidebar from "../Sidebar";
-import { TrashIcon, ArrowLeftIcon } from "@heroicons/react/24/outline";
+import { 
+    TrashIcon, 
+    ArrowLeftIcon, 
+    ShoppingCartIcon, 
+    CurrencyEuroIcon,
+    MinusIcon,
+    PlusIcon,
+    CheckIcon,
+    ExclamationCircleIcon,
+    ChevronLeftIcon,
+    ChevronRightIcon
+} from "@heroicons/react/24/outline";
 import axios from "axios";
 import {urlShporta} from "../../../endpoints";
 import Swal from "sweetalert2";
@@ -210,100 +221,170 @@ function Shporta() {
 
     return (
         <div className="flex min-h-screen bg-gray-50 text-gray-800">
-            {/* Sidebar Statik - i njëjtë si në Market */}
-            <div className="hidden md:block fixed h-full w-64 bg-white border-r shadow-sm">
+            {/* Sidebar */}
+            <div className="hidden md:block fixed h-full w-64 bg-white border-r shadow-sm z-20">
                 <Sidebar />
             </div>
 
-            {/* Përmbajtja kryesore me margin për sidebar */}
+            {/* Main content */}
             <main className="flex-1 md:ml-64 pb-16 overflow-y-auto">
-                {/* Header */}
-                <div className="bg-gradient-to-r from-green-700 to-lime-600 text-white px-4 sm:px-6 md:px-12 py-8 md:py-10">
-                    <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-                        <div className="mb-4 md:mb-0">
-                            <h1 className="text-2xl sm:text-3xl font-bold mb-2">Shporta e Porosive</h1>
-                            <p className="text-base sm:text-lg text-green-100">
-                                Shikoni dhe menaxhoni produktet në shportën tuaj
-                            </p>
+                {/* Header - Updated with less fading */}
+                <div className="bg-green-600 relative overflow-hidden">
+                    <div className="absolute inset-0 bg-pattern opacity-20"></div>
+                    <div className="relative z-10 px-4 sm:px-6 lg:px-8 py-12 max-w-7xl mx-auto">
+                        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+                            <div>
+                                <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">Shporta e Porosive</h1>
+                                <p className="text-white text-lg max-w-2xl">
+                                    Shikoni dhe menaxhoni produktet në shportën tuaj para se të kryeni porosinë
+                                </p>
+                            </div>
+                            <Link
+                                to="/shkolla/porosite/market"
+                                className="flex items-center gap-3 bg-white text-green-700 px-6 py-3 rounded-full shadow-lg hover:bg-green-50 transition duration-200 transform hover:scale-105 font-medium"
+                            >
+                                <ArrowLeftIcon className="w-5 h-5" />
+                                <span>Kthehu në Market</span>
+                            </Link>
                         </div>
-                        <Link
-                            to="/shkolla/porosite/market"
-                            className="flex items-center gap-2 bg-white text-green-700 px-4 py-2 rounded-lg hover:bg-gray-100 transition"
-                        >
-                            <ArrowLeftIcon className="w-5 h-5" />
-                            <span>Kthehu në Market</span>
-                        </Link>
                     </div>
                 </div>
 
-                {/* Përmbajtja */}
-                <div className="px-4 sm:px-6 md:px-12 py-8">
-                    {/* Buxheti dhe Totali */}
+                {/* Main cart content */}
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                    {/* Summary cards - Improved design */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                        <div className="bg-white rounded-xl shadow-sm p-6">
-                            <h3 className="text-lg font-semibold text-gray-800 mb-2">Buxheti në Dispozicion</h3>
-                           <p className={`text-2xl font-bold ${remainingBudget >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                {buxhetiAktual === null 
-                                    ? 'Loading...'
-                                    : cartItems.length === 0 
-                                        ? `€${buxhetiAktual.toLocaleString()}` 
-                                        : `€${remainingBudget.toLocaleString()}`}
-                            </p>
+                        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 transform transition-all duration-300 hover:shadow-md">
+                            <div className="flex items-center gap-4">
+                                <div className="rounded-full bg-green-100 p-3">
+                                    <CurrencyEuroIcon className="h-6 w-6 text-green-600" />
+                                </div>
+                                <div>
+                                    <h3 className="text-lg font-semibold text-gray-800 mb-1">Buxheti në Dispozicion</h3>
+                                    <div className="flex items-baseline">
+                                        <p className={`text-2xl font-bold ${remainingBudget >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                            {buxhetiAktual === null 
+                                                ? 'Duke u ngarkuar...'
+                                                : cartItems.length === 0 
+                                                    ? `€${buxhetiAktual.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}` 
+                                                    : `€${remainingBudget.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`}
+                                        </p>
+                                        {remainingBudget < 0 && (
+                                            <span className="ml-2 text-sm text-red-500 font-medium">Buxhet i pamjaftueshëm</span>
+                                        )}
+                                    </div>
+                                    {buxhetiAktual !== null && cartItems.length > 0 && (
+                                        <p className="text-sm text-gray-500 mt-1">
+                                            Nga €{buxhetiAktual.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})} total
+                                        </p>
+                                    )}
+                                </div>
+                            </div>
                         </div>
 
-                        <div className="bg-white rounded-xl shadow-sm p-6">
-                            <h3 className="text-lg font-semibold text-gray-800 mb-2">Totali i Shportës</h3>
-                            <p className="text-2xl font-bold text-gray-800">
-                                €{calculateTotal().toLocaleString()}
-                            </p>
-                            <p className="text-sm text-gray-500 mt-1">
-                                {cartItems.reduce((total, item) => total + item.sasia, 0)} artikuj
-                            </p>
+                        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 transform transition-all duration-300 hover:shadow-md">
+                            <div className="flex items-center gap-4">
+                                <div className="rounded-full bg-green-100 p-3">
+                                    <ShoppingCartIcon className="h-6 w-6 text-green-600" />
+                                </div>
+                                <div>
+                                    <h3 className="text-lg font-semibold text-gray-800 mb-1">Totali i Shportës</h3>
+                                    <p className="text-2xl font-bold text-gray-800">
+                                        €{calculateTotal().toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                                    </p>
+                                    <p className="text-sm text-gray-500 mt-1">
+                                        {cartItems.reduce((total, item) => total + item.sasia, 0)} artikuj në shportë
+                                    </p>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    {/* Lista e produkteve */}
-                    <div className="bg-white rounded-xl shadow-sm overflow-hidden mb-8">
+                    {/* Cart items */}
+                    <div className="bg-white rounded-xl shadow-sm overflow-hidden mb-8 border border-gray-100">
+                        <div className="px-6 py-4 border-b border-gray-100 bg-gray-50">
+                            <h2 className="text-lg font-semibold text-gray-800">Artikujt në Shportë</h2>
+                        </div>
+
                         {cartItems.length === 0 ? (
-                            <div className="p-8 text-center text-gray-500">
-                                Shporta juaj është e zbrazët
+                            <div className="p-12 text-center">
+                                <div className="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                                    <ShoppingCartIcon className="h-8 w-8 text-gray-400" />
+                                </div>
+                                <h3 className="text-lg font-medium text-gray-800 mb-2">Shporta juaj është e zbrazët</h3>
+                                <p className="text-gray-500 max-w-md mx-auto mb-6">
+                                    Duket se nuk keni asnjë artikull në shportën tuaj. Vizitoni marketin për të shtuar produkte.
+                                </p>
+                                <Link
+                                    to="/shkolla/porosite/market"
+                                    className="inline-flex items-center gap-2 px-5 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                                >
+                                    <ArrowLeftIcon className="w-4 h-4" />
+                                    Shko tek Marketi
+                                </Link>
                             </div>
                         ) : (
-                            <div className="divide-y divide-gray-200">
+                            <div className="divide-y divide-gray-100">
                                 {cartItems.map((item) => (
-                                    <div key={item.id} className="p-4 sm:p-6">
-                                        <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                                            <img src={item.fotografia} alt={item.emriProduktit} className="w-20 h-20 object-contain rounded-lg" />
-
-                                            <div className="flex-1">
-                                                <h3 className="text-lg font-medium text-gray-800">{item.emriProduktit}</h3>
-                                                <p className="text-green-600 font-semibold">€{item.cmimiProduktit.toFixed(2)}</p>
-                                                <p className="text-sm text-gray-500">Total: €{(item.cmimiProduktit * item.sasia).toFixed(2)}</p>
+                                    <div key={item.id} className="p-6 hover:bg-gray-50 transition-colors">
+                                        <div className="flex flex-col sm:flex-row gap-6">
+                                            <div className="flex-shrink-0 w-24 h-24 bg-gray-50 rounded-lg overflow-hidden">
+                                                <img 
+                                                    src={item.fotografia || 'https://via.placeholder.com/150'} 
+                                                    alt={item.emriProduktit} 
+                                                    className="w-full h-full object-contain" 
+                                                />
                                             </div>
 
-                                            <div className="flex items-center gap-4">
-                                                <div className="flex items-center border border-gray-300 rounded-lg">
-                                                    <button
-                                                        onClick={() => updateQuantity(item.id, item.sasia - 1)}
-                                                        className="px-3 py-1 text-gray-600 hover:bg-gray-100"
-                                                    >
-                                                        -
-                                                    </button>
-                                                    <span className="px-3 py-1">{item.sasia}</span>
-                                                    <button
-                                                        onClick={() => updateQuantity(item.id, item.sasia + 1)}
-                                                        className="px-3 py-1 text-gray-600 hover:bg-gray-100"
-                                                    >
-                                                        +
-                                                    </button>
+                                            <div className="flex-1">
+                                                <h3 className="text-lg font-medium text-gray-800 mb-1">{item.emriProduktit}</h3>
+                                                <div className="flex items-center gap-2 mb-3">
+                                                    <span className="text-lg font-semibold text-green-600">
+                                                        €{item.cmimiProduktit.toFixed(2)}
+                                                    </span>
+                                                    <span className="text-sm text-gray-500">për njësi</span>
                                                 </div>
 
-                                                <button
-                                                    onClick={() => removeItem(item.id)}
-                                                    className="text-red-500 hover:text-red-700 p-2"
-                                                >
-                                                    <TrashIcon className="w-5 h-5" />
-                                                </button>
+                                                <div className="flex flex-wrap items-center justify-between gap-4">
+                                                    <div className="flex items-center">
+                                                        <button
+                                                            onClick={() => updateQuantity(item.id, item.sasia - 1)}
+                                                            className="p-2 rounded-l-md bg-gray-100 hover:bg-gray-200 text-gray-600 transition-colors border border-gray-300"
+                                                        >
+                                                            <MinusIcon className="w-4 h-4" />
+                                                        </button>
+                                                        <input
+                                                            type="number"
+                                                            min="1"
+                                                            value={item.sasia}
+                                                            onChange={(e) => updateQuantity(item.id, parseInt(e.target.value) || 1)}
+                                                            className="w-16 border-t border-b border-gray-300 py-2 text-center focus:outline-none focus:ring-1 focus:ring-green-500"
+                                                        />
+                                                        <button
+                                                            onClick={() => updateQuantity(item.id, item.sasia + 1)}
+                                                            className="p-2 rounded-r-md bg-gray-100 hover:bg-gray-200 text-gray-600 transition-colors border border-gray-300"
+                                                        >
+                                                            <PlusIcon className="w-4 h-4" />
+                                                        </button>
+                                                    </div>
+
+                                                    <div className="flex items-center gap-6">
+                                                        <div className="text-right">
+                                                            <div className="text-sm text-gray-500">Totali</div>
+                                                            <div className="text-lg font-bold">
+                                                                €{(item.cmimiProduktit * item.sasia).toFixed(2)}
+                                                            </div>
+                                                        </div>
+
+                                                        <button
+                                                            onClick={() => removeItem(item.id)}
+                                                            className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-full transition-colors"
+                                                            aria-label="Remove item"
+                                                        >
+                                                            <TrashIcon className="w-5 h-5" />
+                                                        </button>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -312,48 +393,89 @@ function Shporta() {
                         )}
                     </div>
 
-                {totalPages > 1 && (
-                    <div className="flex justify-center mt-6 gap-2">
-                        <button
-                            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                            disabled={currentPage === 1}
-                            className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50"
-                        >
-                            Faqja paraprake
-                        </button>
+                    {/* Pagination - Modernized */}
+                    {totalPages > 1 && (
+                        <div className="flex justify-center mb-8">
+                            <nav className="flex items-center space-x-2">
+                                <button
+                                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                                    className={`p-2 rounded-md flex items-center ${
+                                        currentPage === 1 
+                                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+                                        : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                                    }`}
+                                    disabled={currentPage === 1}
+                                >
+                                    <ChevronLeftIcon className="h-5 w-5" />
+                                    <span className="sr-only">Previous</span>
+                                </button>
+                                
+                                <span className="px-4 py-2 bg-green-100 text-green-700 font-medium rounded-md">
+                                    Faqe {currentPage} nga {totalPages}
+                                </span>
+                                
+                                <button
+                                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                                    disabled={currentPage === totalPages}
+                                    className={`p-2 rounded-md flex items-center ${
+                                        currentPage === totalPages 
+                                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+                                        : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                                    }`}
+                                >
+                                    <span className="sr-only">Next</span>
+                                    <ChevronRightIcon className="h-5 w-5" />
+                                </button>
+                            </nav>
+                        </div>
+                    )}
 
-                        <span className="px-4 py-2 text-gray-700 font-medium">
-                            Faqja {currentPage} nga {totalPages}
-                        </span>
-
-                        <button
-                            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                            disabled={currentPage === totalPages}
-                            className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50"
-                        >
-                            Faqja tjetër
-                        </button>
-                    </div>
-                )}
-
-                    {/* Butoni i porosisë */}
+                    {/* Checkout section */}
                     {cartItems.length > 0 && (
-                        <div className="flex justify-end">
-                            <button
-                                onClick={handleKryejPorosine}
-                                disabled={remainingBudget < 0}
-                                className={`px-6 py-3 rounded-lg font-medium ${
-                                    remainingBudget < 0
-                                        ? 'bg-gray-400 cursor-not-allowed'
-                                        : 'bg-green-600 hover:bg-green-700 text-white'
-                                }`}
-                            >
-                                {remainingBudget < 0 ? 'Buxheti nuk mjafton' : 'Kryej Porosinë'}
-                            </button>
+                        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                                <div>
+                                    <h3 className="text-lg font-semibold text-gray-800 mb-1">Përfundoni Porosinë</h3>
+                                    <p className="text-gray-500">
+                                        {remainingBudget < 0 
+                                            ? 'Buxheti nuk është i mjaftueshëm për këtë porosi.' 
+                                            : 'Jeni gati për të përfunduar porosinë tuaj?'}
+                                    </p>
+                                </div>
+                                <button
+                                    onClick={handleKryejPorosine}
+                                    disabled={remainingBudget < 0 || cartItems.length === 0}
+                                    className={`flex items-center justify-center px-6 py-3 rounded-lg font-medium transition-colors ${
+                                        remainingBudget < 0
+                                            ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                                            : 'bg-green-600 hover:bg-green-700 text-white shadow-sm'
+                                    }`}
+                                >
+                                    {remainingBudget < 0 ? (
+                                        <>
+                                            <ExclamationCircleIcon className="w-5 h-5 mr-2" />
+                                            Buxheti nuk mjafton
+                                        </>
+                                    ) : (
+                                        <>
+                                            <CheckIcon className="w-5 h-5 mr-2" />
+                                            Kryej Porosinë
+                                        </>
+                                    )}
+                                </button>
+                            </div>
                         </div>
                     )}
                 </div>
             </main>
+
+            <style>
+                {`
+                .bg-pattern {
+                    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.15'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+                }
+                `}
+            </style>
         </div>
     );
 }

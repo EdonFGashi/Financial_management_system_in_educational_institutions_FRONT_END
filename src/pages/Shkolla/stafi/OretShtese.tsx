@@ -328,7 +328,7 @@ function OretShtese() {
                   </div>
                   
                   <div className="flex items-center justify-between pt-6 border-t border-slate-200">
-                    {values.nrOreve && values.pagesaPerOre ? (
+                    {(values.nrOreve !== undefined && values.pagesaPerOre !== undefined) ? (
                       <div className="bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 flex items-center space-x-2">
                         <CurrencyEuroIcon className="w-5 h-5 text-green-600" />
                         <div>
@@ -437,8 +437,16 @@ function OretShtese() {
                           <td className="py-4 px-4">
                             <input
                               type="number"
-                              defaultValue={entry.nrOreve}
-                              onBlur={(e) => handleInlineEdit(entry.id, "nrOreve", e.target.value)}
+                              min="0"
+                              value={entry.nrOreve}
+                              onChange={(e) => {
+                                const newValue = e.target.value === '' ? 0 : Number(e.target.value);
+                                const updatedEntries = entries.map(item => 
+                                  item.id === entry.id ? {...item, nrOreve: newValue} : item
+                                );
+                                setEntries(updatedEntries);
+                              }}
+                              onBlur={(e) => handleInlineEdit(entry.id, "nrOreve", e.target.value === '' ? 0 : e.target.value)}
                               onKeyDown={(e) => e.key === "Enter" && e.currentTarget.blur()}
                               className="border border-slate-300 rounded-md px-3 py-2 w-20 focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 shadow-sm"
                             />
@@ -446,17 +454,23 @@ function OretShtese() {
                           <td className="py-4 px-4">
                             <input
                               type="number"
+                              min="0"
                               step="0.01"
-                              defaultValue={entry.pagesaPerOre}
-                              onBlur={(e) => handleInlineEdit(entry.id, "pagesaPerOre", e.target.value)}
+                              value={entry.pagesaPerOre}
+                              onChange={(e) => {
+                                const newValue = e.target.value === '' ? 0 : Number(e.target.value);
+                                const updatedEntries = entries.map(item => 
+                                  item.id === entry.id ? {...item, pagesaPerOre: newValue} : item
+                                );
+                                setEntries(updatedEntries);
+                              }}
+                              onBlur={(e) => handleInlineEdit(entry.id, "pagesaPerOre", e.target.value === '' ? 0 : e.target.value)}
                               onKeyDown={(e) => e.key === "Enter" && e.currentTarget.blur()}
                               className="border border-slate-300 rounded-md px-3 py-2 w-24 focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 shadow-sm"
                             />
                           </td>
                           <td className="py-4 px-4 font-medium text-green-600">
-                            {entry.totalPagesa !== undefined 
-                              ? `${entry.totalPagesa.toFixed(2)} €` 
-                              : `${(entry.nrOreve * entry.pagesaPerOre).toFixed(2)} €`}
+                            {`${(Number(entry.nrOreve || 0) * Number(entry.pagesaPerOre || 0)).toFixed(2)} €`}
                           </td>
                           <td className="py-4 px-4">
                             <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium ${getStatusBadgeClass(entry.statusi)}`}>
