@@ -26,6 +26,7 @@ import ShtoShkolle from "./pages/komuna/shkollat/ShtoShkolle";
 import NdarjaBuxhetit from "./pages/komuna/buxheti/NdarjaBuxhetit";
 import BuxhetiHistoriku from "./pages/komuna/buxheti/Historiku";
 import KomunaListaKompanive from "./pages/komuna/kontraktoret/ListaKompanive";
+import MarreveshjetKontraktoreve from "./pages/komuna/kontraktoret/MarreveshjetKontraktoreve";
 import UserProfile from "./pages/komuna/UserProfile";
 import KomunaOretShtese from "./pages/komuna/financat/KomunaOretShtese";
 
@@ -263,6 +264,11 @@ const routes = [
     path: "/komuna/faturat/listafaturave",
     component: ListaFaturat,
     allowedRoles: ["SuperAdmin", "Admin", "Komunë", "Komunë", "komune"],   
+  },
+  {
+    path: "/komuna/kontraktoret/marreveshjet",
+    component: MarreveshjetKontraktoreve,
+    allowedRoles: ["SuperAdmin", "Admin", "Komunë", "Komunë", "komune"],
   },
 
 
