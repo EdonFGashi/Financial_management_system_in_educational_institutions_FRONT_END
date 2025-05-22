@@ -65,34 +65,59 @@ function ListaPorosive() {
     returnRate: 0,
     lastMonthReturns: 0
   });
+  
+  // Add loading state for stats
+  const [statsLoading, setStatsLoading] = useState(true);
 
   useEffect(() => {
     fetchPorosite();
-    fetchReturnStats();
   }, []);
+  
+  // Add useEffect to recalculate stats when porosite changes
+  useEffect(() => {
+    if (porosite.length > 0) {
+      calculateReturnStats();
+    }
+  }, [porosite]);
 
-  const fetchReturnStats = async () => {
+  // Replace the fetchReturnStats with a function that calculates stats from actual data
+  const calculateReturnStats = () => {
+    setStatsLoading(true);
+    
     try {
-      // For now, we'll simulate these statistics since we don't have a real endpoint
-      // In a real application, you'd fetch this from an API
+      // Calculate stats based on actual porosite data
+      const returnedOrders = porosite.filter(p => p.statusi === "Fshire");
+      const allOrders = porosite.length;
       
-      // Simulate some loading time for realism
-      setTimeout(() => {
-        setReturnStats({
-          totalReturns: 14,
-          returnValue: 4250,
-          returnRate: 8.3,
-          lastMonthReturns: 3
-        });
-      }, 1000);
+      // Calculate total returned orders
+      const totalReturns = returnedOrders.length;
       
-      // In a real application, you'd do something like:
-      // const response = await axiosInstance.get(`${urlPorosite}/return-statistics`);
-      // if (response.data.succeeded) {
-      //   setReturnStats(response.data.data);
-      // }
+      // Calculate total value of returned orders and format to 2 decimal places
+      const returnValue = parseFloat(returnedOrders.reduce((sum, order) => sum + order.cmimi, 0).toFixed(2));
+      
+      // Calculate return rate (percentage of all orders that were returned)
+      const returnRate = allOrders > 0 ? ((totalReturns / allOrders) * 100).toFixed(1) : 0;
+      
+      // Calculate returns from the last month
+      const lastMonth = new Date();
+      lastMonth.setMonth(lastMonth.getMonth() - 1);
+      
+      const lastMonthReturns = returnedOrders.filter(order => {
+        const orderDate = new Date(order.dataPorosise);
+        return orderDate >= lastMonth;
+      }).length;
+      
+      // Update the state with calculated values
+      setReturnStats({
+        totalReturns,
+        returnValue,
+        returnRate: parseFloat(returnRate as string),
+        lastMonthReturns
+      });
     } catch (error) {
-      console.error("Failed to fetch return statistics", error);
+      console.error("Error calculating return statistics", error);
+    } finally {
+      setStatsLoading(false);
     }
   };
 
@@ -111,6 +136,7 @@ function ListaPorosive() {
       if (response.data.succeeded) {
         setPorosite(response.data.data);
         console.log(response.data.data);
+        // We'll calculate stats in the useEffect that depends on porosite
       } else {
         setToast({
           message: response.data.message || "Gabim gjatë marrjes së të dhënave",
@@ -185,8 +211,8 @@ function ListaPorosive() {
     id: number,
     cmimi: number,
     shkollaId: number,
+    produktiId: number,
     sasia: number,
-    produktiId: number
   ) => {
     const result = await Swal.fire({
       title: "A jeni i sigurt?",
@@ -215,6 +241,8 @@ function ListaPorosive() {
           autoNdarja: null,
         });
 
+        console.log("Produkti: ", produktiId);
+        console.log("Porosia po fshihet: ", sasia);
         await axiosInstance.put(`${urlProdukt}/${produktiId}`, {
           id: produktiId,
           emri: null,
@@ -309,7 +337,11 @@ function ListaPorosive() {
                           </div>
                           <span className="text-sm text-gray-500">Total Kthime</span>
                         </div>
-                        <p className="text-2xl font-bold text-gray-900">{returnStats.totalReturns}</p>
+                        {statsLoading ? (
+                          <div className="h-8 w-16 bg-gray-200 animate-pulse rounded-md"></div>
+                        ) : (
+                          <p className="text-2xl font-bold text-gray-900">{returnStats.totalReturns}</p>
+                        )}
                       </div>
                       <div className="bg-white rounded-lg p-4 shadow-sm">
                         <div className="flex items-center gap-3 mb-1">
@@ -318,7 +350,11 @@ function ListaPorosive() {
                           </div>
                           <span className="text-sm text-gray-500">Vlera e Kthimeve</span>
                         </div>
-                        <p className="text-2xl font-bold text-gray-900">€ {returnStats.returnValue}</p>
+                        {statsLoading ? (
+                          <div className="h-8 w-24 bg-gray-200 animate-pulse rounded-md"></div>
+                        ) : (
+                          <p className="text-2xl font-bold text-gray-900">€ {returnStats.returnValue.toLocaleString('en-US', {minimumFractionDigits: 1, maximumFractionDigits: 2})}</p>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -341,7 +377,11 @@ function ListaPorosive() {
                           </div>
                           <span className="text-sm text-gray-500">Shkalla e Kthimit</span>
                         </div>
-                        <p className="text-2xl font-bold text-gray-900">{returnStats.returnRate}%</p>
+                        {statsLoading ? (
+                          <div className="h-8 w-16 bg-gray-200 animate-pulse rounded-md"></div>
+                        ) : (
+                          <p className="text-2xl font-bold text-gray-900">{returnStats.returnRate}%</p>
+                        )}
                       </div>
                       <div className="bg-white rounded-lg p-4 shadow-sm">
                         <div className="flex items-center gap-3 mb-1">
@@ -350,7 +390,11 @@ function ListaPorosive() {
                           </div>
                           <span className="text-sm text-gray-500">Kthimet e Muajit</span>
                         </div>
-                        <p className="text-2xl font-bold text-gray-900">{returnStats.lastMonthReturns}</p>
+                        {statsLoading ? (
+                          <div className="h-8 w-16 bg-gray-200 animate-pulse rounded-md"></div>
+                        ) : (
+                          <p className="text-2xl font-bold text-gray-900">{returnStats.lastMonthReturns}</p>
+                        )}
                       </div>
                     </div>
                   </div>

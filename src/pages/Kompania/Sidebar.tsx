@@ -163,8 +163,17 @@ function Sidebar() {
           </nav>
         </div>
 
-        {/* Sign Out */}
-        <div className="pt-6 border-t border-red-100 mt-8">
+        {/* Sign Out with Home link added */}
+        <div className="pt-6 border-t border-red-100 mt-8 space-y-2">
+          {/* Small transparent home link */}
+          <Link 
+            to="/" 
+            className="w-full flex items-center gap-3 px-4 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors duration-200"
+          >
+            <HomeIcon className="w-5 h-5" />
+            <span>Kthehu në Faqen Kryesore</span>
+          </Link>
+
           <button
             onClick={() => {
               logout(update);

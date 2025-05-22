@@ -83,6 +83,8 @@ function Sidebar() {
         }`}
       >
         <div className="flex-1 flex flex-col min-h-0">
+          {/* Remove the previous Home Link */}
+
           {/* User Info */}
           <div className="flex-shrink-0">
             <Link
@@ -325,8 +327,17 @@ function Sidebar() {
           </nav>
         </div>
 
-        {/* Sign Out - Always visible at bottom */}
-        <div className="flex-shrink-0 pt-6 border-t mt-8">
+        {/* Sign Out section with Home link added */}
+        <div className="flex-shrink-0 pt-6 border-t mt-8 space-y-2">
+          {/* Small transparent home link */}
+          <Link 
+            to="/" 
+            className="w-full flex items-center gap-3 px-4 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors duration-200"
+          >
+            <HomeIcon className="w-5 h-5" />
+            <span>Kthehu në Faqen Kryesore</span>
+          </Link>
+
           <button
             onClick={() => {
               logout(update);

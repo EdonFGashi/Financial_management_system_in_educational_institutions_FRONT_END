@@ -12,7 +12,7 @@ import {
 import Sidebar from "../Sidebar";
 import Toast from "../../../components/Toast";
 import Swal from 'sweetalert2';
-import { urlListShkolla, urlShkolla } from "../../../endpoints"; 
+import { urlListShkolla} from "../../../endpoints"; 
 import axiosInstance from "../../../api/axiosInstance";
 
 interface School {
@@ -213,13 +213,10 @@ function Shkollat() {
 
   const stats = calculateSchoolStats();
 
-  // Update the location display in the table to handle null values safely
-  const getLocationDisplay = (school: School) => {
-    if (school.person?.adresa?.qyteti) {
-      return school.person.adresa.qyteti;
-    }
-    if (school.adresa?.qyteti) {
-      return school.adresa.qyteti;
+  // Add this function to get the director's name
+  const getDirectorName = (school: School) => {
+    if (school.person?.emri && school.person?.mbiemri) {
+      return `${school.person.emri} ${school.person.mbiemri}`;
     }
     return 'N/A';
   };
@@ -431,7 +428,7 @@ function Shkollat() {
                     <thead className="bg-blue-50">
                       <tr>
                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">Emri i shkollës</th>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">Lokacioni</th>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">Drejtori</th>
                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">Nr. i nxënësve</th>
                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">Buxheti</th>
                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">Veprimet</th>
@@ -446,7 +443,7 @@ function Shkollat() {
                           >
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{school.emriShkolles}</td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                              {getLocationDisplay(school)}
+                              {getDirectorName(school)}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{school.nrNxenesve}</td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600">
@@ -613,7 +610,7 @@ function Shkollat() {
         <style>
           {`
           .bg-pattern {
-            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.15'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.15'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zM36 4V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
           }
           `}
         </style>

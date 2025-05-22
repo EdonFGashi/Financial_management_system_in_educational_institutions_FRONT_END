@@ -270,6 +270,11 @@ const routes = [
     component: MarreveshjetKontraktoreve,
     allowedRoles: ["SuperAdmin", "Admin", "Komunë", "Komunë", "komune"],
   },
+  {
+    path: "/komuna/profile",
+    component: UserProfile,
+    allowedRoles: ["SuperAdmin", "Admin", "Komunë", "Shkolla", "Kompania", "Komunë", "komune"]
+  },
 
 
   // Shkolla
