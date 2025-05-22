@@ -242,14 +242,14 @@ function KompaniaDashboard() {
             Data e skadencës: <strong>{new Date(marreveshja.deriMeData).toLocaleDateString()}</strong>
           </p>
 
-          {marreveshja.statusi === "joaktive" && (
+          {(marreveshja.statusi === "joaktive") && (
             <p className="mt-4 text-red-600 font-medium">
               Produktet tuaja nuk janë të dukshme për shkollat derisa të rinovohet marrëveshja.
             </p>
           )}
         </>
       ) : (
-        <p className="text-sm text-gray-500">Po ngarkohen të dhënat e marrëveshjes...</p>
+        <p className="text-sm text-gray-500">Nuk keni marrëveshje me komunën.</p>
       )}
     </div>
   </div>

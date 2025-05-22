@@ -41,8 +41,7 @@ export function generateInvoice(faturat: Fatura[]) {
   const finalY = doc.autoTable.previous?.finalY ?? 90;
 
   // Total
-  const total = faturat.reduce((sum, p) => 0 + p.cmimiTotalMeTVSH * 1, 0);
-  doc.setFontSize(12);
+  const total = faturat.reduce((sum, p) => sum + p.cmimiTotalMeTVSH, 0);  doc.setFontSize(12);
   doc.setFont("bold");
   doc.text(`Çmimi Total me TVSH: €${total.toFixed(2)}`, 14, finalY + 10);
 
