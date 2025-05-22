@@ -13,7 +13,7 @@ import Sidebar from "../Sidebar";
 import Toast from "../../../components/Toast";
 import Swal from "sweetalert2";
 import axiosInstance from "../../../api/axiosInstance";
-import { urlListKomuna, urlListShkolla } from "../../../endpoints";
+import { urlListKomuna, urlListShkolla, urlNdarjetBuxhetit } from "../../../endpoints";
 import { isAxiosError } from "axios"; // Keep only the isAxiosError helper
 
 interface SchoolObject {
@@ -75,48 +75,101 @@ function NdarjaBuxhetit() {
     loadKomunaBudget();
   }, []);
 
+  // const loadSchools = async () => {
+  //   try {
+  //     const response = await axiosInstance.get(`${urlListShkolla}/get-all`);
+
+  //     // Extract the data array from the response
+  //     const schoolsData = response.data.data;
+
+  //     // Ensure that schoolsData is an array before calling map
+  //     if (!Array.isArray(schoolsData)) {
+  //       console.error("Expected an array, but got:", schoolsData);
+  //       return;
+  //     }
+
+  //     // Mapping the API data to match the School interface
+  //     const mappedSchools: School[] = schoolsData.map((school) => {
+  //       const shfrytezimiAktualPerqindje = (school.buxhetiAktual) > 0
+  //         ? ((school.buxhetiShfrytezuar / (school.buxhetiAktual + school.buxhetiShfrytezuar)) * 100).toFixed(
+  //             2
+  //           ) // Keeps 2 decimal places
+  //         : "0.00"; // Default to "0.00" if no data
+
+  //       return {
+  //         id: school.id,
+  //         emriShkolles: school.emriShkolles,
+  //         nrNxenesve: school.nrNxenesve,
+  //         buxhetiAktual: school.buxhetiAktual + school.buxhetiShfrytezuar,
+  //         buxhetiShfrytezuar: school.buxhetiShfrytezuar,
+  //         shfrytezimiAktualPerqindje: parseFloat(shfrytezimiAktualPerqindje),
+  //         autoNdarja: school.autoNdarja, // Assuming this field exists in your API response
+  //         drejtori: school.drejtori,
+  //         adresaId: school.adresaId
+  //       };
+  //     });
+
+  //     // Now we are setting the state with the mapped data
+  //     setSchoolRecord(mappedSchools);
+
+  //     console.log("Mapped Schools:", mappedSchools); // To verify the result
+  //   } catch (error) {
+  //     console.error("Failed to load schools:", error);
+  //   }
+  // };
+
   const loadSchools = async () => {
     try {
-      const response = await axiosInstance.get(`${urlListShkolla}/get-all`);
-
-      // Extract the data array from the response
-      const schoolsData = response.data.data;
-
-      // Ensure that schoolsData is an array before calling map
-      if (!Array.isArray(schoolsData)) {
-        console.error("Expected an array, but got:", schoolsData);
-        return;
-      }
-
-      // Mapping the API data to match the School interface
-      const mappedSchools: School[] = schoolsData.map((school) => {
-        const shfrytezimiAktualPerqindje = school.buxhetiAktual
-          ? ((school.buxhetiShfrytezuar / school.buxhetiAktual) * 100).toFixed(
-              2
-            ) // Keeps 2 decimal places
-          : "0.00"; // Default to "0.00" if no data
-
+      const shkollaResponse = await axiosInstance.get(`${urlListShkolla}/get-all`);
+      const historikuResponse = await axiosInstance.get(urlNdarjetBuxhetit);
+  
+      const shkollaData = shkollaResponse.data.data;
+      const historikuData = historikuResponse.data.data;
+  
+      const currentMonth = new Date().getMonth(); // 0-indexed
+      const currentYear = new Date().getFullYear();
+  
+      const schoolBudgetsThisMonth: { [schoolId: number]: number } = {};
+  
+      historikuData.forEach((entry: any) => {
+        const date = new Date(entry.data);
+        if (date.getMonth() === currentMonth && date.getFullYear() === currentYear) {
+          const shkollaId = entry.shkollaId;
+          const shuma = entry.shuma;
+          if (!schoolBudgetsThisMonth[shkollaId]) {
+            schoolBudgetsThisMonth[shkollaId] = 0;
+          }
+          schoolBudgetsThisMonth[shkollaId] += shuma;
+        }
+      });
+  
+      const mappedSchools: School[] = shkollaData.map((school: any) => {
+        const originalAssignedThisMonth = schoolBudgetsThisMonth[school.id] || 0;
+        const used = school.buxhetiShfrytezuar;
+  
+        const shfrytezimiAktualPerqindje = originalAssignedThisMonth > 0
+          ? parseFloat(((used / originalAssignedThisMonth) * 100).toFixed(2))
+          : 0;
+  
         return {
           id: school.id,
           emriShkolles: school.emriShkolles,
           nrNxenesve: school.nrNxenesve,
-          buxhetiAktual: school.buxhetiAktual,
-          buxhetiShfrytezuar: school.buxhetiShfrytezuar,
-          shfrytezimiAktualPerqindje: parseFloat(shfrytezimiAktualPerqindje),
-          autoNdarja: school.autoNdarja, // Assuming this field exists in your API response
+          buxhetiAktual: originalAssignedThisMonth,
+          buxhetiShfrytezuar: used,
+          shfrytezimiAktualPerqindje,
+          autoNdarja: school.autoNdarja,
           drejtori: school.drejtori,
           adresaId: school.adresaId
         };
       });
-
-      // Now we are setting the state with the mapped data
+  
       setSchoolRecord(mappedSchools);
-
-      console.log("Mapped Schools:", mappedSchools); // To verify the result
     } catch (error) {
-      console.error("Failed to load schools:", error);
+      console.error("Failed to load schools with budget history:", error);
     }
   };
+
 
   const loadKomunaBudget = async () => {
     try {
@@ -196,6 +249,8 @@ function NdarjaBuxhetit() {
       allocationAmount = parseFloat(allocation.amount);
     }
 
+    console.log("ALOCATION AMOUNT: ", allocationAmount);
+
     if (isNaN(allocationAmount)) {
       setToast({
         message: "Shuma e ndarjes nuk është e vlefshme",
@@ -214,6 +269,7 @@ function NdarjaBuxhetit() {
       });
       return;
     }
+    
 
     const result = await Swal.fire({
       title: "Konfirmo ndarjen e buxhetit",
@@ -287,7 +343,7 @@ function NdarjaBuxhetit() {
           adresaId: school.adresaId,
           nrNxenesve: school.nrNxenesve,
           buxhetiAktual: allocationAmount,
-          buxhetiShfrytezuar: school.buxhetiShfrytezuar,
+          buxhetiShfrytezuar: null,
           autoNdarja: school.autoNdarja
         });
 
