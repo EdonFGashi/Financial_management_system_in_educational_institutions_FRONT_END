@@ -211,8 +211,8 @@ function ListaPorosive() {
     id: number,
     cmimi: number,
     shkollaId: number,
+    produktiId: number,
     sasia: number,
-    produktiId: number
   ) => {
     const result = await Swal.fire({
       title: "A jeni i sigurt?",
@@ -241,6 +241,8 @@ function ListaPorosive() {
           autoNdarja: null,
         });
 
+        console.log("Produkti: ", produktiId);
+        console.log("Porosia po fshihet: ", sasia);
         await axiosInstance.put(`${urlProdukt}/${produktiId}`, {
           id: produktiId,
           emri: null,
