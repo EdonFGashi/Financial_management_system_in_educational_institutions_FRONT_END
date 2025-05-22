@@ -4,6 +4,9 @@ import { motion } from "framer-motion";
 import ToastContainer, { ToastData } from "../../components/ToastContainer";
 import Sidebar from "../Kompania/Sidebar";
 import { usePorosite } from "../../hooks/usePorosite";
+import { urlMarreveshja} from "../../endpoints";
+import axios from "axios";
+
 // Heroicons
 import {
   BanknotesIcon,
@@ -16,8 +19,42 @@ import {
   CurrencyDollarIcon
 } from "@heroicons/react/24/outline";
 
+interface Marreveshje {
+  statusi: string;
+  deriMeData: string;
+}
+
 function KompaniaDashboard() {
  const { porosite, loading } = usePorosite();
+ const [marreveshja, setMarreveshja] = useState<Marreveshje | null>(null);
+
+
+ useEffect(() => {
+  const fetchMarreveshja = async () => {
+    try {
+      const response = await axios.get(`${urlMarreveshja}/paginated`, {
+        params: {
+          pageNumber: 1,
+          pageSize: 1,
+        },
+      });
+
+      const marreveshjet = response.data.data;
+
+      if (marreveshjet && marreveshjet.length > 0) {
+        const m = marreveshjet[0];
+        setMarreveshja({
+          statusi: m.statusi,
+          deriMeData: m.deriMeData,
+        });
+      }
+    } catch (error) {
+      console.error("Gabim gjatë marrjes së marrëveshjes:", error);
+    }
+  };
+
+  fetchMarreveshja();
+}, []);
 
  const calculateDashboardMetrics = () => {
   if (!porosite || porosite.length === 0) {
@@ -69,13 +106,6 @@ function KompaniaDashboard() {
 };
 
   const metrics = calculateDashboardMetrics();
-
-
-   // Marrëveshja me Komunën - të dhëna statike
-  const [marreveshja, setMarreveshja] = useState({
-    status: "joaktiv", // ose "aktiv"
-    dataSkadimit: "2025-06-30",
-  });
 
   return (
     <div className="flex min-h-screen bg-gray-50 text-gray-800">
@@ -199,20 +229,27 @@ function KompaniaDashboard() {
     <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-yellow-100 to-yellow-50 rounded-bl-[100px] -z-0"></div>
     
     <div className="flex-1 relative z-10 text-gray-800">
-      <p className="text-lg font-semibold">
-        Marrëveshja është:{" "}
-        <span className={marreveshja.status === "aktiv" ? "text-green-600" : "text-red-600"}>
-          {marreveshja.status === "aktiv" ? "Aktive" : "Joaktive"}
-        </span>
-      </p>
-      <p className="mt-2 text-sm text-gray-500">
-        Data e skadencës: <strong>{marreveshja.dataSkadimit}</strong>
-      </p>
+      {marreveshja ? (
+        <>
+          <p className="text-lg font-semibold">
+            Marrëveshja është:{" "}
+            <span className={marreveshja.statusi === "aktive" ? "text-green-600" : "text-red-600"}>
+              {marreveshja.statusi === "aktive" ? "Aktive" : "Joaktive"}
+            </span>
+          </p>
 
-      {marreveshja.status === "joaktiv" && (
-        <p className="mt-4 text-red-600 font-medium">
-          Produktet tuaja nuk janë të dukshme për shkollat derisa të rinovohet marrëveshja.
-        </p>
+          <p className="mt-2 text-sm text-gray-500">
+            Data e skadencës: <strong>{new Date(marreveshja.deriMeData).toLocaleDateString()}</strong>
+          </p>
+
+          {marreveshja.statusi === "joaktive" && (
+            <p className="mt-4 text-red-600 font-medium">
+              Produktet tuaja nuk janë të dukshme për shkollat derisa të rinovohet marrëveshja.
+            </p>
+          )}
+        </>
+      ) : (
+        <p className="text-sm text-gray-500">Po ngarkohen të dhënat e marrëveshjes...</p>
       )}
     </div>
   </div>
