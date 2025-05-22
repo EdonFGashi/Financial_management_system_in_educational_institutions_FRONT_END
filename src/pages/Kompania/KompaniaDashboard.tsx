@@ -145,12 +145,82 @@ function KompaniaDashboard() {
               Shikoni kërkesat e shkollave dhe menaxhoni produktet e juaja.
             </motion.p>
           </div>
+          
+          {/* Agreement Status Alert - Added at the bottom of the hero section */}
+          {marreveshja && marreveshja.statusi !== "aktive" && (
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6 }}
+              className="max-w-5xl mx-auto mt-6 relative z-10"
+            >
+              <div className="bg-white bg-opacity-95 text-red-700 rounded-lg px-6 py-4 flex items-center shadow-lg border border-red-200">
+                <div className="shrink-0 mr-4">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg font-semibold">Marrëveshja me Komunën ka skaduar</h3>
+                  <p className="text-sm">Produktet tuaja nuk janë të dukshme për shkollat. Kontaktoni komunën për rinovimin e marrëveshjes.</p>
+                </div>
+              </div>
+            </motion.div>
+          )}
         </motion.div>
         
         {/* Status Cards */}
         <div className="px-4 sm:px-6 py-8">
           <div className="max-w-5xl mx-auto">
             <h2 className="text-2xl font-semibold text-gray-900 mb-6 text-center">Statistikat e Përgjithshme</h2>
+            
+            {/* Agreement Status Card - Added as the first card in metrics section */}
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.05 }}
+              className={`bg-white rounded-2xl shadow-md border ${
+                marreveshja?.statusi === "aktive" ? "border-green-200" : "border-red-200"
+              } p-6 overflow-hidden relative mb-6`}
+            >
+              <div className={`absolute top-0 right-0 w-24 h-24 bg-gradient-to-br ${
+                marreveshja?.statusi === "aktive" ? "from-green-100 to-green-50" : "from-red-100 to-red-50"
+              } rounded-bl-[100px] -z-0`}></div>
+              
+              <div className="flex items-center gap-5 relative z-10">
+                <div className={`p-4 rounded-xl ${
+                  marreveshja?.statusi === "aktive" ? "bg-green-100" : "bg-red-100"
+                }`}>
+                  <svg xmlns="http://www.w3.org/2000/svg" className={`h-8 w-8 ${
+                    marreveshja?.statusi === "aktive" ? "text-green-600" : "text-red-600"
+                  }`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                
+                <div className="flex-1">
+                  <h3 className="text-lg font-semibold text-gray-800">Statusi i Marrëveshjes me Komunën</h3>
+                  {marreveshja ? (
+                    <div className="mt-1">
+                      <div className="flex items-center">
+                        <span className="text-base mr-2">Marrëveshja është:</span>
+                        <span className={`font-bold ${
+                          marreveshja.statusi === "aktive" ? "text-green-600" : "text-red-600"
+                        }`}>
+                          {marreveshja.statusi === "aktive" ? "Aktive" : "Joaktive"}
+                        </span>
+                      </div>
+                      <p className="text-sm text-gray-500 mt-1">
+                        Data e skadencës: <strong>{new Date(marreveshja.deriMeData).toLocaleDateString()}</strong>
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="h-6 w-40 bg-gray-200 animate-pulse rounded-md mt-2"></div>
+                  )}
+                </div>
+              </div>
+            </motion.div>
+            
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-12">
               {/* Orders Card */}
               <motion.div 
@@ -222,38 +292,7 @@ function KompaniaDashboard() {
               </motion.div>
             </div>
 
-            {/* Marrëveshja me Komunën */}
-<div className="mb-10">
-  <h2 className="text-2xl font-semibold text-gray-900 mb-4 text-center">Statusi i Marrëveshjes me Komunën</h2>
-  <div className="max-w-xl mx-auto bg-white border border-gray-100 rounded-2xl p-6 flex items-center shadow-sm relative">
-    <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-yellow-100 to-yellow-50 rounded-bl-[100px] -z-0"></div>
-    
-    <div className="flex-1 relative z-10 text-gray-800">
-      {marreveshja ? (
-        <>
-          <p className="text-lg font-semibold">
-            Marrëveshja është:{" "}
-            <span className={marreveshja.statusi === "aktive" ? "text-green-600" : "text-red-600"}>
-              {marreveshja.statusi === "aktive" ? "Aktive" : "Joaktive"}
-            </span>
-          </p>
-
-          <p className="mt-2 text-sm text-gray-500">
-            Data e skadencës: <strong>{new Date(marreveshja.deriMeData).toLocaleDateString()}</strong>
-          </p>
-
-          {marreveshja.statusi === "joaktive" && (
-            <p className="mt-4 text-red-600 font-medium">
-              Produktet tuaja nuk janë të dukshme për shkollat derisa të rinovohet marrëveshja.
-            </p>
-          )}
-        </>
-      ) : (
-        <p className="text-sm text-gray-500">Po ngarkohen të dhënat e marrëveshjes...</p>
-      )}
-    </div>
-  </div>
-</div>
+            {/* Remove the old Marrëveshja section since we moved it to better locations */}
             
             {/* Services Section */}
             <h2 className="text-2xl font-semibold text-gray-900 mb-6 text-center">Shërbimet e Sistemit</h2>
