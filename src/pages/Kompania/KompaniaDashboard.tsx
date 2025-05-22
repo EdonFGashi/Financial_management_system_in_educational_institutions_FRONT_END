@@ -3,6 +3,9 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import ToastContainer, { ToastData } from "../../components/ToastContainer";
 import Sidebar from "../Kompania/Sidebar";
+import { usePorosite } from "../../hooks/usePorosite";
+import { urlMarreveshja} from "../../endpoints";
+import axios from "axios";
 
 // Heroicons
 import {
@@ -16,27 +19,93 @@ import {
   CurrencyDollarIcon
 } from "@heroicons/react/24/outline";
 
+interface Marreveshje {
+  statusi: string;
+  deriMeData: string;
+}
+
 function KompaniaDashboard() {
-  const [statistics, setStatistics] = useState({
-    numriPorosive: 5,
-    produktiMeiShitur: "Shkumës",
-    fitimi: 24000,
-  });
-  const [loading, setLoading] = useState(false);
-  const [toasts, setToasts] = useState<ToastData[]>([]);
+ const { porosite, loading } = usePorosite();
+ const [marreveshja, setMarreveshja] = useState<Marreveshje | null>(null);
 
-  const showToast = (type: "success" | "error", message: string) => {
-    const newToast: ToastData = {
-      id: Date.now(),
-      type,
-      message,
+
+ useEffect(() => {
+  const fetchMarreveshja = async () => {
+    try {
+      const response = await axios.get(`${urlMarreveshja}/paginated`, {
+        params: {
+          pageNumber: 1,
+          pageSize: 1,
+        },
+      });
+
+      const marreveshjet = response.data.data;
+
+      if (marreveshjet && marreveshjet.length > 0) {
+        const m = marreveshjet[0];
+        setMarreveshja({
+          statusi: m.statusi,
+          deriMeData: m.deriMeData,
+        });
+      }
+    } catch (error) {
+      console.error("Gabim gjatë marrjes së marrëveshjes:", error);
+    }
+  };
+
+  fetchMarreveshja();
+}, []);
+
+ const calculateDashboardMetrics = () => {
+  if (!porosite || porosite.length === 0) {
+    return {
+      totalOrders: 0,
+      totalRevenue: 0,
+      topSeller: ""
     };
-    setToasts((prev) => [...prev, newToast]);
-  };
+  }
 
-  const removeToast = (id: number) => {
-    setToasts((prev) => prev.filter((toast) => toast.id !== id));
+  const totalOrders = porosite.length;
+
+  const totalRevenue = porosite.reduce(
+    (sum, order) => sum + (order.produktiCmimi * order.sasia),
+    0
+  );
+
+  // Group by produktiId to calculate total quantity per product
+  const productSalesMap: Record<number, { emri: string; totalSasia: number }> = {};
+
+  porosite.forEach(order => {
+    const existing = productSalesMap[order.produktiId];
+    if (existing) {
+      existing.totalSasia += order.sasia;
+    } else {
+      productSalesMap[order.produktiId] = {
+        emri: order.produktiEmri,
+        totalSasia: order.sasia
+      };
+    }
+  });
+
+  // Find the product with the highest totalSasia
+  let topSeller = "";
+  let maxSasia = 0;
+
+  for (const product of Object.values(productSalesMap)) {
+    if (product.totalSasia > maxSasia) {
+      maxSasia = product.totalSasia;
+      topSeller = product.emri;
+    }
+  }
+
+  return {
+    totalOrders,
+    totalRevenue,
+    topSeller
   };
+};
+
+  const metrics = calculateDashboardMetrics();
 
   return (
     <div className="flex min-h-screen bg-gray-50 text-gray-800">
@@ -45,7 +114,6 @@ function KompaniaDashboard() {
       </div>
       
       <main className="flex-1 min-h-screen w-full md:pl-64">
-        <ToastContainer toasts={toasts} removeToast={removeToast} />
         
         {/* Hero Section */}
         <motion.div
@@ -102,7 +170,7 @@ function KompaniaDashboard() {
                   <div className="h-9 w-16 bg-gray-200 animate-pulse rounded-md mt-2 mx-auto"></div>
                 ) : (
                   <div className="flex items-baseline justify-center relative z-10">
-                    <span className="text-3xl font-bold text-gray-900">{statistics.numriPorosive}</span>
+                    <span className="text-3xl font-bold text-gray-900">{metrics.totalOrders}</span>
                   </div>
                 )}
               </motion.div>
@@ -125,7 +193,7 @@ function KompaniaDashboard() {
                   <div className="h-9 w-36 bg-gray-200 animate-pulse rounded-md mt-2 mx-auto"></div>
                 ) : (
                   <div className="flex items-baseline justify-center relative z-10">
-                    <span className="text-3xl font-bold text-gray-900">{statistics.produktiMeiShitur}</span>
+                    <span className="text-3xl font-bold text-gray-900">{metrics.topSeller}</span>
                   </div>
                 )}
               </motion.div>
@@ -142,26 +210,59 @@ function KompaniaDashboard() {
                   <div className="p-3 rounded-xl bg-pink-100 mb-3">
                     <BanknotesIcon className="w-7 h-7 text-pink-700" />
                   </div>
-                  <h3 className="text-lg font-semibold text-gray-800">Fitimi</h3>
+                  <h3 className="text-lg font-semibold text-gray-800">Shitjet totale</h3>
                 </div>
                 {loading ? (
                   <div className="h-9 w-36 bg-gray-200 animate-pulse rounded-md mt-2 mx-auto"></div>
                 ) : (
                   <div className="flex items-baseline justify-center relative z-10">
-                    <span className="text-3xl font-bold text-gray-900">€ {statistics.fitimi.toLocaleString()}</span>
+                    <span className="text-3xl font-bold text-gray-900">€ {metrics.totalRevenue.toLocaleString()}</span>
                   </div>
                 )}
               </motion.div>
             </div>
+
+            {/* Marrëveshja me Komunën */}
+<div className="mb-10">
+  <h2 className="text-2xl font-semibold text-gray-900 mb-4 text-center">Statusi i Marrëveshjes me Komunën</h2>
+  <div className="max-w-xl mx-auto bg-white border border-gray-100 rounded-2xl p-6 flex items-center shadow-sm relative">
+    <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-yellow-100 to-yellow-50 rounded-bl-[100px] -z-0"></div>
+    
+    <div className="flex-1 relative z-10 text-gray-800">
+      {marreveshja ? (
+        <>
+          <p className="text-lg font-semibold">
+            Marrëveshja është:{" "}
+            <span className={marreveshja.statusi === "aktive" ? "text-green-600" : "text-red-600"}>
+              {marreveshja.statusi === "aktive" ? "Aktive" : "Joaktive"}
+            </span>
+          </p>
+
+          <p className="mt-2 text-sm text-gray-500">
+            Data e skadencës: <strong>{new Date(marreveshja.deriMeData).toLocaleDateString()}</strong>
+          </p>
+
+          {marreveshja.statusi === "joaktive" && (
+            <p className="mt-4 text-red-600 font-medium">
+              Produktet tuaja nuk janë të dukshme për shkollat derisa të rinovohet marrëveshja.
+            </p>
+          )}
+        </>
+      ) : (
+        <p className="text-sm text-gray-500">Po ngarkohen të dhënat e marrëveshjes...</p>
+      )}
+    </div>
+  </div>
+</div>
             
             {/* Services Section */}
             <h2 className="text-2xl font-semibold text-gray-900 mb-6 text-center">Shërbimet e Sistemit</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div className="flex flex-wrap justify-center gap-6 mb-8 items-stretch">
               <Link to="/kompania/porosite/lista">
                 <motion.div 
                   whileHover={{ y: -4, boxShadow: "0 12px 24px -8px rgba(0, 0, 0, 0.1)" }}
                   transition={{ duration: 0.2 }}
-                  className="bg-white border border-gray-100 rounded-2xl p-6 hover:border-red-200 transition-all duration-200 h-full flex flex-col items-center text-center"
+                  className="w-72 bg-white border border-gray-100 rounded-2xl p-6 hover:border-red-200 transition-all duration-200 flex flex-col items-center text-center"
                 >
                   <div className="bg-red-50 p-3 inline-flex rounded-xl mb-4">
                     <ClipboardDocumentListIcon className="h-6 w-6 text-red-600" />
@@ -173,50 +274,34 @@ function KompaniaDashboard() {
                 </motion.div>
               </Link>
 
-              <Link to="/kompania/produktet">
+              <Link to="/kompania/regjistri">
                 <motion.div 
                   whileHover={{ y: -4, boxShadow: "0 12px 24px -8px rgba(0, 0, 0, 0.1)" }}
                   transition={{ duration: 0.2 }}
-                  className="bg-white border border-gray-100 rounded-2xl p-6 hover:border-red-200 transition-all duration-200 h-full flex flex-col items-center text-center"
+                  className="w-72 bg-white border border-gray-100 rounded-2xl p-6 hover:border-red-200 transition-all duration-200 flex flex-col items-center text-center"
                 >
                   <div className="bg-rose-50 p-3 inline-flex rounded-xl mb-4">
                     <ArchiveBoxIcon className="h-6 w-6 text-rose-600" />
                   </div>
                   <h3 className="text-lg font-semibold text-gray-800 mb-2">Produktet</h3>
                   <p className="text-sm text-gray-500">
-                    Menaxhoni dhe shtoni produktet.
+                    Menaxhoni dhe shtoni produktet e reja.
                   </p>
                 </motion.div>
               </Link>
 
-              <Link to="/kompania/porosite/raporti">
+              <Link to="/kompania/porosite/raporte">
                 <motion.div 
                   whileHover={{ y: -4, boxShadow: "0 12px 24px -8px rgba(0, 0, 0, 0.1)" }}
                   transition={{ duration: 0.2 }}
-                  className="bg-white border border-gray-100 rounded-2xl p-6 hover:border-red-200 transition-all duration-200 h-full flex flex-col items-center text-center"
+                  className="w-72 bg-white border border-gray-100 rounded-2xl p-6 hover:border-red-200 transition-all duration-200 flex flex-col items-center text-center"
                 >
                   <div className="bg-pink-50 p-3 inline-flex rounded-xl mb-4">
                     <DocumentTextIcon className="h-6 w-6 text-pink-600" />
                   </div>
-                  <h3 className="text-lg font-semibold text-gray-800 mb-2">Raportet</h3>
+                  <h3 className="text-lg font-semibold text-gray-800 mb-2">Faturat</h3>
                   <p className="text-sm text-gray-500">
-                    Gjenero raporte dhe analizo të dhënat e shitjeve.
-                  </p>
-                </motion.div>
-              </Link>
-
-              <Link to="/kompania/financat">
-                <motion.div 
-                  whileHover={{ y: -4, boxShadow: "0 12px 24px -8px rgba(0, 0, 0, 0.1)" }}
-                  transition={{ duration: 0.2 }}
-                  className="bg-white border border-gray-100 rounded-2xl p-6 hover:border-red-200 transition-all duration-200 h-full flex flex-col items-center text-center"
-                >
-                  <div className="bg-red-50 p-3 inline-flex rounded-xl mb-4">
-                    <CurrencyDollarIcon className="h-6 w-6 text-red-600" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-gray-800 mb-2">Financat</h3>
-                  <p className="text-sm text-gray-500">
-                    Raporte të detajuara financiare për produktet tuaja.
+                    Gjenero fatura dhe analizo të dhënat e shitjeve.
                   </p>
                 </motion.div>
               </Link>
