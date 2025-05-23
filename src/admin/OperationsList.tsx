@@ -5,6 +5,7 @@ import Sidebar from "../pages/komuna/Sidebar";
 import { BuildingLibraryIcon } from "@heroicons/react/24/outline";
 import axios from "axios";
 import AdminSidebar from "./AdminSidebar";
+import { urlOperations } from "../endpoints";
 
 interface Operation {
   operationId: number;
@@ -40,7 +41,7 @@ const OperationsList = () => {
   async function loadOperations() {
     try {
       const response = await axios.get(
-        "http://localhost:5102/api/operations/getOperations"
+        `${urlOperations}/getOperations`
       );
       console.log(response.data);
       setOperations(response.data.data);
@@ -67,7 +68,7 @@ const OperationsList = () => {
     try {
       console.log(data);
       const response = await axios.post(
-        "http://localhost:5102/api/operations/createOperation",
+        `${urlOperations}/createOperation`,
         data
       );
       loadOperations();
@@ -83,7 +84,7 @@ const OperationsList = () => {
     try {
       console.log("idja", id);
       const response = await axios.delete(
-        `http://localhost:5102/api/operations/${id}`
+        `${urlOperations}/${id}`
       );
       loadOperations();
       if (response.status === 200) {
@@ -111,7 +112,7 @@ const OperationsList = () => {
   const handleUpdate = async (data: OperationFormValues) => {
     try {
       const response = await axios.put(
-        `http://localhost:5102/api/operations/getOperations/${data.operationId}`,
+        `${urlOperations}/getOperations/${data.operationId}`,
         data
       );
 console.log("u editua: ", data);

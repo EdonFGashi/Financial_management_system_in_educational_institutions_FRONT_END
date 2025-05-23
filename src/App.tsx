@@ -33,9 +33,9 @@ function App() {
     setClaims(getClaims());
   }, []);
 
-  useEffect(() => {
-    axios.get("http://fms-bpgbgbenbgh5amdg.northeurope-01.azurewebsites.net")
-  }, []);
+    // useEffect(() => {
+    //   axios.get("http://fms-bpgbgbenbgh5amdg.northeurope-01.azurewebsites.net")
+    // }, []);
 
   function hasRole(role: string) {
     return claims.some(

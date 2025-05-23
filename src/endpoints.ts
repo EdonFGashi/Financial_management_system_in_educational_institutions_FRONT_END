@@ -20,3 +20,7 @@ export const urlProdukt = `${base}/api/Produkti`;
 export const urlShporta = `${base}/api/Shporta`;
 export const urlFatura = `${base}/api/Fatura`;
 export const urlMarreveshja = `${base}/api/Marreveshja`;
+export const urlOperations = `${base}/api/operations`;
+export const urlUserClaims = `${base}/api/userClaims`;
+export const urlRolePermissions = `${base}/api/role-permissions`;
+export const urlEndpoints = `${base}/api/Endpoints`;
