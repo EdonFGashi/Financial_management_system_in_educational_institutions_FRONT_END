@@ -6,6 +6,7 @@ import Pagination from "../components/Pagination"; // Assure-toi d'importer corr
 import axios from "axios";
 import Swal from "sweetalert2";
 import AdminSidebar from "./AdminSidebar";
+import { urlAccounts } from "../endpoints";
 
 const roles = ["admin", "komun", "shkoll", "kompani"];
 
@@ -20,7 +21,7 @@ export default function UsersManagement() {
   }, [currentPage]);
 
   async function loadUsers() {
-    const response = await axios.post("http://localhost:5102/api/accounts/listUsers", {
+    const response = await axios.post(`${urlAccounts}/listUsers`, {
         page: 1,
         recordsPerPage: 10
       });
