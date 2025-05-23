@@ -22,6 +22,7 @@ import { getClaims } from "./auth/handleJWT";
 
 import RegjistriProdukteve from "./pages/Kompania/produktet/regjistriProdukteve";
 import configureIntercetor from "./auth/httpInterceptors";
+import axios from "axios";
 
 configureIntercetor();
 
@@ -31,6 +32,10 @@ function App() {
   useEffect(() => {
     setClaims(getClaims());
   }, []);
+
+    // useEffect(() => {
+    //   axios.get("http://fms-bpgbgbenbgh5amdg.northeurope-01.azurewebsites.net")
+    // }, []);
 
   function hasRole(role: string) {
     return claims.some(

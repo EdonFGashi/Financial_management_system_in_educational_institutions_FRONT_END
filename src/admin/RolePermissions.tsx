@@ -5,6 +5,7 @@ import Sidebar from "../pages/komuna/Sidebar";
 import { BuildingLibraryIcon } from "@heroicons/react/24/outline";
 import axios from "axios";
 import AdminSidebar from "./AdminSidebar";
+import { urlEndpoints, urlOperations, urlRolePermissions, urlUserClaims } from "../endpoints";
 
 interface Role {
   userId: number;
@@ -66,14 +67,14 @@ const RolePermissions = () => {
   async function loadUsers() {
     try {
       const response = await axios.get(
-        "http://localhost:5102/api/userClaims/getUserClaims"
+        `${urlUserClaims}/getUserClaims`
       );
       // const response = await axios.post("http://localhost:5102/api/accounts/listUsers", {
       //   page: 1,
       //   recordsPerPage: -1
       // });
       
-      setUsers(Array.isArray(response.data.data) ? response.data.data : []);
+      setUsers(Array.isArray(response.data) ? response.data : []);
 
       console.log("Userat: ", response.data);
     } catch (error) {
@@ -84,7 +85,7 @@ const RolePermissions = () => {
   async function loadOperations() {
     try {
       const response = await axios.get(
-        "http://localhost:5102/api/operations/getOperations"
+        `${urlOperations}/getOperations`
       );
       setOperations(Array.isArray(response.data.data) ? response.data.data : []);
 
@@ -106,7 +107,7 @@ const RolePermissions = () => {
   async function loadRolePermissions() {
     try {
       const response = await axios.get(
-        "http://localhost:5102/api/role-permissions/getAll"
+        `${urlRolePermissions}/getAll`
       );
       console.log("Krejt: ", response.data);
 
@@ -135,7 +136,7 @@ const RolePermissions = () => {
     try {
       console.log("Submitting data:", data);
       const response = await axios.post(
-        "http://localhost:5102/api/role-permissions/create",
+        `${urlRolePermissions}/create`,
         data
       );
       loadRolePermissions();
@@ -169,7 +170,7 @@ const RolePermissions = () => {
   const handleDelete = async (id: number) => {
     try {
       const response = await axios.delete(
-        `http://localhost:5102/api/role-permissions/${id}`
+        `${urlRolePermissions}/${id}`
       );
       loadRolePermissions();
       Swal.fire("Deleted!", "Role Permission has been deleted.", "success");
@@ -187,7 +188,7 @@ const RolePermissions = () => {
   const handleUpdate = async (data: RolePermissionFormValues) => {
     try {
       const response = await axios.put(
-        `http://localhost:5102/api/role-permissions/${data.rolePermissionId}`,
+        `${urlRolePermissions}/${data.rolePermissionId}`,
         data
       );
       loadRolePermissions();
@@ -242,7 +243,7 @@ console.log("u editua: ", data);
   
       try {
         const response = await axios.post(
-          "http://localhost:5102/api/Endpoints/reload"
+          `${urlEndpoints}/reload`
         );
       
         const { addedCount, removedCount } = response.data;

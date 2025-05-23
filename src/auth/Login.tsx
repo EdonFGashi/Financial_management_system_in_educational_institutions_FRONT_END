@@ -16,9 +16,10 @@ export default function Login() {
   async function login(credentials: userCredentials) {
     try {
       setErrors([]);
+      console.log("PATH: ", urlAccounts)
       const response = await axios.post<authenticationResponse>(
-        // `${urlAccounts}/login`,
-        `https://fms-bpgbgbenbgh5amdg.northeurope-01.azurewebsites.net/api/accounts/login`,
+        `${urlAccounts}/login`,
+        // `https://fms-bpgbgbenbgh5amdg.northeurope-01.azurewebsites.net/accounts/login`,
         credentials
       );
       saveToken(response.data);
