@@ -73,7 +73,7 @@ const RolePermissions = () => {
       //   recordsPerPage: -1
       // });
       
-      setUsers(Array.isArray(response.data.data) ? response.data.data : []);
+      setUsers(Array.isArray(response.data) ? response.data : []);
 
       console.log("Userat: ", response.data);
     } catch (error) {

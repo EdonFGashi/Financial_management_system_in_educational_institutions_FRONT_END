@@ -185,7 +185,7 @@ function Financat() {
       const updatedRecord = { ...selectedRecord, shumaNdaleses: shuma, aprovuari: true };
       
       // Send the updated data to the backend using axiosInstance
-      await axiosInstance.put(`${urlNdalesat}/${selectedRecord.id}`, updatedRecord);
+      // await axiosInstance.put(`${urlNdalesat}/${selectedRecord.id}`, updatedRecord);
 
       await axiosInstance.delete(`${urlNdalesat}/${selectedRecord.id}`);
 
