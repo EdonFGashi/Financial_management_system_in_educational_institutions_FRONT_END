@@ -1,4 +1,5 @@
-const base = "http://localhost:5102";
+const base = "http://fms-bpgbgbenbgh5amdg.northeurope-01.azurewebsites.net";
+// const base = "http://localhost:5102";
 export const urlKomuna = `${base}/api/Komuna`;
 export const urlShkolla = `${base}/api/Shkolla`;
 export const urlKompania = `${base}/api/Kompania`;
