@@ -29,9 +29,12 @@ configureIntercetor();
 function App() {
   const [claims, setClaims] = useState<claim[]>([]);
 
-  useEffect(() => {
-    setClaims(getClaims());
-  }, []);
+    useEffect(() => {
+        setClaims(getClaims());
+        axios.get("https://fms-bpgbgbenbgh5amdg.northeurope-01.azurewebsites.net/api/accounts/login")
+            .then(res => console.log("API data:", res.data))
+            .catch(err => console.error("API error:", err));
+    }, []);
 
     // useEffect(() => {
     //   axios.get("http://fms-bpgbgbenbgh5amdg.northeurope-01.azurewebsites.net")
