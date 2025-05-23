@@ -17,7 +17,8 @@ export default function Login() {
     try {
       setErrors([]);
       const response = await axios.post<authenticationResponse>(
-        `${urlAccounts}/login`,
+        // `${urlAccounts}/login`,
+        `https://fms-bpgbgbenbgh5amdg.northeurope-01.azurewebsites.net/api/accounts/login`,
         credentials
       );
       saveToken(response.data);
