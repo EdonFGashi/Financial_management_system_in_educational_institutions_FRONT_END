@@ -347,7 +347,8 @@ function NdarjaBuxhetit() {
           autoNdarja: school.autoNdarja
         });
 
-        await axiosInstance.post("http://localhost:5102/api/NdarjetBuxhetit", {
+        // await axiosInstance.post("http://localhost:5102/api/NdarjetBuxhetit", {
+          await axiosInstance.post(`${urlNdarjetBuxhetit}`, {
           shkollaId: schoolId,
           shuma: allocationAmount,
           data: new Date().toISOString(),

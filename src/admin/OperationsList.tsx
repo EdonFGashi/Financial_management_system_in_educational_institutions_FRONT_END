@@ -111,7 +111,7 @@ const OperationsList = () => {
   const handleUpdate = async (data: OperationFormValues) => {
     try {
       const response = await axios.put(
-        `http://localhost:5102/api/operations/${data.operationId}`,
+        `http://localhost:5102/api/operations/getOperations/${data.operationId}`,
         data
       );
 console.log("u editua: ", data);
